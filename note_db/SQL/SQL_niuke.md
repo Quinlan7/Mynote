@@ -139,3 +139,43 @@ from
 
 ```
 
+<br>
+
+### SQL34
+
+##### 需求：
+
+题目： 现在运营想要了解复旦大学的每个用户在8月份练习的总题目数和回答正确的题目数情况，请取出相应明细数据，对于在8月份没有练习过的用户，答题数结果返回0.
+
+##### 示例：
+
+<img src="SQL_niuke.assets/image-20230316114538151.png" alt="image-2023031614538151" style="zoom:50%;" />
+
+<img src="SQL_niuke.assets/image-20230316114544928.png" alt="image-2023036114544928" style="zoom:50%;" />
+
+##### 结果示例
+
+<img src="SQL_niuke.assets/image-20230316114557942.png" alt="image-20230316114557942" style="zoom:50%;" />
+
+##### sql:
+
+对于聚合函数和条件函数的复合使用
+
+```sql
+select
+    u.device_id,
+    u.university,
+    # if(count(*) != 0,count(*),0 ) 
+    sum(if(month(q.date) = 08,1,0)) question_cnt,
+    sum(if(q.result = 'right',1,0)) right_question_cnt
+from
+    user_profile u
+    left join question_practice_detail q on u.device_id = q.device_id
+where
+    u.university = '复旦大学'
+#    and month (q.date) = 08
+group by
+    u.device_id
+
+```
+
