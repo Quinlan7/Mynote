@@ -1,5 +1,9 @@
 # 牛客
 
+*前言：我的刷题顺序，先快速入门，然后看了SQL必知必会发现都是一些基础的内容，直接做SQL进阶挑战*
+
+## Part One: 快速入门
+
 <br>
 
 ### SQL22
@@ -176,6 +180,30 @@ where
 #    and month (q.date) = 08
 group by
     u.device_id
+
+```
+
+
+
+
+
+## Part two: 进阶挑战
+
+
+
+### SQL 110
+
+##### 需求：
+
+就是插入两条数据
+
+##### 注意：
+
+mysql有自增主键，自增主键在插入时直接写null即可
+
+```sql
+insert into exam_record(id,uid,exam_id,start_time,submit_time,score)
+values (null,1001,9001, str_to_date('2021-09-01 22:11:12', '%Y-%m-%d %H:%i:%S'),str_to_date('2021-09-01 23:01:12', '%Y-%m-%d %H:%i:%S'),90),(null,1002,9002, str_to_date('2021-09-04 07:01:02', '%Y-%m-%d %H:%i:%S'),null,null)
 
 ```
 
