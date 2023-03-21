@@ -189,7 +189,7 @@ group by
 
 ## Part two: 进阶挑战
 
-
+*这个部分看似很简单，但是每道题都考到了不同的知识点！*
 
 ### SQL 110
 
@@ -199,11 +199,71 @@ group by
 
 ##### 注意：
 
-mysql有自增主键，自增主键在插入时直接写null即可
+mysql有自增主键，自增主键在插入时直接写null即可。或者 插入数据时不插入自增主键一列，会自动增加自增主键的。
 
 ```sql
 insert into exam_record(id,uid,exam_id,start_time,submit_time,score)
 values (null,1001,9001, str_to_date('2021-09-01 22:11:12', '%Y-%m-%d %H:%i:%S'),str_to_date('2021-09-01 23:01:12', '%Y-%m-%d %H:%i:%S'),90),(null,1002,9002, str_to_date('2021-09-04 07:01:02', '%Y-%m-%d %H:%i:%S'),null,null)
 
+```
+
+
+
+### SQL 111
+
+##### 关键字：
+
+$insert \qquad select$
+
+```sql
+insert into exam_record_before_2021(uid,exam_id,start_time,submit_time,score)
+
+select uid,exam_id,start_time,submit_time,score
+from exam_record
+where year(start_time) < 2021 and submit_time is not null
+```
+
+
+
+### SQL 112
+
+##### 关键字：
+
+$replace\quad into$
+
++ 掌握replace into···values的用法（与insert唯一的区别就是把insert换成replace）
+
+replace into 跟 insert into功能类似，不同点在于：replace into 首先尝试插入数据到表中，
+
+1. 如果发现表中已经有此行数据（根据主键或者唯一索引判断）则先删除此行数据，然后插入新的数据；
+2. 否则，直接插入新数据。
+
+要注意的是：插入数据的表必须有主键或者是唯一索引！否则的话，replace into 会直接插入数据，这将导致表中出现重复的数据。
+
+```sql
+replace into
+    examination_info (exam_id, tag, difficulty, duration, release_time)
+values
+    (
+        9003,
+        'SQL',
+        'hard',
+        90,
+        str_to_date ('2021-01-01 00:00:00', '%Y-%m-%d %H:%i:%S')
+    ) 
+```
+
+
+
+##### 关键字
+
+$on\quad duplicate\quad key \quad update$
+
++ 在高并发项目中，使用[多线程](https://so.csdn.net/so/search?q=多线程&spm=1001.2101.3001.7020)录入数据有可能造成重复录入，出现主键冲突的异常，需要使用关键字进行判断数据库是否已存在此主键，如果存在会将插入操作变为==更新==操作。与replace的区别就在于，replace是先删除后插入，而这个是更新。
+
+```sql
+insert into player_count(player_id,count,name) value(1,1,'张三') 
+on duplicate key update 
+count= 1,name='张三';
 ```
 
