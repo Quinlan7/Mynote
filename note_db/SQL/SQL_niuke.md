@@ -267,3 +267,46 @@ on duplicate key update
 count= 1,name='张三';
 ```
 
+
+
+#### SQL 116
+
+**关于mySQL中的LIMIT关键字**
+
++ 这个关键字是用来在返回结果中限制只返回前N条的
++ 但是在mysql的子查询中是禁止使用LIMIT关键字的，可是解决方法居然是再嵌套一层查询就可以使用了
+
+```sql
+delete from
+    exam_record
+where
+    id in (select A.id from (
+        select
+            id
+        from
+            exam_record
+        where
+            TIMESTAMPDIFF (MINUTE, start_time, submit_time) < 5
+            OR 
+            submit_time is null
+        order by start_time ASC
+        LIMIT 3
+    ) A
+    )
+
+```
+
+
+
+##### 参考
+
+[MySQL也真是让人郁闷(关于子查询中使用limit)](https://www.laruence.com/2008/07/16/227.html)
+
+
+
+### SQL 117
+
+**关键字**
+
++ truncate table table_name
++ 注意：这个语句直接删除表中所有数据 并且 还会自动重置  自增id
