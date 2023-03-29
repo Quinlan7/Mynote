@@ -4912,7 +4912,7 @@ String filePath = "e:\\a.txt";
 
 + 就是用于打印输出的，默认在控制台，也可以更改到文件，感觉没啥用
 
-### 19.7 Properties 
+### 19.7 Properties
 
 + 即：键值对的配置文件（肯定不需要这么读取了，用注解就可以，跳）
 + 可以用Properties读取和修改
@@ -4920,3 +4920,184 @@ String filePath = "e:\\a.txt";
 
 
 ## Chapter20 坦克大战三
+
+滑
+
+
+
+## Chapter21 网络编程
+
+*前言：以我目前的开发经验而言，我并没有感觉这个东西有什么用，所以特意差了一些，问了问chatgpt，虽然使用Spring Boot的时候基本没有感觉用过网络编程，但我觉得应该是因为Spring Boot框架使用注解把它们都封装起来了，而且我觉得可能在开发windows应用程序时，会用到很多网络编程的东西，所以还是简单看一下吧*
+
+>  Web应用程序服务器端和Windows应用程序服务器端有很多不同之处，其中一些主要区别如下：
+>
+> 1. 运行环境：Web应用程序通常运行在Web服务器上，而Windows应用程序可以在Windows操作系统上运行。
+>
+> 2. 通信协议：Web应用程序通常使用HTTP协议进行通信，而Windows应用程序可以使用各种协议进行通信，例如TCP/IP、RPC等。
+>
+> 3. 用户界面：Web应用程序通常使用浏览器作为客户端，而Windows应用程序通常具有自己的用户界面，可以通过窗口和控件与用户交互。
+>
+> 4. 部署方式：Web应用程序通常使用Web服务器进行部署，而Windows应用程序可以直接安装在计算机上或者通过远程桌面等方式进行部署。
+>
+> 至于框架方面，Web应用程序服务器端通常使用基于Java的框架，例如Spring、Struts等，或者其他的Web框架，例如Node.js、Django等。Windows应用程序服务器端可以使用各种不同的框架和技术，例如.NET Framework、WinForms、WPF等，取决于具体的应用需求和技术栈选择。
+
+
+
+>Spring Boot 是一个现代化的、轻量级的 Java Web 开发框架，其本身就已经提供了许多网络编程的相关功能，所以您可能没有使用传统的 Java 网络编程相关内容。
+>
+>具体来说，Spring Boot 提供了对 HTTP 协议的完整支持，包括请求和响应的处理、路由、会话管理、安全认证等方面的功能。您可以使用 Spring Boot 提供的注解和类库来处理 HTTP 请求，而不需要编写低层次的网络编程代码。Spring Boot 还提供了许多与网络编程相关的库，例如 Spring WebFlux，它提供了基于 Reactor 的反应式编程模型，以及 WebSocket 支持等。
+
+
+
+> Spring Boot是一个现代化的Java Web应用程序开发框架，它大量使用了Java EE规范中的技术和框架。其中包括Servlet API，JPA，JMS和Spring框架等。这些技术和框架都可以用来构建网络应用程序，因此使用Java网络编程的需求可能会被这些更高级的技术所替代。
+>
+> 在Spring Boot应用程序中，可以使用Spring框架提供的RESTful API来处理HTTP请求和响应，这样可以大大简化网络编程的复杂性。此外，Spring框架还提供了许多用于处理不同类型网络请求的模块，比如Spring Data JPA用于处理数据库操作、Spring Security用于安全认证和授权、Spring WebSocket用于实时通信等。
+>
+> 虽然Java网络编程是Java EE规范中的一个重要部分，但是在使用Spring Boot的情况下，您可能会发现大部分网络编程需求都可以通过更高级别的Spring组件来解决，而不需要显式地编写网络编程代码。
+
+
+
+### 21.1 TCP 和 UDP
+
+##### TCP
+
++ 使用TCP协议前，须先建立TCP连接，形成传输数据通道
++ 传输前，采用"三次握手"方式，是可靠的
++ TCP协议进行通信的两个应用进程:客户端、服务端
++ 在连接中可进行大数据量的传输
++ 传输完毕，需释放已建立的连接，效率低
+
+##### UDP
+
++ 将数据、源、目的封装成数据包，不需要建立连接
++ 每个数据报的大小限制在==64K==内，不适合传输大量数据
++ 因无需连接，故是不可靠的
++ 发送数据结束时无需释放资源(因为不是面向连接的)，速度快
+
+### 21.2 InetAddress 类
+
++ 获取本机InetAddress对象getLocalHost
++ 根据指定主机名/域名获取ip地址对象getByName
++ 获取InetAddress对象的主机名getHostName
++ 获取InetAddress对象的地址getHostAddress
+
+### 21.3 Socket
+
++ 套接字：实际上我觉得可以理解为（ip:端口）
+
+### 21.4 TCP 网络通信编程
+
+##### 基本内容
+
+<img src="Java_basis.assets/image-20230329213012170.png" alt="image-20230329213012170" style="zoom:50%;" />
+
+##### 示例
+
++ 客户端
+
+```java
+public class SocketTCP03Client {
+    public static void main(String[] args) throws IOException {
+        //思路
+        //1. 连接服务端 (ip , 端口）
+        //解读: 连接本机的 9999端口, 如果连接成功，返回Socket对象
+        Socket socket = new Socket(InetAddress.getLocalHost(), 9999);
+        System.out.println("客户端 socket返回=" + socket.getClass());
+        //2. 连接上后，生成Socket, 通过socket.getOutputStream()
+        //   得到 和 socket对象关联的输出流对象
+        OutputStream outputStream = socket.getOutputStream();
+        //3. 通过输出流，写入数据到 数据通道, 使用字符流
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+        bufferedWriter.write("hello, server 字符流");
+        bufferedWriter.newLine();//插入一个换行符，表示写入的内容结束, 注意，要求对方使用readLine()!!!!
+        bufferedWriter.flush();// 如果使用的字符流，需要手动刷新，否则数据不会写入数据通道
+
+
+        //4. 获取和socket关联的输入流. 读取数据(字符)，并显示
+        InputStream inputStream = socket.getInputStream();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String s = bufferedReader.readLine();
+        System.out.println(s);
+
+        //5. 关闭流对象和socket, 必须关闭
+        bufferedReader.close();//关闭外层流
+        bufferedWriter.close();
+        socket.close();
+        System.out.println("客户端退出.....");
+    }
+}
+```
+
+
+
+```java
+public class SocketTCP03Server {
+    public static void main(String[] args) throws IOException {
+        //思路
+        //1. 在本机 的9999端口监听, 等待连接
+        //   细节: 要求在本机没有其它服务在监听9999
+        //   细节：这个 ServerSocket 可以通过 accept() 返回多个Socket[多个客户端连接服务器的并发]
+        ServerSocket serverSocket = new ServerSocket(9999);
+        System.out.println("服务端，在9999端口监听，等待连接..");
+        //2. 当没有客户端连接9999端口时，程序会 阻塞, 等待连接
+        //   如果有客户端连接，则会返回Socket对象，程序继续
+
+        Socket socket = serverSocket.accept();
+
+        System.out.println("服务端 socket =" + socket.getClass());
+        //
+        //3. 通过socket.getInputStream() 读取客户端写入到数据通道的数据, 显示
+        InputStream inputStream = socket.getInputStream();
+        //4. IO读取, 使用字符流, 老师使用 InputStreamReader 将 inputStream 转成字符流
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String s = bufferedReader.readLine();
+        System.out.println(s);//输出
+
+        //5. 获取socket相关联的输出流
+        OutputStream outputStream = socket.getOutputStream();
+       //    使用字符输出流的方式回复信息
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+        bufferedWriter.write("hello client 字符流");
+        bufferedWriter.newLine();// 插入一个换行符，表示回复内容的结束
+        bufferedWriter.flush();//注意需要手动的flush
+
+
+        //6.关闭流和socket
+        bufferedWriter.close();
+        bufferedReader.close();
+        socket.close();
+        serverSocket.close();//关闭
+
+    }
+}
+```
+
+
+
+##### netstat 指令
+
++ netstat -an可以查看当前主机网络情况，包括端口监听情况和网络连接情况
++ netstat -an | more可以分页显示
+
+
+
+### 21.5 UDP 网络通信编程
+
+##### 基本介绍
+
++ 类DatagramSocket和DatagramPacket[数据包/数据报]实现了基于UDP协议网络程序。
++ UDP数据报通过数据报套接字DatagramSocket发送和接收，系统不保证UDP数据报一定能够安全送到目的地，也不能确定什么时候可以抵达。
++ DatagramPacket对象封装了UDP数据报，在数据报中包含了发送端的IP地址和端口号以及接收端的IP地址和端口号。
++ UDP协议中每个数据报都给出了完整的地址信息，因此无须建立发送方和接收方的连接
+
+##### 基本流程
+
++ 核心的两个类/对象DatagramSocket与DatagramPacket
++ 建立发送端，接收端(没有服务端和客户端概念)
++ 发送数据前，建立数据包/报DatagramPacket对象
++ 调用DatagramSocket的发送、 接收方法
++ 关闭DatagramSocket
+
+
+
+## Chapter22 多用户即时通信系统
