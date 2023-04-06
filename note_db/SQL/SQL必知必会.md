@@ -167,6 +167,7 @@
 ***注意***
 
 1. COUNT(*) 会计算所有行数  COUNT(column)  会忽略值为NULL的行
+1. 聚合函数只能在 $select$ 或者 $having$ 后边使用
 
 <br>
 
