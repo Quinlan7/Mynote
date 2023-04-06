@@ -107,7 +107,7 @@ from 班级表
 
 + 结果
 
-<img src="window_func.assets/image-20230315131636407.png" alt="image-20230315131636407" style="zoom:50%;" />
+<img src="window_func.assets/image-20230315131636407.png" alt="image-20230315131636407" style="zoom:40%;" />
 
 
 
@@ -156,6 +156,10 @@ from 班级表
 > topN问题：找出每个部门排名前N的员工进行奖励
 
 
+
+##### 五 窗口函数、聚合函数和group by的结合使用
+
+[]()
 
 
 
