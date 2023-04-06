@@ -310,3 +310,15 @@ where
 
 + truncate table table_name
 + 注意：这个语句直接删除表中所有数据 并且 还会自动重置  自增id
+
+
+
+
+
+## Part three: 大厂真题
+
+
+
+#### SQL 158
+
++ 聚合函数只能使用在 $select$ 或者 $having$ 后面
