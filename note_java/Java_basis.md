@@ -5102,6 +5102,8 @@ public class SocketTCP03Server {
 
 ## Chapter22 多用户即时通信系统
 
+
+
 ##### 项目流程
 
 > 需求分析（需求分析师）：需求报告
@@ -5115,5 +5117,323 @@ public class SocketTCP03Server {
 > 部署阶段
 >
 > 维护阶段
+
+<br>
+
+<br>
+
+## Chapter23 反射
+
+<br>
+
+### 23.1 反射存在意义
+
+##### ocp原则（开闭原则：不修改代码，扩容功能）
+
++ 设计模式的一个基本原则：即通过改变外部的配置文件，在不修改源码的情况下，来控制程序。（Spring Boot 项目通过yml文件修改关键参数不需修改代码，重新运行jar包即可。==这在实际项目中的使用非常广泛而且好用==）
++ 这样就残生了一种需求，即在配置文件中写上要创建的类对象，然后读取配置文件，创建类。通过new，是无法用类似com.hspedu.Cat这样的类名来新建对象的。这时候就要使用反射机制。
++ 反射机制也是很多框架的基础，没有反射机制，既没有框架
++ 通过反射机制创建对象，可以让类的加载在真正运行到创建对象的语句的时候再进行，new的话是在编译的时候就会进行类的加载
+
+##### 反射简单使用
+
+```java
+//3. 使用反射机制解决
+        //(1) 加载类, 返回Class类型的对象cls
+        Class cls = Class.forName(classfullpath);//"com.hspedu.Cat"
+        //(2) 通过 cls 得到你加载的类 com.hspedu.Cat 的对象实例
+        Object o = cls.newInstance();
+        System.out.println("o的运行类型=" + o.getClass()); //运行类型
+        //(3) 通过 cls 得到你加载的类 com.hspedu.Cat 的 methodName"hi"  的方法对象
+        //    即：在反射中，可以把方法视为对象（万物皆对象）
+        Method method1 = cls.getMethod(methodName);
+        //(4) 通过method1 调用方法: 即通过方法对象来实现调用方法
+        System.out.println("=============================");
+        method1.invoke(o); //传统方法 对象.方法() , 反射机制 方法.invoke(对象)
+```
+
+
+
+### 23.2 反射机制
+
+##### Java Reflection
+
++ 反射机制允许程序在执行期借助于Reflection API取得任何类的内部信息(比如成员变量，构造器，成员方法等等)，并能操作对象的属性及方法。反射在设计模式和框架底层都会用到
++ ==加载完类==之后，在堆中就产生了一个Class类型的对象(==一个类只有一个Class对象==)，这个对象包含了类的完整结构信息。通过这个对象得到类的结构。这个Class对象就像一面镜子，透过这个镜子看到类的结构，所以，形象的称之为:反射
+
+##### Java 反射机制原理图
+
+![image-20230408103511825](Java_basis.assets/image-20230408103511825.png)
+
++ 每一个类（Class）都有一个（且只有一个）对应的对象，来对应这个类，可以反射出这个类的结构信息
+
+##### Java 反射机制可以完成
+
++ 在运行时判断任意一个对象所属的类
++ 在运行时构造任意一个类的对象
++ 在运行时得到任意一个类所具有的成员变量和方法
++ 在运行时调用任意一个对象的成员变量和方法
++ 生成动态代理
+
+##### 反射相关的类
+
++ ava.lang.Class:代表一个类，Class对象表示某 个类加载后在堆中的对象
+
++ java.lang.reflect.Method:代表类的方法，Method对象表示某个类的方法
+
++ java.lang.reflect.Field: 代表类的成员变量，Field对象表示某个类的成员变量
+
++ java.lang.reflect.Constructor:代表类的构造方法，Constructor对象表示构造器
+
+  这些类在iava lana . reflection
+
+##### 基本使用
+
+```java
+	//java.lang.reflect.Field: 代表类的成员变量, Field对象表示某个类的成员变量
+    //得到name字段
+    //getField不能得到私有的属性
+    Field nameField = cls.getField("age"); //
+    System.out.println(nameField.get(o)); // 传统写法 对象.成员变量 , 反射 :  成员变量对象.get(对象)
+
+     //java.lang.reflect.Constructor: 代表类的构造方法, Constructor对象表示构造器
+    Constructor constructor = cls.getConstructor(); //()中可以指定构造器参数类型, 返回无参构造器
+    System.out.println(constructor);//Cat()
+
+	Constructor constructor2 = cls.getConstructor(String.class); //这里老师传入的 String.class 就是String类的Class对象
+    ystem.out.println(constructor2);//Cat(String name)
+```
+
+##### 反射优点和缺点
+
++ 优点:可以动态的创建和使用对象(也是框架底层核心),使用灵活，没有反射机制，框架技术就失去底层支撑。
++ 缺点:使用反射基本是解释执行，对执行速度有影响。（实际执行较慢）
+
+##### 反射调用优化
+
++ Method和Field、 Constructor对象都有setAccessible(方法
++ setAccessible作用是启动和禁用访问安全检查的开关
++ 参数值为true表示反射的对象在使用时取消访问检查，提高反射的效率。参数值为false则表示反射的对象执行访问检查
+
+<img src="Java_basis.assets/image-20230408110353603.png" alt="image-20230408110353603" style="zoom:50%;" />
+
+
+
+### 23.3 Class 类
+
+##### 基本介绍
+
++ Class也是类，因此也继承Object类
++ Class类对象不是new出来的，而是系统创建的
++ ==对于某个类的Class类对象，在内存中只有一份，因为类只加载一次==
++ 每个类的实例都会记得自己是由哪个Class实例所生成
++ 通过Class对象可以完整地得到一个类的完整结构，通过一系列API
++ Class对象是存放在堆的
++ 类的字节码二进制数据，是放在方法区的，有的地方称为类的元数据(包括 方法代变量名，方法名，访问权限等等) 
+
++ 类图
+
+<img src="Java_basis.assets/image-20230408111113892.png" alt="image-20230408111113892" style="zoom:50%;" />
+
+##### 常用方法
+
+![image-20230408111536305](Java_basis.assets/image-20230408111536305.png)
+
+##### 获取Class类对象
+
++ 前提:已知一个类的全类名，且该类在类路径下，可通过Class类的静态方法
+  forName()获取，可能抛出ClassNotFoundException
+
+  实例：`Class cls1 = Class.forName( "java.lang.Cat" );`
+  应用场景：多用于配置文件，读取类全路径，加载类.
+
++ 前提:若已知具体的类，通过类的class获取，该方式最为安全可靠，程序性能最高
+
+  实例：`Class cls2 = Cat.class;`
+  应用场景：多用于参数传递，比如通过反射得到对应构造器对象.
+
++ 前提:已知某个类的实例，调用该实例的getClass()方法获取Class对象
+
+  实例：``Class clazz =对象.getClass();//运行类型``
+  应用场景:通过创建好的对象，获取Class对象
+
++ 其他方式
+  ```java
+  ClassLoader cl =对象.getClass().getClassLoader();
+  Class clazz4 = cl.loadClass( "类的全类名”);
+  ```
+
++ 基本数据(int, char,boolean,float,double,bytelong,short) 按如下方式得到Class类对象
+  `Class cls =基本数据类型.class`
+
++ 基本数据类型对应的包装类，可以通过.TYPE得到Class类对象
+  `Class cls =包装类.TYPE`
+
+##### 哪些类型有Class对象
+
++ 外部类，成员内部类，静态内部类，局部内部类，匿名内部类
++ interface :接口
++ 数组
++ enum :枚举
++ annotation :注解
++ 基本数据类型
++ void
+
+### 23.4 类加载
+
+##### 基本说明
+
++ 静态加载:编译时加载相关的类，如果没有则报错，依赖性太强
++ 动态加载:运行时加载需要的类，如果运行时不用该类，即使不存在该类，则不报
+  错，降低了依赖性
+
+##### 类加载时机
+
++ 当创建对象时(new) 					//静态加载（编译时加载）
++ 当子类被加载时,父类也加载      //静态加载（编译时加载）
++ 调用类中的静态成员时               //静态加载（编译时加载）
++ 通过反射                                       //动态加载（运行时加载）
+
+##### 类加载过程图
+
+<img src="Java_basis.assets/image-20230408143850442.png" alt="image-20230408143850442" style="zoom:50%;" />
+
+##### 类加载各阶段完成的任务
+
+<img src="Java_basis.assets/image-20230408144322541.png" alt="image-20230408144322541" style="zoom:50%;" />
+
+##### 加载阶段
+
+<img src="Java_basis.assets/image-20230408144629631.png" alt="image-20230408144629631" style="zoom:50%;" />
+
+##### 连接阶段-验证
+
++ 目的是为了确保Class文件的字节流中包含的信息符合当前虚拟机的要求，并且不会危害虚拟机自身的安全。
++ 包括:文件格式验证(是否以魔数OXcafebabe开头)、元数据验证、字节码验证和符号引用验证
++ 可以考虑使用-Xverify:none 参数来关闭大部分的类验证措施，缩短虚拟机类加载的时间。
+
+##### 连接阶段-准备
+
++ JVM会在该阶段对静态变量，分配内存并默认初始化(对应数据类型的默认初始值，如0、OL、null、 false等)。这些变量所使用的内存都将在方法区中进行分配
+
+##### 连接阶段-解析
+
++ 虚拟机将常量池内的符号引用替换为直接引用
++ 即：将对类名的引用替换为其在内存地址的地址引用
+
+##### Initialization (初始化)
+
++ 到初始化阶段，才真正开始执行类中定义的Java程序代码，此阶段是执行\<clinit> ()方法的过程。
++ \<clinit> ()方法是由编译器按语句在源文件中出现的顺序，依次自动收集类中的所有静态变量的赋值动作和静态代码块中的语句，并进行合并。
++ 虚拟机会保证一个类的< clinit> ()方法在多线程环境中被正确地加锁、同步，如果多个线程同时去初始化一个类， 那么只会有一一个线程去执行这个类的< clinit>()方法，其他线程都需要阻塞等待，直到活动线程执行< clinit> ()方法完毕
+
+<br>
+
+### 23.5 通过反射获取类的结构信息
+
+##### java.lang.Class
+
++ getName:获取全类名
++ getSimpleName:获取简单类名
++ getFields:获取所有public修饰的属性，包含本类以及父类的
++ getDeclaredFields:获取本类中所有属性
++ getMethods:获取所有public修饰的方法，包含本类以及父类的
++ getDeclaredMethods:获取本类中所有方法
++ getConstructors:获取本类所有public修饰的构造器
++ getDeclaredConstructors获取本类中所有构造器
++ getPackage:以Package形式返回包信息
++ getSuperClass:以Class形式返回父类信息
++ getInterfaces:以Class[]形式返回接口信息
++ getAnnotations:以Annotation[]形式返回注解信息
+
+##### java.lang.reflect.Field
+
++ getModifiers:以int形式返回修饰符
+  [说明:默认修饰符是0，public 是1 , private是2，protected是4, static是8 , final 是16] , public(1) + static (8) = 9
+2. getType:以Class形式返回类型
+3. getName:返回属性名
+
+##### java.lang.reflect.Method
+
++ getModifiers:以int形式返回修饰符
+  [说明:默认修饰符是0，public 是1 , private 是2，protected 是4, static是8，final 是16]
++ getReturnType:以Class形式获取返回类型
++ getName:返回方法名
++ getParameterTypes:以Class[]返回参数类型数组
+
+##### java.lang.reflect.Constructor
+
++ getModifiers:以int形式返回修饰符
++ getName:返回构造器名(全类名)
++ getParameter Types:以Class[]返回参数类型数组
+
+
+
+### 23.6 通过反射创建对象
+
+##### Class 和 Constructor
+
++ Class类相关方法
+  + newInstance :调用类中的无参构造器，获取对应类的对象
+  + getConstructor(Class...clazz):根据参数列表，获取对应的public构造器对象
+  + getDecalaredConstructor(Class..clazz):根据参数列表，获取对应的所有构造器对象
+
++ Constructor类相关方法
+  + setAccessible:暴破
+  + newInstance(Objet...obj):调用构造器
+
+##### 示例
+
++ 可以通过反射爆破来访问类中的私有属性、方法和构造器
+
+```java
+//1. 先获取到User类的Class对象
+        Class<?> userClass = Class.forName("com.hspedu.reflection.User");
+        //2. 通过public的无参构造器创建实例
+        Object o = userClass.newInstance();
+        System.out.println(o);
+        //3. 通过public的有参构造器创建实例
+        /*
+            constructor 对象就是
+            public User(String name) {//public的有参构造器
+                this.name = name;
+            }
+         */
+        //3.1 先得到对应构造器
+        Constructor<?> constructor = userClass.getConstructor(String.class);
+        //3.2 创建实例，并传入实参
+        Object hsp = constructor.newInstance("hsp");
+        System.out.println("hsp=" + hsp);
+        //4. 通过非public的有参构造器创建实例
+        //4.1 得到private的构造器对象
+        Constructor<?> constructor1 = userClass.getDeclaredConstructor(int.class, String.class);
+        //4.2 创建实例
+        //暴破【暴力破解】 , 使用反射可以访问private构造器/方法/属性, 反射面前，都是纸老虎
+        constructor1.setAccessible(true);
+        Object user2 = constructor1.newInstance(100, "张三丰");
+        System.out.println("user2=" + user2);
+```
+
+
+
+### 23.7 通过反射访问类中的成员
+
+##### 访问属性
+
++ 根据属性名获取Field对象:`Field f = class对象.getDeclaredField(属性名);`
++ 暴破:`f.setAccessible(true); //f是Field `
++ 访问
+  `f.set(o,值); /。表示对象`
+  `syso(f.get(o));//o表示对象`
++ 注意：如果是静态属性，则set和get中的参数o,可以写成null
+
+###### 访问方法
+
++ 根据方法名和参数列表获取Method方法对象: `Method m =class.getDeclaredMethod(方法名，XX.class); //得到本类的所有方法`
++ 获取对象: Object o= class.newInstance();
++ 暴破: m.setAccessible(true);
++ 访问: Object returnValue = m.invoke(o,实参列表);//o就是对象
++ 注意:如果是静态方法，则invoke的参数o,可以写成null!
+
 
 
