@@ -26,6 +26,8 @@ leetcode 15 ：三数之和
 关于KMP算法原理可以看这篇文章[（算法）通俗易懂的字符串匹配KMP算法及求next值算法](https://blog.csdn.net/qq_37969433/article/details/82947411)     
 关于KMP算法的代码解析可以看我的文章[KMP算法](https://blog.csdn.net/miserable_world/article/details/130116323?spm=1001.2014.3001.5501)
 
+##### kmp
+
 leetcode 28 ：字符串模式匹配
 
 
