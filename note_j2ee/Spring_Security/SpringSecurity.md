@@ -1134,7 +1134,7 @@ https://spring.io/guides/topicals/spring-security-architecture
 
   **总结**
 
-  1. 一旦通过 configure 方法自定义 AuthenticationManager实现 就回将工厂中自动配置AuthenticationManager 进行覆盖
+  1. 一旦通过 configure 方法自定义 AuthenticationManager实现 就会将工厂中自动配置AuthenticationManager 进行覆盖
   2. 一旦通过 configure 方法自定义 AuthenticationManager实现 需要在实现中指定认证数据源对象 UserDetaiService 实例
   3. 一旦通过 configure 方法自定义 AuthenticationManager实现 这种方式创建AuthenticationManager对象工厂内部本地一个 AuthenticationManager 对象 不允许在其他自定义组件中进行注入
 
@@ -2375,7 +2375,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 - 启动项目测试
 
-# 第六章 RememberMe 
+# 第六章 RememberMe
 
 - 简介
 - 基本使用
@@ -2442,7 +2442,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   
 
-- (2）当自动登录成功后返回的rememberMeAuth 不为null 时，表示自动登录成功，此时调用 authenticate 方法对 key 进行校验，并且将登录成功的用户信息保存到 SecurityContextHolder 对象中，然后调用登录成功回调，并发布登录成功事件。需要注意的是，登录成功的回调并不包含 RememberMeServices 中的 1oginSuccess 方法。
+- (2）当自动登录成功后返回的rememberMeAuth 不为null 时，表示自动登录成功，此时调用 authenticate 方法对 key 进行校验，并且将登录成功的用户信息保存到 SecurityContextHolder 对象中，然后调用登录成功回调，并发布登录成功事件。需要注意的是，登录成功的回调并不包含 RememberMeServices 中的 loginSuccess 方法。
 
   
 
@@ -3299,7 +3299,7 @@ X-XSRF-TOKEN:value
 
 跨域问题是实际应用开发中一个非常常见的需求，在 Spring 框架中对于跨域问题的处理方案有好几种，引 了 Spring Security 之后，跨域问题的处理方案又增加了。
 
-## 什么是 CORS 
+## 什么是 CORS
 
 CORS (Cross-Origin Resource Sharing ）是由 W3C制定的一种跨域资源共享技术标准，其目的就是为了解决前端的跨域请求。在JavaEE 开发中，最常见的前端跨域请求解决方案是早期的JSONP，但是 JSONP 只支持 GET 请求，这是一个很大的缺陷，而 CORS 则支特多种 HTTTP请求方法，也是目前主流的跨域解决方案。
 
@@ -3575,8 +3575,7 @@ Spring Security 中提供的权限管理策略主要有两种类型:
 - 基于 AOP (方法)的权限管理   (MethodSecurityInterceptor)
   - 基于 AOP 权限管理主要是用来处理方法级别的权限问题。当需要调用某一个方法时，通过 AOP 将操作拦截下来，然后判断用户是否具备相关的权限。
 
-
-### 基于 URL 权限管理
+### 基于过滤器权限管理
 
 - 开发 controller
 
@@ -3666,11 +3665,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 | hasPermission(Object targetId, Object permission);           | 当前用户是否具备指定目标的指定权限信息                      |
 | hasPermission(Object targetId, String targetType, Object permission); | 当前用户是否具备指定目标的指定权限信息                      |
 
-### 基于 方法 权限管理
+### 基于 AOP 权限管理
 
 基于方法的权限管理主要是通过 A0P 来实现的，Spring Security 中通过 MethodSecurityInterceptor 来提供相关的实现。不同在于 FilterSecurityInterceptor 只是在请求之前进行前置处理，MethodSecurityInterceptor 除了前置处理之外还可以进行后置处理。前置处理就是在请求之前判断是否具备相应的权限，后置处理则是对方法的执行结果进行二次过滤。前置处理和后置处理分别对应了不同的实现类。
 
-#### @EnableGlobalMethodSecurity 
+#### @EnableGlobalMethodSecurity
 
 EnableGlobalMethodSecurity 该注解是用来开启权限注解，用法如下：
 
@@ -3781,7 +3780,7 @@ public class AuthorizeMethodController {
 }
 ```
 
-## 原理分析
+## 基于过滤器的权限管理原理分析
 
 ![image-20220618140440796](SpringSecurity.assets/image-20220618140440796.png)
 
@@ -4322,7 +4321,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 ## OAuth2 简介
 
-OAuth 是一个开放的非常重要的认证标准/协议，该标准允许用户让第三方应用访问该用户在某一网站上存储的私密资源（如头像、照片、视频等），并且在这个过程中无须将用户名和密码提供给第三方应用。通过令牌（token）可以实现这一功能，每一个令牌授权一个特定的网站在特定的时段内允许可特定的资源。OAuth 让用户可以授权第三方网站灵活访问它们存储在另外一些资源服务器上的特定信息，而非所有内容。对于用户而言，我们在互联网应用中最常见的 OAuth 应用就是各种第三方登录，例如QQ授权登录、微信授权登录、微博授权登录、GitHub 授权登录等。
+OAuth 是一个开放的非常重要的认证标准/协议，该标准允许用户让第三方应用访问该用户在某一网站上存储的私密资源（如头像、照片、视频等），并且在这个过程中无须将用户名和密码提供给第三方应用。通过令牌（token）可以实现这一功能，每一个令牌授权一个特定的网站在特定的时段内允许可特定的资源。OAuth 让用户可以授权第三方网站灵活访问它们存储在另外一些资源服务器上的特定信息，而非所有内容。对于用户而 言，我们在互联网应用中最常见的 OAuth 应用就是各种第三方登录，例如QQ授权登录、微信授权登录、微博授权登录、GitHub 授权登录等。
 
 例如用户想登录 Ruby China，传统方式是使用用户名密码但是这样并不安全，因为网站会存储你的用户名密码，这样可能会导致密码泄露。这种授权方式安全隐患很大，如果使用 OAuth 协议就能很好地解决这一问题。
 

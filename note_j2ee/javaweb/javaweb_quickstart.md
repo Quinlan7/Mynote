@@ -266,11 +266,109 @@
 >
 > 需要注意的是，无状态会话适用于某些场景，如无需保存大量会话状态信息、会话状态信息较小且不敏感的场景。对于一些需要保存大量会话状态信息或涉及敏感信息的场景，仍然需要谨慎选择合适的会话管理方式。
 
+##### 表单参数是放在哪里传递给后端的？
 
+> 在前后端分离开发中，表单参数一般是通过请求的请求体（request body）来传递给后端。
+>
+> 对于POST请求，表单参数可以使用以下两种常见的方式之一传递给后端：
+>
+> 1. 表单数据作为请求体的一部分（application/x-www-form-urlencoded）：
+>    - 在前端，可以使用JavaScript的`FormData`对象或前端框架（如Vue.js、React等）的表单处理库，将表单字段和对应的值封装成一个`FormData`对象，并通过AJAX请求发送给后端。
+>    - 在后端，可以使用`@RequestParam`注解或`@RequestBody`注解（将参数封装成对象）来接收表单数据。
+>
+> 2. 表单数据以JSON格式作为请求体（application/json）：
+>    - 在前端，可以使用JavaScript的`JSON.stringify()`方法将表单数据转换为JSON字符串，并通过AJAX请求发送给后端。
+>    - 在后端，可以使用`@RequestBody`注解将请求体的JSON数据自动转换为对应的Java对象。
+>
+> 无论是哪种方式，重要的是在前端和后端之间确保请求体的数据格式和处理方式是一致的。
+>
+> 需要注意的是，对于文件上传等特殊情况，请求体的格式可能会有所不同。对于文件上传，可以使用`multipart/form-data`格式，前端可以使用`FormData`对象来封装表单数据和文件，后端可以使用`@RequestParam`注解或特定的文件上传处理库来接收和处理文件数据。
+>
+> 综上所述，在前后端分离开发中，表单参数一般通过请求体的形式传递给后端，具体的传递方式取决于请求的数据格式和后端的处理方式。
 
+##### 作为请求体的一部分时，使用 request.getParameter方法还能获取到这个参数吗
 
+> 当请求体以`application/x-www-form-urlencoded`格式传递时，使用`request.getParameter`方法是无法直接获取到参数的。
+>
+> `request.getParameter`方法是用于获取请求的查询参数（URL中的参数）或以`application/x-www-form-urlencoded`格式传递的表单参数。它不能直接从请求体中获取参数。
+>
+> 如果请求体以`application/x-www-form-urlencoded`格式传递表单参数，并且需要在后端获取这些参数，可以考虑使用`@RequestParam`注解来接收参数，或者使用`@RequestBody`注解将请求体的数据转换为对应的对象。
+>
+> 使用`@RequestParam`注解来接收参数示例：
+>
+> ```java
+> @PostMapping("/submit-form")
+> public String handleFormSubmission(@RequestParam("username") String username,
+>                                    @RequestParam("password") String password) {
+>     // 处理表单参数
+>     // ...
+>     return "success";
+> }
+> ```
+>
+> 使用`@RequestBody`注解将请求体的数据转换为对象示例：
+>
+> ```java
+> @PostMapping("/submit-form")
+> public String handleFormSubmission(@RequestBody FormData formData) {
+>     // 处理表单参数
+>     // ...
+>     return "success";
+> }
+> ```
+>
+> 在这两种情况下，都无需使用`request.getParameter`方法来获取表单参数，Spring Boot会自动将参数绑定到方法的参数上，从而实现获取表单参数的功能。
 
+##### request.getParameter和request.getAttribute有什么区别
 
+> `request.getParameter`和`request.getAttribute`是用于在Java Servlet中获取请求参数和请求属性的两个方法，它们有以下区别：
+>
+> 1. 作用对象：
+>    - `request.getParameter`用于获取请求的查询参数（URL中的参数）或以`application/x-www-form-urlencoded`格式传递的表单参数。
+>    - `request.getAttribute`用于获取在请求范围内设置的属性，这些属性可以在请求的生命周期内共享。
+>
+> 2. 参数类型：
+>    - `request.getParameter`接受一个参数名，用于获取指定参数名的参数值。
+>    - `request.getAttribute`接受一个属性名，用于获取指定属性名的属性值。
+>
+> 3. 数据来源：
+>    - `request.getParameter`从请求的查询参数或表单参数中获取数据。对于`application/x-www-form-urlencoded`格式，参数通常位于请求体中。
+>    - `request.getAttribute`从请求范围内设置的属性中获取数据。这些属性可以是在Servlet中设置的、过滤器中设置的或其他组件中设置的。
+>
+> 4. 返回值类型：
+>    - `request.getParameter`返回字符串类型的参数值，或者如果参数不存在则返回`null`。
+>    - `request.getAttribute`返回`Object`类型的属性值，或者如果属性不存在则返回`null`。
+>
+> 总的来说，`request.getParameter`用于获取请求参数，特别是查询参数和表单参数，而`request.getAttribute`用于获取请求范围内的属性值。它们的用途和适用场景有所不同，根据具体的需求选择合适的方法来获取相应的数据。
+
+##### request.getAttribute用于获取在请求范围内设置的属性，这个属性可以由前端设置吗
+
+> 在典型的前后端分离的架构中，前端通常不会直接设置Servlet请求的属性（attributes），因为前端主要负责呈现用户界面，并与后端通过API进行通信。
+>
+> 在前后端分离的情况下，前端可以通过API请求将数据发送到后端，并由后端进行处理和设置属性。后端可以将处理结果、状态信息或其他相关数据作为请求属性设置，并将其返回给前端。
+>
+> 在后端中，可以使用`request.setAttribute`方法设置请求的属性，例如：
+>
+> ```java
+> // 在后端处理中设置请求属性
+> request.setAttribute("status", "success");
+> ```
+>
+> 然后，后端通过API将处理结果返回给前端。前端可以解析API的响应，根据需要处理请求结果。然而，前端不能直接设置请求属性，因为请求属性是在后端的Servlet容器中维护的。
+>
+> 需要注意的是，如果前端与后端之间使用的是某种模板引擎（如Thymeleaf、JSP等），那么在模板中可以使用相关的语法来获取和处理后端设置的属性。但是，这个属性的设置是在后端逻辑中完成的，前端并不能直接设置。
+
+##### 前后端分离时这个属性（attributes），会返回给前端吗
+
+> 在前后端分离的架构中，请求属性（attributes）通常不会直接返回给前端。请求属性是在后端处理请求的过程中使用的一种机制，用于在请求的处理流程中传递数据或状态。
+>
+> 在前后端分离开发中，后端通常会处理请求，执行相应的业务逻辑，然后将结果封装成JSON或其他格式的响应数据返回给前端。前端通过API请求获取响应数据，并根据需要进行展示或处理。
+>
+> 请求属性主要用于在后端处理过程中传递数据，而不是直接返回给前端。前端可以通过API的响应数据获取后端处理结果，而不需要直接访问请求属性。
+>
+> 如果后端的请求属性中包含前端需要的数据，后端可以将这些数据提取出来，并作为API响应的一部分返回给前端。这样前端可以通过解析API响应获取所需的数据，而不必直接访问后端的请求属性。
+>
+> 总结起来，在前后端分离的架构中，请求属性主要用于在后端处理过程中传递数据，而不会直接返回给前端。前端通过API请求获取响应数据，后端可以将请求属性中的数据提取出来并作为API响应的一部分返回给前端。
 
 
 
