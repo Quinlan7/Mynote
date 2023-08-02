@@ -11,3 +11,20 @@ RESTful API 是两个计算机系统用于通过互联网安全地交换信息�
 
 
 [亚马逊restful-api](https://aws.amazon.com/cn/what-is/restful-api/)
+
+
+
+### 路径变量
+
+```java
+@RequestMapping("/hello/{id}")
+    public String getDetails(@PathVariable(value="id") String id,
+    @RequestParam(value="param1", required=true) String param1,
+    @RequestParam(value="param2", required=false) String param2){
+.......
+}
+
+```
+
+
+
