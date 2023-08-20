@@ -155,3 +155,28 @@ b.虽然防火墙开放了6379端口，但是外网还是无法访问的，因�
 [Linux安装部署Redis(超级详细)](https://www.cnblogs.com/hunanzp/p/12304622.html)
 
 [linux 安装redis 完整步骤](https://juejin.cn/post/7012898467643621412)
+
+
+
+
+
+
+
+
+
+### redis问题
+
+（二）命令：redis-cli连接到redis后，通过 config get  daemonize和config get  protected-mode 是不是都为no，如果不是，就用config set 配置名 属性 改为no。
+
+```
+redis-cli shutdown 
+redis-server &
+
+
+
+config get requirepass
+
+#指定配置文件q
+/usr/local/redis/bin/redis-server /usr/local/redis/etc/redis.conf 
+```
+

@@ -53,7 +53,7 @@ Spring Security是一个面向Java应用程序提供身份验证和安全性的�
 
 在\<Spring Security>的架构设计中，**`认证`**\<Authentication>和**`授权`** \<Authorization>是分开的，无论使用什么样的认证方式。都不会影响授权，这是两个独立的存在，这种独立带来的好处之一，就是可以非常方便地整合一些外部的解决方案。
 
-![image-20220110112541559](spring_security.assets/image-20220110112541559.png)
+![image-20230814143103349](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141431773.png)
 
 #### 认证
 
@@ -61,7 +61,7 @@ Spring Security是一个面向Java应用程序提供身份验证和安全性的�
 
 在Spring Security中认证是由`AuthenticationManager`接口来负责的，接口定义为：
 
-![image-20220110104531129](spring_security.assets/image-20220110104531129.png)
+![image-20230814142953595](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141429794.png)
 
 ```java
 public interface AuthenticationManager { 
@@ -75,13 +75,13 @@ public interface AuthenticationManager {
 
 AuthenticationManager 主要实现类为 ProviderManager，在 ProviderManager 中管理了众多 AuthenticationProvider 实例。在一次完整的认证流程中，Spring Security 允许存在多个 AuthenticationProvider ，用来实现多种认证方式，这些 AuthenticationProvider 都是由 ProviderManager 进行统一管理的。
 
-![image-20220110103518334](spring_security.assets/image-20220110103518334.png)
+![image-20230814143050315](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141430492.png)
 
 ##### Authentication
 
 认证以及认证成功的信息主要是由 Authentication 的实现类进行保存的，其接口定义为：
 
-![image-20220110104815645](spring_security.assets/image-20220110104815645.png)
+![image-20230814143335895](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141433101.png)
 
 ```java
 public interface Authentication extends Principal, Serializable {
@@ -112,13 +112,13 @@ SecurityContextHolder 用来获取登录之后用户信息。Spring Security 会
 
 >  AccessDecisionManager (访问决策管理器)，用来决定此次访问是否被允许。
 
-![image-20220110110946267](spring_security.assets/image-20220110110946267.png)
+![image-20230814143352528](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141433746.png)
 
 ##### AccessDecisionVoter
 
 > AccessDecisionVoter (访问决定投票器)，投票器会检查用户是否具备应有的角色，进而投出赞成、反对或者弃权票。
 
-![image-20220110111011018](spring_security.assets/image-20220110111011018.png)
+![image-20230814143411583](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141434846.png)
 
 AccesDecisionVoter 和 AccessDecisionManager 都有众多的实现类，在 AccessDecisionManager 中会换个遍历 AccessDecisionVoter，进而决定是否允许用户访问，因而 AaccesDecisionVoter 和 AccessDecisionManager 两者的关系类似于 AuthenticationProvider 和 ProviderManager 的关系。
 
@@ -126,7 +126,7 @@ AccesDecisionVoter 和 AccessDecisionManager 都有众多的实现类，在 Acce
 
 > ConfigAttribute，用来保存授权时的角色信息
 
-![image-20220110111037603](spring_security.assets/image-20220110111037603.png)
+![image-20230814143423906](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141434124.png)
 
 在 Spring Security 中，用户请求一个资源(通常是一个接口或者一个 Java 方法)需要的角色会被封装成一个 ConfigAttribute 对象，在 ConfigAttribute 中只有一个 getAttribute方法，该方法返回一个 String 字符串，就是角色的名称。一般来说，角色名称都带有一个 `ROLE_` 前缀，投票器 AccessDecisionVoter 所做的事情，其实就是比较用户所具各的角色和请求某个
 资源所需的 ConfigAtuibute 之间的关系。
@@ -154,14 +154,14 @@ AccesDecisionVoter 和 AccessDecisionManager 都有众多的实现类，在 Acce
 > - 1.启动完成后控制台生成一个密码
 > - 2.访问 hello 发现直接跳转到登录页面
 
-![image-20230429120000081](spring_security.assets/image-20230429120000081.png)
+![image-20230814143443103](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141434304.png)
 
 > 3.登录系统
 >
 > - 默认用户名为: user
 > - 默认密码为:  控制台打印的 uuid
 
-![image-20230429120041633](spring_security.assets/image-20230429120041633.png)
+![image-20230814143453454](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141434714.png)
 
 ### 实现原理
 
@@ -169,26 +169,26 @@ AccesDecisionVoter 和 AccessDecisionManager 都有众多的实现类，在 Acce
 
 > 在 Spring Security 中 `认证、授权` 等功能都是基于[过滤器](https://docs.spring.io/spring-security/site/docs/5.5.4/reference/html5/#servlet-architecture)完成的。
 
-![image-20230429121854056](spring_security.assets/image-20230429121854056.png)
+![image-20230814143511756](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141435960.png)
 
 + 过滤器Filter是java web组件，在请求到达Servlet前进行处理
 + Spring Boot 中的Filter并不是直接放在java web的filter中，而是通过一个 $DelegatingFilterProxy$ (授权过滤器代理) 进行代理。因为java web原生的 filter 无法==使用一些 Spring Boot 的特性==，所以使用了一个这样的代理同时方便管理。
 + $DelegatingFilterProxy$ 顶层代理，管理所有的Spring Boot过滤器，通过它转发给我们的 Spring Boot 的过滤器
 
-![image-20230429141208143](spring_security.assets/image-20230429141208143.png)
+![image-20230814143531947](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141435163.png)
 
 + $DelegatingFilterProxy$ 顶层代理，肯定不能只管理一个Filter，所以在它下面还有一个 $ FilterChainProxy$ 过滤器链代理
 + $ FilterChainProxy$ (过滤器链代理) 二级代理，管理所有的过滤器链，通过它转发给所有的过滤器链
 
-![image-20230429141456451](spring_security.assets/image-20230429141456451.png)
+![image-20230814143555169](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141435415.png)
 
 +  $SecurityFilterChain$ Spring Security过滤器链，由它来管理我们的Spring Security的过滤器链，过滤器链中可以有多个过滤器
 
-![image-20230429142700967](spring_security.assets/image-20230429142700967.png)
+![image-20230814143604890](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141436281.png)
 
 + 可以根据url的不同配置多个Spring Security的过滤器链
 
-![image-20230429142925396](spring_security.assets/image-20230429142925396.png)
+![image-20230814143629468](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141436699.png)
 
 > 需要注意的是，默认过滤器并不是直接放在 Web 项目的原生过滤器链中，而是通过一个
 > FlterChainProxy 来统一管理。Spring Security 中的过滤器链通过 FilterChainProxy 嵌入到 Web项目的原生过滤器链中。FilterChainProxy  作为一个顶层的管理者，将统一管理 Security Filter。FilterChainProxy 本身是通过 Spring 框架提供的 DelegatingFilterProxy 整合到原生的过滤器链中。
@@ -230,7 +230,7 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 
 + 可以看到父类的结构，确实有doFilter方法，那么又是怎么调用了我们的$attemptAuthentication$ 方法呢？我们去看这里的doFilter源码
 
-<img src="spring_security.assets/image-20230429194034062.png" alt="image-2030429194034062" style="zoom:50%;" />
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141438899.png" alt="image-2023081414380591" style="zoom:50%;" />
 
 + doFilter源码，可以看到在第十行调用了 $attemptAuthentication$ 方法，我们看父类中的这个方法源码
 
@@ -286,7 +286,7 @@ public void doFilter(ServletRequest request, ServletResponse response, FilterCha
 
 - 资源分为公共资源（common）和受限资源
 
-<img src="spring_security.assets/image-20230429214158102.png" alt="image-20230429214158102" style="zoom:100%;" />
+![image-20230814143835460](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141438904.png)
 
 - /portal  公共资源
 - /hello .... 受保护资源 权限管理
@@ -404,7 +404,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
 > 这是因为我们的登陆操作（点击登录按钮），请求的url为`/login`这个url也是被保护的所以我们又重定向到了登录页面。这时候小伙伴们肯定又有疑问了，之前的 $UsernamePasswordAuthenticationFilter$ 过滤器不是会默认处理`/login` 的请求吗？是的！但是！当我们自己指定了我们自定义的登录页面之后，这个处理登录请求的url我们也必须要显示的自己指定！
 
-![image-20230430110410012](spring_security.assets/image-20230430110410012.png)
+![image-20230814143848988](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141438386.png)
 
 + 修改 Spring Security 配置类
 
@@ -471,7 +471,7 @@ public interface AuthenticationSuccessHandler {
 
 + **根据接口的描述信息,也可以得知登录成功会自动回调这个方法，进一步查看它的默认实现，你会发现successForwardUrl、defaultSuccessUrl也是由它的子类实现的**
 
-![image-20230430173219152](spring_security.assets/image-20230430173219152.png)
+![image-20230814143913659](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141439976.png)
 
 + 自定义 $AuthenticationSuccessHandle$ 实现登录成功的处理
 
@@ -514,7 +514,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
 + 登陆成功返回信息
 
-<img src="spring_security.assets/image-20230507143352043.png" alt="image-20230507143352043" style="zoom:100%;" />
+![image-20230814143929272](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141439543.png)
 
 
 
@@ -575,7 +575,7 @@ public interface AuthenticationFailureHandler {
 
 + **根据接口的描述信息,也可以得知登录失败会自动回调这个方法，进一步查看它的默认实现，你会发现failureUrl、failureForwardUrl也是由它的子类实现的。**
 
-![image-20230430185601629](spring_security.assets/image-20230430185601629.png)
+![image-20230814144003162](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141440518.png)
 
 + 自定义 AuthenticationFailureHandler 实现
 
@@ -620,7 +620,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
 + 登录失败返回信息
 
-![image-20230507143612780](spring_security.assets/image-20230507143612780.png)
+![image-20230814144018926](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141440191.png)
 
 
 
@@ -741,7 +741,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
 + 注销登录返回信息
 
-![image-20230507143440840](spring_security.assets/image-20230507143440840.png)
+![image-20230814144211179](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141442588.png)
 
 
 
@@ -757,7 +757,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
 ​	实际上 SecurityContextHolder 中存储是 SecurityContext，在 SecurityContext 中存储是 Authentication。
 
-<img src="spring_security.assets/image-20230507163606615.png" alt="image-20230507163606615" style="zoom:50%;" />
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141443596.png" alt="image-20230814144309327" style="zoom:50%;" />
 
 + 这种设计是典型的策略设计模式:
 
@@ -867,7 +867,7 @@ public interface SecurityContextHolderStrategy {
 - `setContext`：该方法用来设置存储的 SecurityContext 对象。
 - `create Empty Context`：该方法则用来创建一个空的 SecurityContext 对象。
 
-![image-20220113125407538](spring_security.assets/image-20220113125407538-2049649.png)
+![image-20230814144326217](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141443704.png)
 
 从上面可以看出每一个实现类对应一种策略的实现。
 
@@ -913,7 +913,7 @@ public interface SecurityContextHolderStrategy {
 
 + 控制台输出
 
-![image-20230507163149342](spring_security.assets/image-20230507163149342.png)
+![image-20230814144340329](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141443629.png)
 
 可以看到我们的子线程无法获取用户信息，这是因为我们的默认策略为 $MODE\quad THREADLOCAL$ 我们需要把策略更改为 $MODE INHERITABLETHREADLOCAL$ 才可以让我们的子线程也能获取到用户信息，那么怎么更改策略呢？
 
@@ -923,11 +923,11 @@ public interface SecurityContextHolderStrategy {
 -Dspring.security.strategy=MODE_INHERITABLETHREADLOCAL
 ```
 
-<img src="spring_security.assets/image-20230507163213764.png" alt="image-20230507163213764" style="zoom:50%;" />
+![image-20230814144354510](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141443072.png)
 
 + 改变策略后的控制台输出
 
-![image-20230507163055497](spring_security.assets/image-20230507163055497.png)
+![image-20230814144411760](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141444245.png)
 
 
 
@@ -939,7 +939,7 @@ public interface SecurityContextHolderStrategy {
 
 https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html
 
-![image-20220118060526805](spring_security.assets/image-20220118060526805.png)
+![image-20230814144452766](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141444532.png)
 
 - 发起认证请求，请求中携带用户名、密码，该请求会被`UsernamePasswordAuthenticationFilter` 拦截
 - 在`UsernamePasswordAuthenticationFilter`的`attemptAuthentication`方法中将请求中用户名和密码，封装为`Authentication`对象(其实就是UsernamePasswordAuthenticationToken对象，这是Authentication的实现类)，并交给`AuthenticationManager` 进行认证
@@ -956,7 +956,7 @@ https://docs.spring.io/spring-security/reference/servlet/authentication/architec
 
 **AuthenticationManager 与 ProviderManager**
 
-![image-20220118061756972](spring_security.assets/image-20220118061756972.png)
+![image-20230814144607312](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141446607.png)
 
 ​	ProviderManager 是 AuthenticationManager 的唯一实现，也是 Spring Security 默认使用实现。从这里不难看出默认情况下AuthenticationManager 就是一个ProviderManager。
 
@@ -964,7 +964,7 @@ https://docs.spring.io/spring-security/reference/servlet/authentication/architec
 
 摘自官方: https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html
 
-![image-20220118060824066](spring_security.assets/image-20220118060824066.png)
+![image-20230814144618564](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141446234.png)
 
 
 
@@ -981,13 +981,13 @@ ProviderManager 来扮演 parent 的角色，也就是 ProviderManager 是 Provi
 
 摘自官网: https://spring.io/guides/topicals/spring-security-architecture
 
-![image-20220118061343516](spring_security.assets/image-20220118061343516.png)
+![image-20230814144629729](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141446064.png)
 
 
 
  弄清楚认证原理之后我们来看下具体认证时数据源的获取。`默认情况下 AuthenticationProvider  是由AbstractUserDetailsAuthenticationProvider  类来实现认证的，DaoAuthenticationProvider类是AbstractUserDetailsAuthenticationProvider类的实现类，在DaoAuthenticationProvider 认证时又通过 UserDetailsService 完成数据源的校验。`他们之间调用关系如下：
 
-![image-20220114163045543](spring_security.assets/image-20220114163045543.png)
+![image-20230814144640194](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141446618.png)
 
 **总结: AuthenticationManager 是认证管理器，在 Spring Security 中有全局AuthenticationManager，也可以有局部AuthenticationManager。全局的AuthenticationManager用来对全局认证进行处理，局部的AuthenticationManager用来对某些特殊资源认证处理。当然无论是全局认证管理器还是局部认证管理器都是由 ProviderManger 进行实现。 每一个ProviderManger中都代理一个AuthenticationProvider的列表，列表中每一个实现代表一种身份认证方式。认证时底层数据源需要调用 UserDetailService 来实现。**
 
@@ -1038,7 +1038,7 @@ https://spring.io/guides/topicals/spring-security-architecture
 
   > 为什么这个方法会有这样的特性呢？我们看他重写的方法源码上的注解
   >
-  > ![image-20230507202451151](spring_security.assets/image-20230507202451151.png)
+  > ![image-20230814144656978](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141446428.png)
   >
   > > 被authenticationManager()的默认实现所使用，以试图获得一个AuthenticationManager。如果被重载，应该使用AuthenticationManagerBuilder来指定AuthenticationManager。
   > > authenticationManagerBean()方法可以用来将得到的AuthenticationManager作为一个Bean公开。userDetailsServiceBean()可以用来将最后填充的UserDetailsService作为一个Bean公开，该服务是用AuthenticationManagerBuilder创建的。
@@ -1395,17 +1395,17 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 + 测试效果
   + root登录
 
-<img src="spring_security.assets/image-20230509202456835.png" alt="image-20230509202456835" style="zoom:100%;" />
+![image-20230814144717026](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141447343.png)
 
   + admin登录
 
-![image-20230509202607118](spring_security.assets/image-20230509202607118.png)
+![image-20230814144727781](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141447162.png)
 
 ### 登录请求处理（前后端分离）
 
 #### 基本架构图
 
-![image-20230509203935600](spring_security.assets/image-20230509203935600.png)
+![image-20230814144738794](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141447194.png)
 
  
 
@@ -1485,9 +1485,9 @@ public interface PasswordEncoder {
 
 默认提供加密算法如下:
 
-![image-20220127162622771](spring_security.assets/image-20220127162622771.png)
+![image-20230814144808997](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141448452.png)
 
-![image-20220127162759461](spring_security.assets/image-20220127162759461.png)
+![image-20230814144820200](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141448741.png)
 
 ### DelegatingPasswordEncoder
 
@@ -1685,7 +1685,7 @@ public class MyUserDetailService implements UserDetailsService,UserDetailsPasswo
 
 RememberMe 这个功能非常常见，下图就是QQ 邮箱登录时的“记住我” 选项。
 
-![image-20220308185102746](spring_security.assets/image-20220308185102746.png)
+![image-20230814145050111](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141450656.png)
 
 具体的实现思路就是通过 Cookie 来记录当前用户身份。当用户登录成功之后，会通过一定算法，将用户信息、时间戳等进行加密，加密完成后，通过响应头带回前端存储在cookie中，当浏览器会话过期之后，如果再次访问该网站，会自动将 Cookie 中的信息发送给服务器，服务器对 Cookie中的信息进行校验分析，进而确定出用户的身份，Cookie中所保存的用户信息也是有时效的，例如三天、一周等。
 
@@ -1715,11 +1715,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 + 客户端第一次登录认证流程图
 
-![image-20230512153813944](spring_security.assets/image-20230512153813944.png)
+![image-20230814145128718](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141451183.png)
 
 + session过期后的请求（携带）
 
-![image-20230512154634023](spring_security.assets/image-20230512154634023.png)
+![image-20230814145144646](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141451131.png)
 
 ##### 主要涉及类介绍
 
@@ -1729,7 +1729,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 session 过期后的请求会被 `RememberMeAuthenticationFilter`进行拦截然后自动登录具体参见源码:
 
-![image-20220317195930708](spring_security.assets/image-20220317195930708.png)
+![image-20230814145402254](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308141454931.png)
 
 - 请求到达过滤器之后，首先判断 SecurityContextHolder 中是否有值，没值的话表示用户尚未登录，此时调用 autoLogin 方法进行自动登录。
 
@@ -1749,13 +1749,13 @@ session 过期后的请求会被 `RememberMeAuthenticationFilter`进行拦截然
 2. loginFail 方法是自动登录失败的回调。
 3. 1oginSuccess 方法是自动登录成功的回调。
 
-![image-20220317200522015](spring_security.assets/image-20220317200522015.png)
+![image-20230815154922266](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151549513.png)
 
 ##### TokenBasedRememberMeServices
 
 在开启记住我后如果没有加入额外配置默认实现就是由TokenBasedRememberMeServices进行的实现。查看这个类源码中 processAutoLoginCookie 方法实现:
 
-![image-20220317201055784](spring_security.assets/image-20220317201055784.png)
+![image-20230815154945911](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151549247.png)
 
 processAutoLoginCookie 方法主要用来验证 Cookie 中的令牌信息是否合法：
 
@@ -1767,7 +1767,7 @@ processAutoLoginCookie 方法主要用来验证 Cookie 中的令牌信息是否�
 5. 判断第4 步生成的签名和通过 Cookie 传来的签名是否相等（即 cookieTokens 数组
    的第2项），如果相等，表示令牌合法，则直接返回用户对象，否则拋出异常。
 
-![image-20220318142054096](spring_security.assets/image-20220318142054096.png)
+![image-20230815155014993](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151550423.png)
 
 1. 在这个回调中，首先获取用户经和密码信息，如果用户密码在用户登录成功后从successfulAuthentication对象中擦除，则从数据库中重新加载出用户密码。
 
@@ -1781,29 +1781,29 @@ processAutoLoginCookie 方法主要用来验证 Cookie 中的令牌信息是否�
 
 *流程比较复杂，结合流程图理解*
 
-![image-20220317194843649](spring_security.assets/image-20220317194843649.png)
+![image-20230815155106554](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151551753.png)
 
 + 从上图中，当在SecurityConfig配置中开启了"rememberMe"功能之后,在进行认证时如果勾选了"记住我"选项，此时打开浏览器控制台，分析整个登录过程。首先当我们登录时，在登录请求中多了一个 RememberMe 的参数。
 
-![image-20220308191736005](spring_security.assets/image-20220308191736005.png)
+![image-20230815155115273](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151551447.png)
 
 + 很显然，这个参数就是告诉服务器应该开启 RememberMe功能的。如果自定义登录页面开启 RememberMe 功能应该多加入一个一样的请求参数就可以啦。
 
 + 这个请求会在通过 $UsernamePasswordAuthenticationFilter$ 的登录认证 $attemptAuthentication$ 后返回到它的父类 $AbstractAuthenticationProcessingFilter$ 并调用 $successfulAuthentication$ 方法
 
-![image-20230512163616209](spring_security.assets/image-20230512163616209.png)
+![image-20230815155130525](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151551767.png)
 
 + 在 $successfulAuthentication$ 方法中又会调用 $rememberMeServices.loginSuccess$ 方法，这样就回到了我们的 $rememberMeService$ 了
 
-![image-20230512163920544](spring_security.assets/image-20230512163920544.png)
+![](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151552583.png)
 
 + $rememberMeService$ 中的 $loginSuccess$ 方法是个接口，我们去找它的实现。默认调用的是 $AbstractRememberMeServices$ 中的实现
 
-![image-20230512164435918](spring_security.assets/image-20230512164435918.png)
+![image-20230815155324017](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151553155.png)
 
 + $loginSuccess$ 的实现中会先调用 $rememberMeRequested$ 方法，判断这个请求是否为启用 rememberMe 的请求（前端是否勾选记住我选项）
 
-![image-20230512164534423](spring_security.assets/image-20230512164534423.png)
+![image-20230815155332744](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151553872.png)
 
 + 在 $rememberMeRequested$ 方法中，我们先判断是不是 alwayRemember，我们可以在初始化 Spring Security 的配置时指定是否为 alwayRemember，若不是就要通过前端传来的参数判断是否启用 RememberMe 登录，默认情况下这个参数用 application/x-www-form-urlencoded 格式传递，我们可以默认获取。如果用 Json 字符串传递，我们需要重写这个方法，来自定义参数获取的方法。参数值为 ‘真’ ，即视为启用了 RememberMe。
 
@@ -1815,15 +1815,15 @@ processAutoLoginCookie 方法主要用来验证 Cookie 中的令牌信息是否�
 
   ​		也可以在初始化配置中指定。
 
-![image-20230512165611522](spring_security.assets/image-20230512165611522.png)
+![image-20230815155344410](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151553586.png)
 
 + 当我们开启了 RememberMe 功能时，就会返回 true 然后会返回上层去调用 $onLoginSuccess$ 方法，这是本类中的抽象方法，我们去找它的实现。在上面的继承关系图中可以看到 $AbstractRememberMeServices$ 有两个实现类，默认调用的是 $TokenBasedRememberMeServices$ ，关于另一个实现类在后面会说明使用场合。
 
-![image-20230512171016944](spring_security.assets/image-20230512171016944.png)
+![image-20230815161505706](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151615867.png)
 
 + 在 $TokenBasedRememberMeServices$ 的实现中，我们会用：用户名、过期时间以及签名，来设置一个 cookie，等这个 session 过期后，我们会利用这个 cookie 进行自动登录。但是这样只要这个 cookie 被黑客劫持到就会有安全问题，所以有相对应的改进措施，但是只用使用 RememberMe 就一定会存在安全问题。
 
-![image-20230512171347042](spring_security.assets/image-20230512171347042.png)
+![image-20230815161520128](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151615343.png)
 
 
 
@@ -1831,16 +1831,16 @@ processAutoLoginCookie 方法主要用来验证 Cookie 中的令牌信息是否�
 
 + 登录请求会被 $RememberMeAuthenticationFilter$ 拦截，然后调用 $rememberMeServices.autoLogin$ 方法，同样找这个接口的默认实现，在 $AbstractRememberMeServices$ 类中
 
-![image-20230512180056205](spring_security.assets/image-20230512180056205.png)
+![image-20230815161536839](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151615017.png)
 
 + 在实现方法中，主要的处理是在 $ processAutoLoginCookie$ 类中，同样这也是个接口，我们去找它的实现，也在 $TokenBasedRememberMeServices$ 类中
   + 要注意在我们这里的认证成功处理操作中并没有再调用 $RememberMeServices$ 的loginSuccess 方法，所以并没有再次生成我们的 cookie，这个 cookie 第一次生成后，直到它过期前都不会变换，安全风险很大
 
-![image-20230512180319561](spring_security.assets/image-20230512180319561.png)
+![image-20230815161632420](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151616700.png)
 
 + 这个方法主要的操作是，用我们 cookie 中的 username 从 UserDetailService 中取出个人信息然后生成签名，和我们传入的签名对比，相同则返回当前认证用户信息，否则抛出异常
 
-![image-20230512182041094](spring_security.assets/image-20230512182041094.png)
+![image-20230815161647405](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151616655.png)
 
 
 
@@ -1848,7 +1848,7 @@ processAutoLoginCookie 方法主要用来验证 Cookie 中的令牌信息是否�
 
 当用户通过用户名/密码的形式登录成功后，系统会根据用户的用户名、密码以及令牌的过期时间计算出一个签名，这个签名使用 MD5 消息摘要算法生成，是不可逆的。然后再将用户名、令牌过期时间以及签名拼接成一个字符串，中间用“:” 隔开，对拼接好的字符串进行Base64 编码，然后将编码后的结果返回到前端，也就是我们在浏览器中看到的令牌。当会话过期之后，访问系统资源时会自动携带上Cookie中的令牌，服务端拿到 Cookie中的令牌后，先进行 Bae64解码，解码后分别提取出令牌中的三项数据：接着根据令牌中的数据判断令牌是否已经过期，如果没有过期，则根据令牌中的用户名查询出用户信息：接着再计算出一个签名和令牌中的签名进行对比，如果一致，表示会牌是合法令牌，自动登录成功，否则自动登录失败。
 
-![image-20220308192413735](spring_security.assets/image-20220308192413735.png)
+![image-20230815161704873](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151617155.png)
 
 
 
@@ -1858,7 +1858,7 @@ processAutoLoginCookie 方法主要用来验证 Cookie 中的令牌信息是否�
 
 #### PersistentTokenBasedRememberMeServices
 
-![image-20220319104657210](spring_security.assets/image-20220319104657210.png)
+![image-20230815161736962](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151617462.png)
 
 1. 不同于 TokonBasedRemornberMeServices 中的 processAutologinCookie 方法，这里cookieTokens 数组的长度为2，第一项是series，第二项是 token。
 2. 从cookieTokens数组中分到提取出 series 和 token． 然后根据 series 去内存中查询出一个 PersistentRememberMeToken对象。如果查询出来的对象为null，表示内存中并没有series对应的值，本次自动登录失败。如果查询出来的 token 和从 cookieTokens 中解析出来的token不相同，说明自动登录会牌已经泄漏（恶意用户利用令牌登录后，内存中的token变了)，此时移除当前用户的所有自动登录记录并抛出异常。
@@ -1877,13 +1877,13 @@ processAutoLoginCookie 方法主要用来验证 Cookie 中的令牌信息是否�
 
 AbstractUserDetailsAuthenticationProvider类中authenticate方法在最后认证成功之后实现了记住我功能，但是查看源码得知如果开启记住我,必须进行相关的设置 
 
-![image-20200814184455083](spring_security.assets/image-20200814184455083.png)
+![image-20230815161833809](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151618114.png)
 
-![image-20200814184605516](spring_security.assets/image-20200814184605516.png)
+![image-20230815161846679](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151618974.png)
 
-![image-20200814184651238](spring_security.assets/image-20200814184651238.png)
+![image-20230815161936357](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151619654.png)
 
-![image-20200814185157418](spring_security.assets/image-20200814185157418.png)
+![image-20230815161945237](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151619627.png)
 
 
 
@@ -2436,7 +2436,7 @@ Security 过滤器，即先于 Spring Security 过滤器执行，则 CorsFiter �
 
 为了理清楚这个问题，我们先简略了解一下 Filter、DispatchserServlet 以及Interceptor 执行顺序。
 
-<img src="spring_security.assets/image-20220521074711128.png" alt="f" style="zoom:150%;" />
+![image-20230815162043282](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151620644.png)
 
 理清楚了执行顺序，我们再来看跨域请求过程。由于非简单请求都要首先发送一个预检请求
 request），而预检请求并不会携带认证信息，所以预检请求就有被 Spring Security 拦截的可能。因此通过@CrossOrigin 注解或者重写 addCorsMappings 方法配置跨域就会失效。如果使用 CorsFilter 配置的跨域，只要过滤器优先级高于 SpringSecurity 过滤器就不会有问题。反之同样会出现问题。
@@ -2489,11 +2489,11 @@ Spring Security 中异常主要分为两大类:
 
 其中认证所涉及异常类型比较多，默认提供的异常类型如下：
 
-![image-20220430213210778](spring_security.assets/image-20220430213210778.png)
+![image-20230815162053041](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151620342.png)
 
 相比于认证异常，权限异常类就要少了很多，默认提供的权限异常如下：
 
-![image-20220430213344621](spring_security.assets/image-20220430213344621.png)
+![image-20230815162109562](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151621772.png)
 
 在实际项目开发中，如果默认提供异常无法满足需求时，就需要根据实际需要来自定义异常类。
 
@@ -2543,7 +2543,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 在前面学习认证过程中，我们得知认证成功之后会将当前登录用户信息保存到 Authentication 对象中，Authentication 对象中有一个 getAuthorities() 方法，用来返回当前登录用户具备的权限信息，也就是当前用户具有权限信息。该方法的返回值为 Collection<? extends GrantedAuthority>，当需要进行权限判断时，就会根据集合返回权限信息调用相应方法进行判断。
 
-![image-20220523110143445](spring_security.assets/image-20220523110143445.png)
+![image-20230815162121344](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151621547.png)
 
 那么问题来了，针对于这个返回值 GrantedAuthority 应该如何理解呢? 是角色还是权限?
 
@@ -2567,33 +2567,33 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 >
 > > 1. 首先都是调用的 SecurityExpressionRoot 这个类中的功能，先在 hasAuthority 中直接调用 hasAnyAuthority 
 > >
-> > <img src="spring_security.assets/image-20230603162834442.png" alt="image-2023003162834442" style="zoom:100%;" />
+> > ![image-20230815162130794](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151621962.png)
 > >
 > > 2. 在 hasAnyAuthority 中调用 hasAnyAuthorityName 传入一个为 null 的前缀
 > >
-> > ![image-20230603162938533](spring_security.assets/image-20230603162938533.png)
+> > ![image-20230815162139416](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151621614.png)
 > >
 > > 3. 在 hasAnyAuthorityName 中我们可以看到是由 getAuthoritySet 方法获取当前角色授权信息的，后面的代码都是做校验的，验证 roleSet是否存在这个权限，所以我们进入 getAuthoritySet 这个方法中看
 > >
-> > ![image-20230603202243457](spring_security.assets/image-20230603202243457.png)
+> > ![image-20230815162147404](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151621575.png)
 > >
 > > 4. 在 getAuthoritySet 方法中我们可以看到是由 authentication 调用它的 getAuthorities 方法实现的获取权限信息，Authentication 对象在我们讲述 Spring Security 架构时就说过，它是用来保存我们的登录用户的信息的，就相当于调用我们的实现了 UserDetails 接口的类的重写的 getAuthorities 方法，我们只需要在我们自己重写的方法中，获取到我们的权限信息集合就可以
 > >
-> > ![image-20230603203806085](spring_security.assets/image-20230603203806085.png)
+> > ![image-20230815162157741](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151621957.png)
 >
 > hasRole：
 >
 > > 1. 我们也可以看到基本和 hasAuthority 的调用流程相同，也是 hasRole 调用 hasAnyRole 然后再 调用 hasAnyAuthorityName ，这时候就已经和刚在的 hasAuthority 调用到了同一个方法，唯一的不同是这次传入了一个不为 null 的前缀 defaultRolePrefix 
 > >
-> > ![image-20230603211709871](spring_security.assets/image-20230603211709871.png)
+> > ![image-20230815162206448](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151622678.png)
 > >
-> > ![image-20230603211727378](spring_security.assets/image-20230603211727378.png)
+> > ![image-20230815162212835](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151622996.png)
 > >
 > > 2. 可以看到这个默认前缀被固定为 Role_ ，这就是我们的 基于角色的架构设计 与 基于 权限的架构设计的不同点，我们在注解上使用的角色会被自动加上一个 ROLE_ 的前缀，所以我们从数据库中取出的角色也应该带有 ROLE_ 的前缀
 > >
-> > ![image-20230603212500411](spring_security.assets/image-20230603212500411.png)
+> > ![image-20230815162220604](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151622757.png)
 > >
-> > ![image-20230603212909562](spring_security.assets/image-20230603212909562.png)
+> > ![image-20230815162226977](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151622169.png)
 >
 > 综上，可以看出我们的 Spring Security 在角色和权限架构上的处理基本相同，所以我们示例时，只用基于角色的架构示例，权限的架构基本一致
 
@@ -2684,7 +2684,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 #### 权限表达式
 
-![image-20220523153200373](spring_security.assets/image-20220523153200373.png)
+![image-20230815162239033](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151622286.png)
 
 | 方法                                                         | 说明                                                        |
 | ------------------------------------------------------------ | ----------------------------------------------------------- |
@@ -2796,40 +2796,40 @@ public class AuthorizeMethodController {
 
 #### 简介
 
-![image-20220618140440796](spring_security.assets/image-20220618140440796-16858529170771.png)
+![image-20230815162257288](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151622593.png)
 
 - **$ConfigAttribute$** 在 Spring Security 中，用户请求一个资源(通常是一个接口或者一个 Java 方法)需要的角色会被封装成一个 ConfigAttribute 对象，在 ConfigAttribute 中只有一个 getAttribute方法，该方法返回一个 String 字符串，就是角色的名称。一般来说，角色名称都带有一个 `ROLE_` 前缀，投票器 AccessDecisionVoter 所做的事情，其实就是比较用户所具各的角色和请求某个资源所需的 ConfigAtuibute 之间的关系。
 - **$AccesDecisionVoter$ 和 $AccessDecisionManager$** 都有众多的实现类，在 AccessDecisionManager 中会换个遍历 AccessDecisionVoter，进而决定是否允许用户访问，因而 AaccesDecisionVoter 和 AccessDecisionManager 两者的关系类似于 AuthenticationProvider 和 ProviderManager 的关系。
 
 #### 认证流程图
 
-![image-20230604163450888](spring_security.assets/image-20230604163450888.png)
+![image-20230815162308912](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151623170.png)
 
 #### 认证流程追踪
 
 + 先是 $FilterSecurityInterceptor$ 过滤器中的 $doFilter$ 调用 $invoke$ 方法
 
-![image-20230604163902378](spring_security.assets/image-20230604163902378.png)
+![image-20230815162329702](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151623911.png)
 
 + 可以看到调用 $invoke$ 方法时，传入的参数就是请求方式和请求路径，然后调用 $beforeInvocation$  
 
-![image-20230604164005996](spring_security.assets/image-20230604164005996.png)
+![image-20230815162356210](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151623447.png)
 
 + 在 $beforeInvocation$ 中调用 $obtainSecurityMetadataSource$ 方法获取 $FilterInvocationSecurityMetadataSource$ 对象，再调用这个对象的 $getAttributes$ 方法，通过这个方法我们获得了允许访问当前接口的 角色/权限 信息，之后再通过调用 $attemptAuthorization$ 方法去授权，即判断当前用户是否拥有这些权限中的一个（这主要由$AccesDecisionVoter$ 和 $AccessDecisionManager$ 来实现）
 
-![image-20230604164107664](spring_security.assets/image-20230604164107664.png)
+![image-20230815162410925](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151624135.png)
 
 + 这里默认调用的是 $DefaultFilterInvocationSecurityMetadataSource$ 这个实现类中的 $getAttributes$ 方法，获取我们代码中配置的权限信息，我们自定义数据源实现的时候只需要继承 $FilterInvocationSecurityMetadataSource$ 接口并重写 $getAttributes$ 方法，来获取我们数据库中的 角色/权限 信息集合就可以
 
-![image-20230604164308488](spring_security.assets/image-20230604164308488.png)
+![image-20230815162420966](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151624161.png)
 
 + 通过 $AccessDecisionManager$ 的 $decide$ 方法来进行是否授权的判断
 
-![image-20230604164440553](spring_security.assets/image-20230604164440553.png)
+![image-20230815162428639](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151624824.png)
 
 + 最后由 $AccesDecisionVoter$ 决定是否授权
 
-![image-20230604164511394](spring_security.assets/image-20230604164511394.png)
+![image-20230815162435859](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151624027.png)
 
 
 
@@ -3365,7 +3365,7 @@ OAuth 是一个开放的非常重要的认证标准/协议，该标准允许用�
 
 例如用户想登录 Ruby China，传统方式是使用用户名密码但是这样并不安全，因为网站会存储你的用户名密码，这样可能会导致密码泄露。这种授权方式安全隐患很大，如果使用 OAuth 协议就能很好地解决这一问题。
 
-![image-20220711201517843](spring_security.assets/image-20220711201517843.png)
+![image-20230815162450283](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151624686.png)
 
 > 注意: OAuth2 是OAuth 协议的下一版本，但不兼容 OAuth 1.0。 OAuth2 关注客户端开发者的简易性，同时为 Web 应用、桌面应用、移动设备、IoT 设备提供专门的认证流程。
 
@@ -3375,7 +3375,7 @@ OAuth 是一个开放的非常重要的认证标准/协议，该标准允许用�
 
 整体流程如下:（图片来自 RFC6749文档 https://tools.ietf.org/html/rfc6749)
 
-![image-20220625085816021](spring_security.assets/image-20220625085816021.png)
+![image-20230815162528647](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151625026.png)
 
 ```markdown
 - （A）用户打开客户端以后，客户端要求用户给予授权。
@@ -3405,7 +3405,7 @@ OAuth 是一个开放的非常重要的认证标准/协议，该标准允许用�
 - Authorization Server：认证服务器，即服务端专门用来处理认证的服务器；
 - Resource Server：资源服务器，即服务端存放用户生成的资源的服务器。它与认证服务器，可以是同一台服务器，也可以是不同的服务器。
 
-![image-20220625090018332](spring_security.assets/image-20220625090018332.png)
+![image-20230815162553341](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151625589.png)
 
 具体流程如下:
 
@@ -3438,7 +3438,7 @@ https://wx.com/oauth/authorize?response_type=code&client_id=CLIENT_ID&redirect_u
 
 **简化模式（`implicit` grant type）**不通过第三方应用程序的服务器，直接在浏览器中向认证服务器申请令牌，跳过了"授权码"这个步骤，因此得名。所有步骤在浏览器中完成，令牌对访问者是可见的，且客户端不需要认证。其具体的授权流程如图所示（图片来自 RFC6749文档 https://tools.ietf.org/html/rfc6749)
 
-![image-20220625090540320](spring_security.assets/image-20220625090540320.png)
+![image-20230815162603107](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151626368.png)
 
 具体步骤如下:
 
@@ -3468,7 +3468,7 @@ https://wx.com/oauth/authorize?response_type=token&client_id=CLIENT_ID&redirect_
 
 **密码模式（Resource Owner `Password` Credentials Grant）**中，用户向客户端提供自己的用户名和密码。客户端使用这些信息，向"服务商提供商"索要授权。在这种模式中，用户必须把自己的密码给客户端，但是客户端不得储存密码。这通常用在用户对客户端高度信任的情况下，比如客户端是操作系统的一部分，或者由一个相同公司出品。而认证服务器只有在其他授权模式无法执行的情况下，才能考虑使用这种模式。其具体的授权流程如图所示（图片来自 RFC6749文档 https://tools.ietf.org/html/rfc6749)
 
-![image-20220625090710221](spring_security.assets/image-20220625090710221.png)
+![image-20230815162619674](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151626979.png)
 
 具体步骤如下:
 
@@ -3488,7 +3488,7 @@ https://wx.com/token?grant_type=password&username=USERNAME&password=PASSWORD&cli
 
 **客户端模式（`Client Credentials` Grant）**指客户端以自己的名义，而不是以用户的名义，向"服务提供商"进行认证。严格地说，客户端模式并不属于OAuth框架所要解决的问题。在这种模式中，用户直接向客户端注册，客户端以自己的名义要求"服务提供商"提供服务，其实不存在授权问题。
 
-![image-20220625090900509](spring_security.assets/image-20220625090900509.png)
+![image-20230815162639143](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151626365.png)
 
 具体步骤如下:
 
@@ -3525,15 +3525,15 @@ https://wx.com/token?grant_type=client_credentials&client_id=CLIENT_ID&client_se
 
 访问 github 并登录，在https://github.com/settings/profile中找到 Developer Settings 选项
 
-![image-20220601100844019](spring_security.assets/image-20220601100844019.png)
+![image-20230815162648317](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151626535.png)
 
 - 创建 OAuth App并输入一下基本信息:
 
-![image-20220601101157267](spring_security.assets/image-20220601101157267.png)
+![image-20230815162657058](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151626385.png)
 
 - 注册成功后会获取到对应的 Client ID 和 Client Secret。
 
-![image-20220601101312113](spring_security.assets/image-20220601101312113.png)
+![image-20230815162718651](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151627931.png)
 
 #### 项目开发
 
@@ -3597,11 +3597,11 @@ spring.security.oauth2.client.registration.github.redirect-uri=http://localhost:
 
 - 启动测试
 
-![image-20220601102620149](spring_security.assets/image-20220601102620149.png)
+![image-20230815162729503](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151627711.png)
 
 - 点击 github 登录,点击授权 访问 hello 接口
 
-![image-20220601102749454](spring_security.assets/image-20220601102749454.png)
+![image-20230815162738755](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202308151627062.png)
 
 
 

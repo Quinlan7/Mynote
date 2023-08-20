@@ -26,3 +26,11 @@ FROM "EXTRACURRICULAR_SCORE_SUMMARY"
 SUBSTR(STUDENT_CODE, 1, 2)
 ```
 
+
+
+
+
+
+
+### with as
+
