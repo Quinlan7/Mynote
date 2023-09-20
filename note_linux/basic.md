@@ -126,5 +126,80 @@ find ~/ -type f -name "*redis*"
 
 
 
-### 查看系统信息
+### 压缩包
 
+打包当前文件夹下所有文件，命名为：etc.tar.gz
+
+ ```
+ [root@Slave1 hadoop]# tar -zcvf etc.tar.gz *
+ ```
+
+文件下载到本地
+
+```
+[root@Slave1 hadoop]# sz etc.tar.gz 
+```
+
+
+
+### 修改权限
+
+权限：文件权限通常分为读取（r）、写入（w）和执行（x）三个部分
+
+> `chmod +x op_base.sh` 是一条Linux/Unix命令，用于给文件分配执行权限。让我们详细解释一下：
+>
+> - `chmod`：这是一个用于修改文件权限的命令，其名称是"change mode"的缩写。
+>
+> - `+x`：这是chmod命令的参数，表示添加执行权限。在Linux/Unix系统中，文件权限通常分为读取（r）、写入（w）和执行（x）三个部分。`+x` 表示添加执行权限，允许文件在终端中执行（如果是脚本）或在shell中运行。
+>
+> - `op_base.sh`：这是要添加执行权限的文件的名称。在这个示例中，文件名是op_base.sh。
+>
+> 所以，`chmod +x op_base.sh` 的作用是将op_base.sh文件的权限更改为可执行，以便您可以在终端中运行它。如果这个文件是一个Shell脚本，您可以通过`./op_base.sh` 来运行它，前提是您已经在终端中位于包含该文件的目录，并且具有执行该文件的权限。
+>
+> 这个命令通常用于使脚本文件或可执行文件在Linux系统中可运行。请注意，要运行脚本，还需要确保脚本文件的内容和语法正确。
+
+### source
+
+> `source` 命令是用于在当前Shell会话中执行一个脚本文件的命令。它通常用于加载和运行Shell脚本或配置文件中的命令，以便将它们应用到当前Shell环境中。
+>
+> `source` 命令的常见用法是在Linux和Unix系统中，它可以用不同的方式执行，具体取决于您的Shell（通常是Bash或其他Shell）。
+>
+> 以下是一些常见的用法和示例：
+>
+> 1. **在Bash中使用source命令**：
+>
+>    在Bash Shell中，`source` 命令通常有两种等效的形式：`. filename` 和 `source filename`，它们都可以用来执行一个脚本文件。示例：
+>
+>    ```bash
+>    source myscript.sh
+>    ```
+>
+>    或
+>
+>    ```bash
+>    . myscript.sh
+>    ```
+>
+>    这会在当前Shell环境中执行名为 `myscript.sh` 的脚本文件中的命令。
+>
+> 2. **使用source命令加载配置文件**：
+>
+>    `source` 命令通常用于加载配置文件，例如 `.bashrc` 或 `.profile`。这允许您立即应用配置更改，而不必注销并重新登录到Shell。示例：
+>
+>    ```bash
+>    source ~/.bashrc
+>    ```
+>
+>    这会重新加载 `~/.bashrc` 文件中的配置。
+>
+> 3. **传递参数给脚本**：
+>
+>    您还可以向脚本文件传递参数，就像在普通的Shell脚本调用中一样。示例：
+>
+>    ```bash
+>    source myscript.sh arg1 arg2
+>    ```
+>
+>    这将在执行 `myscript.sh` 时将参数 `arg1` 和 `arg2` 传递给脚本。
+>
+> 总之，`source` 命令是用于在当前Shell环境中执行脚本文件或加载配置文件的有用工具。它使得在Shell中应用更改变得更加方便，而不必启动新的Shell会话。

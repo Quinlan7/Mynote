@@ -53,6 +53,16 @@ git push origin master #可选，如果需要同步到remote上的话
 
 
 
+### 生成自定义名字的ssh密钥
+
+```
+$ ssh-keygen -t rsa -C “your email” -f id_rsa_xx
+```
+
+
+
+
+
 ##### 参考
 
 [详解gitignore的使用方法，让你尽情使用git add .](https://www.cnblogs.com/techflow/p/13801136.html)
