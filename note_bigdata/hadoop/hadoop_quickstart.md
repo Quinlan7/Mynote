@@ -393,25 +393,101 @@ The filesystem under path '/home/hadoop/city/data/' is HEALTHY
 
 ### 1 分布式计算概述
 
++ 分散 --> 汇总模式
+
+![image-20230920190245111](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309201902563.png)
+
++ 中心调度 --> 步骤执行模式
+
+![image-20230920190745648](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309201907051.png)
+
++ 总结
+
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309201909119.png" alt="image-20230920190914900" style="zoom:40%;" />
 
 
 
+### 2 MapReduce 概述
+
++ 分布式计算框架 MapReduce
+
+![image-20230920193257459](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309201932647.png)
+
++ **总结**
+
+  ![image-20230920193755025](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309201937348.png)
 
 
 
+### 3 YARN 概述
+
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309201959921.png" alt="image-20230920195952694" style="zoom:50%;" />
+
+### 4 YARN 架构
+
+#### 4.1 核心架构
+
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309202142895.png" alt="image-20230920214243461" style="zoom:30%;" />
+
+#### 4.2 **辅助架构**
+
++ **YARN 辅助角色**
+
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309202200047.png" alt="image-2023092022051885" style="zoom:50%;" />
+
++ **Web应用代理（Web Application Proxy）**
+
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309202204096.png" alt="image-20230920220417885" style="zoom:50%;" />
+
++ **JobHistoryServer 历史服务器**
+
+![image-20230920220739384](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309202207657.png)
+
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309202210618.png" alt="image-20230920221055414" style="zoom:50%;" />
+
++ **总结**
+
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309202151470.png" alt="image-2023092021536290" style="zoom:50%;" />
 
 
 
+### 5 MapReduce & YARN 部署
+
+#### 5.1 部署说明
+
+![image-20230921130141222](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309211301515.png)
+
++ **汇总说明**
+
+![image-20230921125748323](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309211257632.png)
 
 
 
+#### 5.2 MapReduce 框架运行配置
+
++ **MapReduce 配置文件**
+
+![image-20230921134105263](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309211341853.png)
 
 
 
+#### 5.3 YARN集群部署
+
++ **YARN 配置文件**
+
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309211343595.png" alt="image-20230921134319176" style="zoom:50%;" /> 
+
+![image-20230921134402520](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309211344319.png)
 
 
 
+#### 5.4 分发配置文件
 
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309211345247.png" alt="image-20230921134550976" style="zoom:47%;" />
+
+#### 5.5 集群启动命令
+
+![image-20230921134644943](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202309211346114.png)
 
 
 
