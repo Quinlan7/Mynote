@@ -328,11 +328,11 @@ if __name__ == '__main__':
 
 ### 三：DataFrame 入门和操作
 
+ 
 
 
 
-
-
+ 
 
 ### 四：SparkSQL 函数定义
 
@@ -342,9 +342,25 @@ if __name__ == '__main__':
 
 #### 1. 原理
 
+> Spark SQL 提供了类似于 Hive 的功能，但是 Spark 没有提供元数据的管理功能，所以 Spark On Hve 就是 Spaark 借用了 Hive 的 metastore 功能
+
+<img src="https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202310111053897.png" alt="image-20231011105327599" style="zoom:80%;" />
+
 #### 2. 配置
 
++ hive-site.xml 配置文件
+
+> 直接把 Hive 的 conf 目录下的 hive-site.xml 复制到 Spark 的 conf 目录下就可以
+
++ mysql 驱动（metastore 源数据存储在mysql中）
+
+> 把 mysql 的驱动 jar 包下载到 Spark 的 jars 目录下就可以
+
 #### 3. 在代码中集成
+
+ 
+
+
 
 
 
@@ -352,15 +368,27 @@ if __name__ == '__main__':
 
 #### 1. 概念
 
+> spark 和 Hive 一样，提供了一个类似于 hiveserver2 的 JDBC 连接工具 thriftserver（守护进程 daemon），一般的开发人员可以直接通过 JDBC 连接上我们的 Spark ，可以查看 hive 的元数据，通过 SparkSQL 可以直接进行计算，并且操作存储再 HDFS 中的数据。
 
+![image-20231011160430649](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202310111604896.png)
 
 #### 2. 客户端工具连接
+
+
 
 #### 3. 代码 JDBC 连接
 
 
 
+
+
+#### 4. 总结
+
+![image-20231011164221512](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202310111642692.png)
+
 ## 第四章、综合案例
+
+
 
 ## 第五章、Spark 核心原理
 
