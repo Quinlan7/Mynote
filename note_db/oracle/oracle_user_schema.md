@@ -2,6 +2,10 @@
 
 *oracle的基础知识*
 
+
+
+[TOC]
+
 ### 用户、模式、表空间、表的关系
 
 ​		一个模式对应一个项目，对应一个用户；每个用户可以管理多个表空间，每个表空间由一个或多个物理文件(.dbf)组成，一个用户可以分配多个表空间，但只能有一个默认表空间，每张表可以存在于一个或多个表空间中（比如图中的表1）。
@@ -35,6 +39,12 @@
 > `DBA_SEGMENTS` 视图实际上是一个数据库视图，它是通过查询底层数据字典表来创建的。这些数据字典表包括 `SYS.DBA_SEGMENTS`，`SYS.DBA_USERS`，`SYS.DBA_TABLESPACES` 等，它们存储了关于数据库的元数据信息。这些表和视图通常只能由具有足够权限的用户（通常是具有 `SELECT_CATALOG_ROLE` 或 `SELECT ANY DICTIONARY` 权限的用户）进行查询。
 >
 > 你可以通过 SQL 查询来访问 `DBA_SEGMENTS` 视图，如前面提到的查询示例，以获取数据库中段的信息。这些视图和表存储在数据库的 `SYS` 用户模式中，对于普通用户而言通常是不可见的，但具有适当权限的用户可以查询这些视图来获取有关数据库的元数据信息。
+
+##### 参考
+
+[Oracle中表空间、段、区、块及方案详解](https://hongyitong.github.io/2016/09/05/Oracle%E4%B8%AD%E8%A1%A8%E7%A9%BA%E9%97%B4%E3%80%81%E6%AE%B5%E3%80%81%E5%8C%BA%E3%80%81%E5%9D%97%E5%8F%8A%E6%96%B9%E6%A1%88%E8%AF%A6%E8%A7%A3/)
+
+
 
 
 
@@ -83,6 +93,42 @@ INNER JOIN dba_users u ON d.owner = u.username;
 
 
 
+
+### oracle 表空间创建以及踩坑
+
+navicat对于oracle分区信息的查看十分有限，且有bug
+
+
+
+加入三条数据
+
+![image-20231025151327806](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202310251513862.png)
+
+执行如下sql查看表和对应的表空间的关系
+
+```sql
+-- 查询表和对应的表空间
+SELECT t.owner AS schema_name, t.table_name, s.tablespace_name, s.bytes/1024/1024 AS size_mb
+FROM dba_tables t
+INNER JOIN dba_segments s ON t.table_name = s.segment_name
+WHERE t.owner = 'GSPASS';
+```
+
+
+
+
+
+可以看到我新加的三条数据，产生了对应的三个分区，并且对应的表空间均为我在创建表的时候指定的
+
+![image-20231025151242363](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202310251512569.png)
+
+但是在navicat 的表设计中，看到表空间字段为空，并且如果在这里选择表空间并且保存的话，会报错
+
+![image-20231025153640574](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202310251536658.png)
+
+在 navicat 右侧的表信息中也可以看到表空间为空，所以navicat对于分区表的显示是存在问题的，千万不要被误导
+
+![image-20231025153717310](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202310251537401.png)
 
 
 
