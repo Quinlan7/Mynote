@@ -59,3 +59,6 @@ leetcode 28 ：字符串模式匹配
 [leetcode151](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/String/151.md)：反转字符串中的单词顺序，调包写的话很简单，但是也涉及到了正则表达式，不调包的实现难度比较大，可以仔细做做（先写个调包的算法，然后把调用的每个函数都实现一遍）；         
 [leetcode28](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/String/28.md)：KMP算法，很有价值，尤其是对于next数组的求解；      
 
+##### 栈与队列题目（值得重复刷的）
+
+[leetcode239](https://leetcode.cn/problems/sliding-window-maximum/)：双端队列，很不错，有一些小的点很难想到

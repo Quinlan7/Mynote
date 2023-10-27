@@ -1,4 +1,4 @@
-# oracle特性
+# oracle 表空间，分区表基础知识以及实操
 
 *oracle的基础知识*
 
@@ -60,45 +60,101 @@
 
 
 
-### oracle相关命令
+### oracle 表空间，分区表创建实操以及踩坑
 
-+ 查询所有用户
+*navicat对于oracle分区信息的查看十分有限，且有bug*
 
+#### 创建表空间
+
+```sql
+-- 创建表空间（默认就是永久的，没有配置的参数都是直接使用默认的就ok）
+/*
+    需要确定物理文件路径确实存在，否则会报错
+    并且需要确定物理文件路径的权限是oracle用户
+    如果是root用户，需要修改权限
+    修改所有者：chown -R oracle:oinstall /mnt/sdd_tmp/oracle/gs
+    修改权限：chmod -R 777 /mnt/sdd_tmp/oracle/gs
+    */
+/*创建表空间*/
+create tablespace GTY_BILLING_TRANSACTION
+/*表空间物理文件名称*/
+datafile '/mnt/sdd_tmp/oracle/gs/gtybillingtransaction.dbf'
+-- 大小 500M，每次 5M 自动增大，最大不限制(数据文件策略)
+size 1024M autoextend on next 100M maxsize unlimited
+--这一行指定了数据文件的数据块大小为8K字节。这是典型的块大小，但你可以根据需要进行调整。
+BLOCKSIZE 8192
+--这一行指定表空间采用本地管理，这意味着段的管理由Oracle自动处理。
+EXTENT MANAGEMENT LOCAL
+-- 这一行指定表空间中的段空间管理采用自动模式，Oracle将自动管理段的空间分配和释放。
+SEGMENT SPACE MANAGEMENT AUTO
+--这一行将表空间设置为在线状态，允许用户访问并向其中插入数据。
+ONLINE;
+
+
+-- 删除表空间
+DROP TABLESPACE TOLL_ENTRY_DETAILS INCLUDING CONTENTS AND DATAFILES;
+
+
+-- 查询表空间是否存在
+SELECT tablespace_name FROM dba_tablespaces WHERE tablespace_name = 'TOLL_ENTRY_DETAILS';
+
+-- 修改表的对应表空间
+ALTER TABLE your_table_name
+MOVE TABLESPACE new_tablespace_name;
 ```
-SELECT username FROM dba_users;
+
+
+
+
+
+#### 创建分区表
+
+```sql
+CREATE TABLE toll_entry_details
+(
+    id VARCHAR2(50),
+    passid VARCHAR2(50),
+    vehicletype NUMBER,
+    enaxlecount NUMBER,
+    lanetype NUMBER,
+    vehicleclass NUMBER,
+    enweight VARCHAR2(50),
+    entime TIMESTAMP,
+    vehicleid VARCHAR2(50),
+    mediatype NUMBER,
+    entolllaneid VARCHAR2(50)
+)
+TABLESPACE TOLL_ENTRY_DETAILS -- 指定共同的表空间
+PARTITION BY RANGE (entime) -- 使用日期作为分区键
+INTERVAL(NUMTODSINTERVAL(1, 'DAY')) -- 按天分区
+(
+  PARTITION initial_partition VALUES LESS THAN (TO_DATE('2023-01-01', 'YYYY-MM-DD'))
+);
+
+
+COMMENT ON TABLE toll_entry_details IS '收费站入口数据明细';
+COMMENT ON COLUMN toll_entry_details.vehicletype IS '收费车型';
+COMMENT ON COLUMN toll_entry_details.enaxlecount IS '入口轴数';
+COMMENT ON COLUMN toll_entry_details.lanetype IS '车道类型';
+COMMENT ON COLUMN toll_entry_details.vehicleclass IS '车种';
+COMMENT ON COLUMN toll_entry_details.enweight IS '入口重量';
+COMMENT ON COLUMN toll_entry_details.passid IS '通行标识ID';
+COMMENT ON COLUMN toll_entry_details.id IS '入口处理编号';
+COMMENT ON COLUMN toll_entry_details.entime IS '入口处理时间';
+COMMENT ON COLUMN toll_entry_details.vehicleid IS '实际车辆车牌号码+颜色';
+COMMENT ON COLUMN toll_entry_details.mediatype IS '通行介质类型';
+COMMENT ON COLUMN toll_entry_details.entolllaneid IS '入口车道编号';
+
+
+--删除表
+DROP TABLE toll_entry_details;
 ```
 
 
 
-+ 查询对应的空闲表空间的大小
-
-```
--- 查询对应的空闲表空间的大小
-SELECT tablespace_name, SUM(bytes) / (1024 * 1024) AS "Free Space (MB)"
-FROM dba_free_space
-GROUP BY tablespace_name;
-```
 
 
-
-+ 查看所有用户和它们所在的表空间
-
-```
--- 查看所有用户和它们所在的表空间，可以执行以下查询：
-SELECT DISTINCT d.tablespace_name, u.username
-FROM dba_segments d
-INNER JOIN dba_users u ON d.owner = u.username;
-```
-
-
-
-
-
-### oracle 表空间创建以及踩坑
-
-navicat对于oracle分区信息的查看十分有限，且有bug
-
-
+#### 测试是否为分区表以及表空间是否生效
 
 加入三条数据
 
@@ -116,8 +172,6 @@ WHERE t.owner = 'GSPASS';
 
 
 
-
-
 可以看到我新加的三条数据，产生了对应的三个分区，并且对应的表空间均为我在创建表的时候指定的
 
 ![image-20231025151242363](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202310251512569.png)
@@ -129,6 +183,41 @@ WHERE t.owner = 'GSPASS';
 在 navicat 右侧的表信息中也可以看到表空间为空，所以navicat对于分区表的显示是存在问题的，千万不要被误导
 
 ![image-20231025153717310](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202310251537401.png)
+
+
+
+#### 查询分区表相关操作
+
+```sql
+-- 显示数据库所有分区表的信息：DBA_PART_TABLES
+-- 显示当前用户可访问的所有分区表信息：ALL_PART_TABLES
+-- 显示当前用户所有分区表的信息：USER_PART_TABLES
+
+-- 显示当前用户所有分区表的分区列信息：USER_PART_KEY_COLUMNS
+-- 显示当前用户可访问的所有分区表的分区列信息：ALL_PART_KEY_COLUMNS
+-- 显示分区列 显示数据库所有分区表的分区列信息：DBA_PART_KEY_COLUMNS
+
+
+-- 查询某张表是否分区
+SELECT table_name, partitioned
+FROM all_tables
+WHERE table_name = 'TOLL_ENTRY_DETAILS';
+
+-- 查询某张表的分区信息
+SELECT * FROM ALL_PART_TABLES WHERE TABLE_NAME = 'TOLL_ENTRY_DETAILS';
+
+
+-- 查询所有分区表 一个表对应n个分区就有n条记录
+select * from all_tab_partitions where table_name='TOLL_ENTRY_DETAILS';
+--2.3、指定分区查询数据
+select * from tablename partition(partitionname);
+--2.4、不指定分区查询数据
+select * from tablename;
+```
+
+
+
+
 
 
 
