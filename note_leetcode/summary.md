@@ -33,6 +33,23 @@ leetcode 28 ：字符串模式匹配
 
 
 
+
+
+### 递归调用
+
++ 最后需要返回的是 bool 类型
+
+> 在某个条件返回时，返回当前判断 并(&&) 上递归调用
+>
+> 递归函数返回 bool
+
++ 最后需要返回的是 List
+
+> 1. 如果是一层一个结果的话，可以直接List.addAll(递归调用)，递归函数返回list
+> 2. 如果是递归到某个条件才能有一个结果的话（例如：二叉树的所有路径，只有找到叶子节点才能向list中增加一个结果），直接返回 void，在递归中判断条件向list中添加结果，并将中间参数作为递归函数的参数传递
+
+
+
 ### 参考
 
 [双指针技巧labuladong](https://labuladong.github.io/algo/di-ling-zh-bfe1b/shuang-zhi-fa4bd/)     
@@ -62,3 +79,15 @@ leetcode 28 ：字符串模式匹配
 ##### 栈与队列题目（值得重复刷的）
 
 [leetcode239](https://leetcode.cn/problems/sliding-window-maximum/)：双端队列，很不错，有一些小的点很难想到
+
+leetcode347
+
+##### 二叉树题目（值得重复刷的）
+
+leetcode101
+
+leetcode102
+
+leetcode110
+
+leetcode257
