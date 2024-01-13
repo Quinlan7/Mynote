@@ -476,6 +476,12 @@ MongoDB OR 条件语句使用了关键字 **$or**,语法格式如下：
 
 ### 总条数
 
++ **db.collection.count(query, options)**
+
+> 过时但是可以用
+>
+> 可以用于find()的结果，也可以直接在整个集合上find
+
 ```sql
 > db.集合名称.count();
 > db.集合名称.find({"name":"编程不良人"}).count();
@@ -483,7 +489,40 @@ MongoDB OR 条件语句使用了关键字 **$or**,语法格式如下：
 
 `类似于 SQL 语句为: 'select count(id) from ....'`
 
++ **db.collection.countDocuments(query, options)**
+
+> ==不可以==用于find()的结果，但可以直接在整个集合上find，如果有查询条件，直接写在函数内部
+
+```sql
+> db.orders.countDocuments()
+> db.users.count({ age: { $lte: 22 } })
+> db.users.find({ age: { $lte: 22 } }).countDocuments()
+TypeError: db.users.find ... 2 } }).countDocuments is not a function
+```
+
++ **db.collection.estimatedDocumentCount(options)**
+
+> 只用于整个集合的计数，但是在集合文档数量巨大的时候，计数会不准确
+>
+> 只能用于整个集合的计数
+
++ db.orders.countDocuments() db.orders.estimatedDocumentCount() 这两个方法有什么区别
+
+> `db.orders.countDocuments()` 和 `db.orders.estimatedDocumentCount()` 是 MongoDB 数据库中用于获取集合中文档数量的两个不同方法，它们之间有一些关键区别：
+>
+> 1. **准确性**：
+>    + `countDocuments()` 方法会精确地计算集合中的文档数量。它执行一个全集合扫描，确保准确计数。这在文档数量不是非常庞大时是可行的，但在大型集合上可能会带来一定的性能开销。
+>    + `estimatedDocumentCount()` 方法则是一种估计值，它会返回一个近似的文档数量，而不是执行完整的集合扫描。这个方法通常更快，但结果可能不是完全准确，尤其是在集合有删除操作或集合尺寸巨大的情况下。
+> 2. **性能**：
+>    + `countDocuments()` 的性能开销可能较大，特别是在大型集合上。因为它需要执行一个全集合扫描来确保准确的文档数量。
+>    + `estimatedDocumentCount()` 的性能通常更好，因为它不需要完全扫描集合，而是使用一些元数据信息来估计文档数量。这使得它在大型集合中更为高效。
+> 3. **用途**：
+>    + 如果需要确切的文档数量，例如在需要准确分页或精确计算百分比的情况下，应该使用 `countDocuments()`。
+>    + 如果对准确性要求不高，而且希望在大型集合上快速获取近似值，可以使用 `estimatedDocumentCount()`。
+
 ### 去重
+
++ **db.collection.distinct(field, query, options)**
 
 ```sql
 > db.集合名称.distinct('字段')
@@ -492,6 +531,8 @@ MongoDB OR 条件语句使用了关键字 **$or**,语法格式如下：
 `类似于 SQL 语句为: 'select distinct name from ....'`
 
 ### 指定返回字段
+
+> _id：默认返回
 
 ```sql
 > db.集合名称.find({条件},{name:1,age:1}) 
@@ -628,6 +669,10 @@ createIndex() 接收可选参数，可选参数列表如下：
 ```
 
 ### 复合索引
+
+> 数据库原理：索引的数据结构
+>
+> sql 优化
 
 ​	说明: 一个索引的值是由多个 key 进行维护的索引的称之为复合索引
 
