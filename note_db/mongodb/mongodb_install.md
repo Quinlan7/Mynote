@@ -65,7 +65,7 @@ export PATH=$PATH:$MONGODB_HOME/bin
 ### 4. 创建数据和日志目录
 
 ```
-[root@glnode07 servers]# mkdir -p /home/mongodb/data/{db,log}
+[root@glnode07 servers]# mkdir -p /home/mongodb/data/{db,logs}
 ```
 
 
@@ -81,14 +81,20 @@ export PATH=$PATH:$MONGODB_HOME/bin
 
 添加如下内容
 
-```shell
-port=27017 # 端口号
-dbpath=/root/data/mongodb/data # 数据目录
-logpath=/root/data/mongodb/log/mongodb.log # 日志目录
-logappend=true # 使用追加的方式写日志
-fork=true # 后台运行
-maxConns=5000 # 最大同时连接数，默认2000
-bind_ip=0.0.0.0 # 默认127.0.0.1仅可本地访问。改为0.0.0.0 可以远程访问
+```yaml
+#数据库数据存放目录
+systemLog:
+ destination: file
+ path: /home/mongodb/data/logs/mongodb.log
+ logAppend: true
+storage:
+ dbPath: /home/mongodb/data/db
+net:
+ bindIp: 0.0.0.0
+ port: 27017
+ maxIncomingConnections: 5000
+processManagement:
+ fork: true
 ```
 
 
