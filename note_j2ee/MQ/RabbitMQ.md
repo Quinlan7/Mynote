@@ -473,13 +473,13 @@ public class SpringRabbitListener {
 }
 ```
 
-
-
 ### 3.1.3.测试
 
 启动consumer服务，然后在publisher服务中运行测试代码，发送MQ消息
 
+### 3.1.4.总结
 
+![image-20240304154806728](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403041548883.png)
 
 
 
@@ -552,15 +552,13 @@ public void listenWorkQueue2(String msg) throws InterruptedException {
 
 启动ConsumerApplication后，在执行publisher服务中刚刚编写的发送测试方法testWorkQueue。
 
+![image-20240304162141451](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403041621641.png)
+
 可以看到消费者1很快完成了自己的25条消息。消费者2却在缓慢的处理自己的25条消息。
-
-
 
 也就是说消息是平均分配给每个消费者，并没有考虑到消费者的处理能力。这样显然是有问题的。
 
-
-
-
+> 这是由于rabbitmq的内部机制，消息预取机制。
 
 ### 3.2.4.能者多劳
 
@@ -767,7 +765,7 @@ public void listenFanoutQueue2(String msg) {
 
  在Direct模型下：
 
-- 队列与交换机的绑定，不能是任意绑定了，而是要指定一个`RoutingKey`（路由key）
+- 队列与交换 机的绑定，不能是任意绑定了，而是要指定一个`RoutingKey`（路由key）
 - 消息的发送方在 向 Exchange发送消息时，也必须指定消息的 `RoutingKey`。
 - Exchange不再把消息交给每一个绑定的队列，而是根据消息的`Routing Key`进行判断，只有队列的`Routingkey`与消息的 `Routing key`完全一致，才会接收到消息
 
