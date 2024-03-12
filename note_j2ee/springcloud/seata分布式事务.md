@@ -298,19 +298,19 @@ Seata基于上述架构提供了四种不同的分布式事务解决方案：
 
 ```yaml
 seata:
-  registry: # TC服务注册中心的配置，微服务根据这些信息去注册中心获取tc服务地址
-    type: nacos # 注册中心类型 nacos
+  registry:
+    type: nacos
     nacos:
-      server-addr: 127.0.0.1:8848 # nacos地址
-      namespace: "" # namespace，默认为空
-      group: DEFAULT_GROUP # 分组，默认是DEFAULT_GROUP
-      application: seata-tc-server # seata服务名称
+      application: seata-server
+      server-addr: glnode01:8848
+      namespace:
+      group: DEFAULT_GROUP
       username: nacos
       password: nacos
   tx-service-group: seata-demo # 事务组名称
   service:
-    vgroup-mapping: # 事务组与cluster的映射关系
-      seata-demo: SH
+      vgroup-mapping: # 事务组与cluster映射关系
+        seata-demo: TJ
 ```
 
 
@@ -419,13 +419,13 @@ RM二阶段的工作：
 
 XA模式的优点是什么？
 
-- 事务的强一致性，满足ACID原则。
+- 事务的==强一致性==，满足ACID原则。
 - 常用数据库都支持，实现简单，并且没有代码侵入
 
 XA模式的缺点是什么？
 
-- 因为一阶段需要锁定数据库资源，等待二阶段结束才释放，性能较差
-- 依赖关系型数据库实现事务
+- ==因为一阶段需要锁定数据库资源，等待二阶段结束才释放，性能较差==
+- ==依赖关系型数据库实现事务==
 
 
 
@@ -559,7 +559,7 @@ AT模式下，当前分支事务执行流程如下：
 - XA模式依赖数据库机制实现回滚；AT模式利用数据快照实现数据回滚。
 - XA模式强一致；AT模式最终一致
 
-
+ 
 
 ### 4.2.4.脏写问题
 
@@ -571,9 +571,15 @@ AT模式下，当前分支事务执行流程如下：
 
 解决思路就是引入了全局锁的概念。在释放DB锁之前，先拿到全局锁。避免同一时刻有另外一个事务来操作当前数据。
 
+> 这个全局锁由 TC 服务器实现，全局锁会与DB锁产生死锁问题，但是全局锁重试次数少，会优先事务回滚。
+
 ![image-20210724181843029](assets/image-20210724181843029.png)
 
+> 由于全局锁由 TC 服务器实现，所以非 seata 事务不会被全局锁限制，会产生脏写问题。
+>
+> 快照记录时，会记录修改前和修改后的两个快照，产生脏写问题后，在回滚时 发现数据不一致的话就会，产生错误，发出警告，请求人工干预
 
+![image-20240308150125270](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403081501637.png)
 
 ### 4.2.5.优缺点
 
@@ -585,7 +591,7 @@ AT模式的优点：
 
 AT模式的缺点：
 
-- 两阶段之间属于软状态，属于最终一致
+- ==两阶段之间属于软状态，属于最终一致==
 - 框架的快照功能会影响性能，但比XA模式要好很多
 
 
@@ -594,13 +600,13 @@ AT模式的缺点：
 
 AT模式中的快照生成、回滚等动作都是由框架自动完成，没有任何代码侵入，因此实现非常简单。
 
-只不过，AT模式需要一个表来记录全局锁、另一张表来记录数据快照undo_log。
+==只不过，AT模式需要一个表来记录全局锁、另一张表来记录数据快照undo_log==。
 
 
 
 1）导入数据库表，记录全局锁
 
-导入课前资料提供的Sql文件：seata-at.sql，其中lock_table导入到TC服务关联的数据库，undo_log表导入到微服务关联的数据库：
+导入课前资料提供的Sql文件：seata-at.sql，其中lock_table导入到TC服务关联的数据库，==undo_log表导入到微服务关联的数据库==：
 
 ![image-20210724182217272](assets/image-20210724182217272.png)
 
@@ -703,7 +709,7 @@ TCC的缺点是什么？
 
 - 有代码侵入，需要人为编写try、Confirm和Cancel接口，太麻烦
 - 软状态，事务是最终一致
-- 需要考虑Confirm和Cancel的失败情况，做好幂等处理
+- ==需要考虑Confirm和Cancel的失败情况，做好幂等处理==
 
 
 
@@ -775,7 +781,7 @@ CREATE TABLE `account_freeze_tbl` (
 - 如何避免业务悬挂？
   - try业务中，根据xid查询account_freeze ，如果已经存在则证明Cancel已经执行，拒绝执行try业务
 
-
+ 
 
 接下来，我们改造account-service，利用TCC实现余额扣减功能。
 
