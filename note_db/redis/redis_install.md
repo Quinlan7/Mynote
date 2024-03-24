@@ -26,7 +26,7 @@ wget https://github.com/redis/redis/archive/7.0.12.tar.gz
 
 出现如下画面
 
-![image-20230724174653618](redis_install.assets/image-20230724174653618.png)
+![image-20240311093903915](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403110939006.png)
 
 
 
@@ -40,7 +40,7 @@ tar -zvxf 7.0.12.tar.gz
 
 使用ls查看文件
 
-![image-20230724200455952](redis_install.assets/image-20230724200455952.png)
+![image-20240311093914311](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403110939357.png)
 
 ##### 3.移动文件夹
 
@@ -88,7 +88,7 @@ cd etc/
 vim redis.conf
 ```
 
-![image-20230724205217021](redis_install.assets/image-20230724205217021.png)
+![image-20240311093922262](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403110939319.png)
 
 通过 /daemonize 查找到属性，默认是no，更改为yes即可。 (vim可以通过`/关键字`查找出现多个结果则使用 n字符切换到下一个即可，查找到结果后输入:noh退回到正常模式)
 
@@ -140,11 +140,11 @@ b.虽然防火墙开放了6379端口，但是外网还是无法访问的，因�
 
 我使用的是another redis desktop manager，用户名密码默认空
 
-![image-20230724214905084](redis_install.assets/image-20230724214905084.png)
+![image-20240311093928870](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403110939967.png)
 
 成功连接
 
-![image-20230724214956285](redis_install.assets/image-20230724214956285.png)
+![image-20240311093935977](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403110939180.png)
 
 
 
@@ -180,3 +180,63 @@ config get requirepass
 /usr/local/redis/bin/redis-server /usr/local/redis/etc/redis.conf 
 ```
 
+
+
+
+
+
+
+### 启动报错 `GLIBC_2.27' not found
+
+```sh
+[root@glnode06 bin]# ./redis-server ../etc/redis.conf 
+./redis-server: /lib64/libc.so.6: version `GLIBC_2.27' not found (required by ./redis-server)
+./redis-server: /lib64/libc.so.6: version `GLIBC_2.28' not found (required by ./redis-server)
+```
+
+之后尝试把源代码复制过去，编译发现也报错
+
+```sh
+[root@glnode06 redis-7.2.4]# make
+cd src && make all
+which: no python3 in (/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/java/default/bin:/export/servers/Hive3.1.2/bin:/export/servers/Hadoop3.3.4/sbin:/export/servers/Hadoop3.3.4/bin:/export/servers/Mysql5.7.39/bin:/export/softwares/redis-5.0.5/bin:/root/bin:/export/servers/mongodb/bin:/usr/java/default/bin:/export/servers/Hive3.1.2/bin:/export/servers/Hadoop3.3.4/sbin:/export/servers/Hadoop3.3.4/bin:/export/servers/Mysql5.7.39/bin:/export/softwares/redis-5.0.5/bin:/root/bin)
+make[1]: Entering directory `/export/servers/redis-7.2.4/src'
+    GEN commands.def
+Processing json files...
+Linking container command to subcommands...
+Checking all commands...
+Generating commands.def...
+All done, exiting.
+    CC commands.o
+    LINK redis-server
+/tmp/ccPNne18.ltrans1.ltrans.o: In function `anetPipe':
+/export/servers/redis-7.2.4/src/anet.c:676: undefined reference to `fcntl64'
+/export/servers/redis-7.2.4/src/anet.c:663: undefined reference to `fcntl64'
+/export/servers/redis-7.2.4/src/anet.c:666: undefined reference to `fcntl64'
+/export/servers/redis-7.2.4/src/anet.c:672: undefined reference to `fcntl64'
+/tmp/ccPNne18.ltrans1.ltrans.o: In function `anetCloexec':
+/export/servers/redis-7.2.4/src/anet.c:118: undefined reference to `fcntl64'
+/tmp/ccPNne18.ltrans1.ltrans.o:/export/servers/redis-7.2.4/src/anet.c:127: more undefined references to `fcntl64' follow
+collect2: error: ld returned 1 exit status
+make[1]: *** [redis-server] Error 1
+make[1]: Leaving directory `/export/servers/redis-7.2.4/src'
+make: *** [all] Error 2
+
+```
+
+这个报错的原因可能是没有下载 tcl，你可以尝试下载后再编译是否可以，但是我的服务器特殊原因没有连接网络，所以尝试别的方法
+
+```
+yum install -y tcl
+```
+
+
+
+https://www.cnblogs.com/FengZeng666/p/15989106.html
+
+我尝试了网上找到的这个方法，可惜报错
+
+These critical programs are missing or too old: make bison compiler
+Check the INSTALL file for required versions.
+
+还是需要联网下载，gg

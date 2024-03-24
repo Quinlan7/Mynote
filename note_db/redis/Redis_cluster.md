@@ -425,48 +425,37 @@ redis-sentinel s3/sentinel.conf
 
 ## 4.1.集群结构
 
-分片集群需要的节点数量较多，这里我们搭建一个最小的分片集群，包含3个master节点，每个master包含一个slave节点，结构如下：
+分片集群需要的节点数量较多，这里我们搭建一个最小的分片集群，包含3个master节点，每个master包含两个slave节点，结构如下：
 
-![image-20210702164116027](assets/image-20210702164116027.png)
+![image-20240313105554888](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403131055966.png)
 
 
 
-这里我们会在同一台虚拟机中开启6个redis实例，模拟分片集群，信息如下：
+信息如下：
 
-|       IP        | PORT |  角色  |
-| :-------------: | :--: | :----: |
-| 192.168.150.101 | 7001 | master |
-| 192.168.150.101 | 7002 | master |
-| 192.168.150.101 | 7003 | master |
-| 192.168.150.101 | 8001 | slave  |
-| 192.168.150.101 | 8002 | slave  |
-| 192.168.150.101 | 8003 | slave  |
+|    IP    | PORT |  角色  |
+| :------: | :--: | :----: |
+| glnode03 | 6379 | slave  |
+| glnode05 | 6379 | slave  |
+| glnode07 | 6379 | master |
+| glnode08 | 6379 | master |
+| glnode09 | 6379 | master |
+| glnode11 | 6379 | slave  |
 
 
 
 ## 4.2.准备实例和配置
 
-删除之前的7001、7002、7003这几个目录，重新创建出7001、7002、7003、8001、8002、8003目录：
-
-```sh
-# 进入/tmp目录
-cd /tmp
-# 删除旧的，避免配置干扰
-rm -rf 7001 7002 7003
-# 创建目录
-mkdir 7001 7002 7003 8001 8002 8003
-```
-
-
-
-在/tmp下准备一个新的redis.conf文件，内容如下：
+在 redis 的安装目录下的 etc 目录下准备一个新的 redis.conf 文件，内容如下：
 
 ```ini
 port 6379
+
+# 以下的集群配置在redis官方提供的配置模板文件中并没有，需要自己添加
 # 开启集群功能
 cluster-enabled yes
 # 集群的配置文件名称，不需要我们创建，由redis自己维护
-cluster-config-file /tmp/6379/nodes.conf
+cluster-config-file /export/servers/redis/etc/nodes.conf
 # 节点心跳失败的超时时间
 cluster-node-timeout 5000
 # 持久化文件存放目录
@@ -482,40 +471,27 @@ protected-mode no
 # 数据库数量
 databases 1
 # 日志
-logfile /tmp/6379/run.log
+logfile logfile "/export/servers/redis/logs/redis.log"
 ```
 
 将这个文件拷贝到每个目录下：
 
+**切记：在这步骤之前 删除所有的 RDB AOF 文件**
+
 ```sh
-# 进入/tmp目录
-cd /tmp
-# 执行拷贝
-echo 7001 7002 7003 8001 8002 8003 | xargs -t -n 1 cp redis.conf
+[root@glnode07 AutoShell]# ./1toN.sh 01,03-06,08,09,11 /export/servers/redis /export/servers/
 ```
 
 
-
-修改每个目录下的redis.conf，将其中的6379修改为与所在目录一致：
-
-```sh
-# 进入/tmp目录
-cd /tmp
-# 修改配置文件
-printf '%s\n' 7001 7002 7003 8001 8002 8003 | xargs -I{} -t sed -i 's/6379/{}/g' {}/redis.conf
-```
 
 
 
 ## 4.3.启动
 
-因为已经配置了后台启动模式，所以可以直接启动服务：
+因为已经配置了后台启动模式，所以可以直接启动服务，进入到redis安装文件的bin目录下：
 
 ```sh
-# 进入/tmp目录
-cd /tmp
-# 一键启动所有服务
-printf '%s\n' 7001 7002 7003 8001 8002 8003 | xargs -I{} -t redis-server {}/redis.conf
+redis-server ../etc/redis.conf
 ```
 
 通过ps查看状态：
@@ -526,23 +502,15 @@ ps -ef | grep redis
 
 发现服务都已经正常启动：
 
-![image-20210702174255799](assets/image-20210702174255799.png)
+![image-20240313093439870](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403130934017.png)
 
 
 
-如果要关闭所有进程，可以执行命令：
-
-```sh
-ps -ef | grep redis | awk '{print $2}' | xargs kill
-```
-
-或者（推荐这种方式）：
+如果要关闭进程，可以执行命令：
 
 ```sh
-printf '%s\n' 7001 7002 7003 8001 8002 8003 | xargs -I{} -t redis-cli -p {} shutdown
+redis-cli shutdown
 ```
-
-
 
 
 
@@ -579,7 +547,11 @@ cd /tmp/redis-6.2.4/src
 
 2）Redis5.0以后
 
-我们使用的是Redis6.2.4版本，集群管理以及集成到了redis-cli中，格式如下：
+我们使用的是Redis7.2.4版本，集群管理以及集成到了redis-cli中，格式如下：
+
+```sh
+redis-cli --cluster create --cluster-replicas 1 glnode07:6379 glnode08:6379 glnode09:6379 glnode03:6379 glnode05:6379 glnode11:6379
+```
 
 ```sh
 redis-cli --cluster create --cluster-replicas 1 192.168.150.101:7001 192.168.150.101:7002 192.168.150.101:7003 192.168.150.101:8001 192.168.150.101:8002 192.168.150.101:8003
@@ -595,11 +567,11 @@ redis-cli --cluster create --cluster-replicas 1 192.168.150.101:7001 192.168.150
 
 运行后的样子：
 
-![image-20210702181101969](assets/image-20210702181101969.png)
+![image-20240313102814282](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403131028404.png)
 
 这里输入yes，则集群开始创建：
 
-![image-20210702181215705](assets/image-20210702181215705.png)
+![image-20240313102839387](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403131028523.png)
 
 
 
@@ -609,7 +581,7 @@ redis-cli --cluster create --cluster-replicas 1 192.168.150.101:7001 192.168.150
 redis-cli -p 7001 cluster nodes
 ```
 
-![image-20210702181922809](assets/image-20210702181922809.png)
+![image-20240313103212594](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403131032720.png)
 
 
 
@@ -628,17 +600,62 @@ get num
 set a 1
 ```
 
-结果悲剧了：
-
-![image-20210702182343979](assets/image-20210702182343979.png)
-
 集群操作时，需要给`redis-cli`加上`-c`参数才可以：
 
 ```sh
 redis-cli -c -p 7001
 ```
 
-这次可以了：
+可以看到会在存储 hash 不在一个节点的数据时，自动切换master节点
 
-![image-20210702182602145](assets/image-20210702182602145.png)
+![image-20240313103423020](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403131034101.png)
 
+
+
+
+
+
+
+
+
+### 报错：
+
+##### 在创建集群时报错[ERR] Node glnode07:6379 is not empty. Either the node already knows other nodes (check with CLUSTER NODES) or contains some key in database 0.
+
+主要原因是 RDB 或者 AOF 文件中有数据，redis集群搭建的时候需要所有节点都为 空，不可以右节点有数据，我这个节点原本是一个单机 redis 并且存在数据，所以我需要删除之前的 RDB 和 AOF 文件。
+
+还可能由于上次redis集群没有配置成功，生成了每个节点的配置文件，才产生这个错误，要将每个节点中的 nodes.conf文件删除.
+
+先停止 redis 服务
+
+```sh
+redis-cli shutdown
+```
+
+按照我的配置 AOF 和 RDB 文件是在redis安装目录下的 redis/data/appendonlydir 这个文件夹中。删除即可
+
+```sh
+[root@glnode07 appendonlydir]# rm -rf *
+```
+
+删除 dump.rdb 文件，按照我的配置是在 redis 安装目录下的 redis/data 这个文件夹
+
+```sh
+[root@glnode07 data]# rm -rf dump.rdb 
+```
+
+然后 删除 nodes.conf 文件
+
+```sh
+[root@glnode07 etc]# rm -rf nodes.conf
+```
+
+
+
+
+
+
+
+**参考**
+
+[redisNode is not empty](https://blog.csdn.net/PacosonSWJTU/article/details/113852320)
