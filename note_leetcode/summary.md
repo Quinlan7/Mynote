@@ -2,6 +2,8 @@
 
 *前言：我是按照代码随想录刷的，每日一道，打算先把所有种类的题刷一点，每个方法都学会一些，然后再去找难题刷*
 
+## 算法技巧总结
+
 ### 通用技巧
 
 1. 定义全局变量：在类中定义一个类属性，而不是定义在方法内，这样可以使很多题简单得多！！！
@@ -9,6 +11,7 @@
 3. 当查询模式匹配，给定 key 寻找 value，考虑使用map存储原始信息。
 4. 当遇到复杂问题时：先对给定的数字排序总能简化问题
 5. 当遇到需要查找一个集合中是否包含某个元素时，考虑使用Set<>结构存储原始数据
+6. 原地问题：一般都是使用输入参数，来标记状态，从而达到 原地算法
 
 ### 双指针法
 
@@ -144,41 +147,50 @@ for (int j = 0; j <= amount; j++) { // 遍历背包容量
 
 
 
+### 子串（滑动窗口）
+
++ 子串问题 大多和 滑动窗口有关，一般都可以降低一个数量级的复杂度
++ 子串和
+  + 子串和 可以利用 前缀和 来优化
++ 使用双端队列实现滑动窗口，实现在一次幂复杂度下寻找滑动窗口内的最大最小值
 
 
-### 参考
+
+## 质量题目
 
 [双指针技巧labuladong](https://labuladong.github.io/algo/di-ling-zh-bfe1b/shuang-zhi-fa4bd/)     
 
-##### 数组题目（值得重复刷的）
+### 题目类型分组
+
+##### 数组题目
 
 [leetcode209](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Array/209.md)：滑动窗口；     
 [leetcode704](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Array/704.md)：二分查找；      
 [leetcode977](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Array/977.md)：头尾指针；     
 
-##### 链表题目（值得重复刷的）
+##### 链表题目
 
 [leetcode142](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Linked_Tables/142.md)：快慢指针；      
 [leetcode203](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Linked_Tables/203.md)：递归/迭代；     
 
-##### 哈希表题目（值得重复刷的）
+##### 哈希表题目
 
 [leetcode15](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Hash_Tables/15.md)：头尾指针优化时间复杂度 $O(N^2)$ 变为 $O(N)$；      
 [leetcode454](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Hash_Tables/454.md)：简单的四数之和（分治）；      
 [leetcode1](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Hash_Tables/1.md)：哈希表或者头尾指针（先排序）；      
 
-##### 字符串题目（值得重复刷的）
+##### 字符串题目
 
 [leetcode151](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/String/151.md)：反转字符串中的单词顺序，调包写的话很简单，但是也涉及到了正则表达式，不调包的实现难度比较大，可以仔细做做（先写个调包的算法，然后把调用的每个函数都实现一遍）；         
 [leetcode28](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/String/28.md)：KMP算法，很有价值，尤其是对于next数组的求解；      
 
-##### 栈与队列题目（值得重复刷的）
+##### 栈与队列题目
 
 [leetcode239](https://leetcode.cn/problems/sliding-window-maximum/)：双端队列，很不错，有一些小的点很难想到
 
 leetcode347
 
-##### 二叉树题目（值得重复刷的）
+##### 二叉树题目
 
 leetcode101
 
@@ -196,13 +208,13 @@ leetcode236：这道题简直就是艺术，高质量
 
 leetcode538
 
-##### 回溯算法（值得重复刷的）
+##### 回溯算法
 
 leetcode93
 
 leetcode332：高质量，不使用回溯算法
 
-##### 贪心算法（值得重复刷的）
+##### 贪心算法
 
 leetcode53：动态规划了
 
@@ -216,7 +228,7 @@ leetcode452：复杂问题先排序后处理
 
 leetcode968：监控二叉树
 
-##### 动态规划（值得重复刷的）
+##### 动态规划
 
 leetcode70：分解为子问题，找到隐藏的状态转移方程
 
@@ -236,8 +248,49 @@ leetcode718：子序列问题的 dp 定义
 
 leetcode72：编辑距离（字符串的dp）
 
-##### 图论（值得重复刷的）
+##### 图论
 
 leetcode827：最大人工岛，难度刚刚好，代码量大，不错的题
 
 leetcode127：单词接龙（BFS优于DFS）
+
+
+
+
+
+### leetcode top 100
+
+##### 双指针
+
+leetcode11: 双指针
+
+##### 子串
+
+leetcode560：优化暴力解（前缀和 + 哈希表）
+
+leetcode76：子串问题 使用 滑动窗口。 Java Integer 类型的比较！！
+
+##### 普通数组
+
+leetcode41：利用输入数组优化，空间复杂度
+
+##### 链表
+
+leetcode234：单链表需要从后向前遍历时，翻转链表降低复杂度
+
+leetcode148：链表的自底向上的归并排序（时间复杂度O(n logn)，常数级空间复杂度）
+
+leetcode146：LRU缓存
+
+##### 树
+
+leetcode437：树的前缀和
+
+
+
+
+
+### 蓝桥杯
+
+附近最小：使用双端队列实现滑动窗口，实现在一次幂复杂度下寻找滑动窗口内的最大最小值
+
