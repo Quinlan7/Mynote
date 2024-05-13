@@ -8,6 +8,14 @@
 
 1. **数据库连接不上**，**我们直接服务器进入命令行**
 
+先
+
+```shell
+sqlplus
+```
+
+
+
 ![image-20231205192146251](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202312051921383.png)
 
 无法进入命令行，报错：Oracle 数据库尝试创建审计追踪文件，由于没有空间无法创建。
@@ -73,12 +81,12 @@ cat /etc/profile
 
 ![image-20231205194220565](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202312051942671.png)
 
-进入 $ORACLE_BASE/admin/orcl/adump
+进入 $ORACLE_BASE/admin/ORCLCDB/adump
 
 直接删除这个文件夹下所有文件
 
 ```
-rm -rf adump/*
+rm -rf *
 ```
 
 3. **进入oracle命令行重启服务器实例**

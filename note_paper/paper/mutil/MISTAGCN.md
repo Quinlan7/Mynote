@@ -218,6 +218,8 @@ MISTAGCN包括两个阶段。在第一阶段（对应于模型的第一部分，
 
 ### 5.3 实验设置
 
+![image-20240416135937375](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202404161359524.png)
+
 *We implemented MISTAGCN based on MXNet framework, version 1.9.1, on a single workstation with 2 NVIDIA TITAN Xp GPUs, 16 kernel CPUs and 64G memory. The key parameters and settings of our experiments are summarized in Table 2.*
 
 我们基于MXNet框架（版本1.9.1）实现了MISTAGCN，使用了一台装有2块NVIDIA TITAN Xp GPU、16核CPU和64GB内存的工作站。我们实验的关键参数和设置总结如表2所示。
@@ -306,3 +308,30 @@ MISTAGCN包括两个阶段。在第一阶段（对应于模型的第一部分，
 > 计算数据源：traffic-flows.db，weather-air-condition-haikou-2017.xlsx
 >
 > 用途：可以修改预测步长 $T_p$ 
+
++ 参数含义
+
+|       符号       |            值            |
+| :--------------: | :----------------------: |
+|        N         |        图中节点数        |
+|        M         |         图中边数         |
+|        F         |          特征数          |
+|      $X_t$       |      时间t的流量数       |
+|  $\mathcal{x} $  |    所有时间的流量记录    |
+|  $\mathcal{y} $  |     未来交通特征序列     |
+| $\mathcal{x_r} $ |         最近输入         |
+| $\mathcal{x_d} $ |     以天为周期的输入     |
+| $\mathcal{x_w} $ |     以周为周期的输入     |
+|      $T_r$       |    最近输入的时间片数    |
+|      $T_d$       | 日为周期输入中的时间片数 |
+|      $T_w$       | 周为周期输入中的时间片数 |
+|      $T_p$       |     要预测的时间片数     |
+|        K         |   切比雪夫多项式的阶数   |
+|     $A_{DG}$     |     距离图的邻接矩阵     |
+|     $A_{IG}$     |     交互图的邻接矩阵     |
+|     $A_{CG}$     |     关系图的邻接矩阵     |
+|      $S^‘$       |      空间注意力矩阵      |
+|      $E^‘$       |      时间注意力矩阵      |
+
+
+
