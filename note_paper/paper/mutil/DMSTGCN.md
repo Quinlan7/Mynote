@@ -24,7 +24,7 @@ Specifically, we design a dynamic graph construction method to learn the time-sp
 
 *Even though, two key issues have rarely been discussed. The first problem is how to model the spatial dependencies of road segments dynamically. In most of the existing research, the impacts of two road segments are viewed as static, and determined by a predefined Research Track Paper KDD ’21, August 14–18, 2021, Virtual Event, Singapore or self-learned adjacency matrix. However, the interactions of two road segments at different time are supposed to be different. As traffic speed of two segments (top right) in Figure 1 shows, the speed pattern of them is similar in morning peak while completely different in evening peak. The second problem is how to incorporate the traffic speed forecasting problem with rich multi-faceted auxiliary data. Urban traffic networks are complex, dynamic and giant systems. Different types of traffic data record the observations of traffic systems from different perspectives. Therefore, it is promising to improve the performance of traffic speed forecasting by mining the latent patterns and dynamics underlying traffic systems deeply and sufficiently from multi-faceted data. As the combination of traffic speed and traffic volume (bottom right) in Figure 1 shows, traffic speed have a stiff drop after traffic volume increase rapidly in morning and evening peak, which reveals the potential of traffic volume to assist traffic speed forecasting.*
 
-尽管如此，两个关键问题很少被讨论。第一个问题是如何动态地建模道路段之间的空间依赖关系。在大多数现有的研究中，两个道路段之间的影响被视为静态的，并由预定义的或自学得的邻接矩阵确定。然而，两个道路段在不同时间的相互作用应该是不同的。如图1中所示，两个段的交通速度（右上角）显示，它们的速度模式在早高峰时期相似，而在晚高峰时期完全不同。第二个问题是如何将交通速度预测问题与丰富的多方位辅助数据结合起来。城市交通网络是复杂、动态且庞大的系统。不同类型的交通数据记录了从不同角度观察交通系统的观测结果。因此，通过从多方位数据中深入充分挖掘交通系统潜在的模式和动态，有望提高交通速度预测的性能。正如图1中交通速度和交通量的组合（右下角）所示，在早晚高峰期间交通量迅速增加后，交通速度急剧下降，这揭示了交通量在辅助交通速度预测方面的潜力。
+尽管如此，两个关键问题很少被讨论。==第一个问题是如何动态地建模道路段之间的空间依赖关系。==在大多数现有的研究中，两个道路段之间的影响被视为静态的，并由预定义的或自学得的邻接矩阵确定。然而，两个道路段在不同时间的相互作用应该是不同的。如图1中所示，两个段的交通速度（右上角）显示，它们的速度模式在早高峰时期相似，而在晚高峰时期完全不同。==第二个问题是如何将交通速度预测问题与丰富的多方位辅助数据结合起来==。城市交通网络是复杂、动态且庞大的系统。不同类型的交通数据记录了从不同角度观察交通系统的观测结果。因此，通过从多方位数据中深入充分挖掘交通系统潜在的模式和动态，有望提高交通速度预测的性能。正如图1中交通速度和交通量的组合（右下角）所示，在早晚高峰期间交通量迅速增加后，交通速度急剧下降，这揭示了交通量在辅助交通速度预测方面的潜力。
 
 *This paper aims to address the above two issues. However, it is a nontrivial endeavor to design such a dynamic and multi-faceted traffic speed forecasting method due to the following challenges: First, traffic speed of multiple road segments follows a dynamic and implicit spatial pattern. Hand-designed spatial graph is easy to interpret but could not really reflect the interaction relationship.*
 
@@ -44,7 +44,7 @@ Specifically, we design a dynamic graph construction method to learn the time-sp
 
 总的来说，我们的贡献有三个方面：
 1. 提出了一种动态空间依赖关系学习方法。与现有方法不同，其基于预定义或自学习的静态邻接矩阵，我们的方法根据动态空间关系传播节点的隐藏状态。我们设计了动态图构建器和动态图卷积方法来实现这一点。
-2. 提供了一个多层面融合模块，以在时空上空间地将辅助隐藏状态与主要隐藏状态整合。这是一个处理多层面时空数据的通用框架。
+2. 提供了一个多方位的融合模块，用于在空间和时间上将辅助隐藏状态与主要隐藏状态相结合。它是一个通用的框架，用于处理多面向的时空数据。
 3. 我们不仅通过对真实数据集的实验证明了所提方法的有效性，还揭示了多层面数据之间关系的显式和发现的动态模式。
 
 
@@ -59,36 +59,28 @@ Specifically, we design a dynamic graph construction method to learn the time-sp
 
 ### 3.1 动态图构造器
 
-*As spatial dependencies between segments are implicit and changing constantly due to dynamic characteristic of traffic, it is necessary to properly design a graph learning module to address this. In previous work, dependencies between nodes were either defined by human knowledge like distance and functional similarity or generated as a static graph which omits the dynamic characteristic of traffic spatial dependencies. In this paper, to capture varying relationships between nodes, we propose the dynamic graph constructor which produces dynamic learnable graphs used in the dynamic graph convolution and the multi-faceted fusion module.*
-
 由于交通的动态特性，路段之间的空间依赖关系是隐含的并且不断变化的，因此有必要设计一个合适的图学习模块来解决这个问题。在先前的工作中，节点之间的依赖关系要么是由人类知识（如距离和功能相似性）定义的，要么是生成的静态图，这忽略了交通空间依赖关系的动态特性。在本文中，为了捕捉节点之间变化的关系，我们提出了动态图构建器，它产生用于动态图卷积和多层面融合模块的动态可学习图。
-
-*However, it is nontrivial to adaptively model relationships between each pair of nodes at each time. The simplest way is to directly assign a learnable parameter tensor to represent dynamic relationships, but the complexity of this method is 𝑂(𝑇 𝑁 𝑁), where 𝑇 is the number of total time slots and 𝑁 is the number of nodes, making it hard to compute and coverage. Considering the periodicity of traffic status, we assume that traffic at the same time in a day could share a same graph. Thus, our goal is transferred to an adjacency tensor A ∈ R 𝑁𝑡×𝑁 ×𝑁 where 𝑁𝑡 is the number of time slots in a day. And the graph at time slot 𝑡 is A𝜙 (𝑡) where 𝜙 (𝑡) is a function to get time in a day. But the complexity of this solution is still 𝑂(𝑁𝑡𝑁 𝑁) which grows quadratically as the graph becomes larger. In reality, some structures of dynamic graph could be shared across time and space. For example, two adjacent segments could be correlated across the day, and people will leave from different resident areas to different work areas in the morning.*
-
-*So we propose a method inspired by Tucker decomposition [24] to form the adjacency tensor as shown in Figure 3. In traffic speed forecasting, instead of decomposing an known tensor, we aim to compose an unknown tensor with learnable parameters for spatial dependencies. This procedure performs reversely as original Tucker decomposition and updates dynamic graph by backpropagation during training.*
 
 然而，在每一对节点之间自适应地建模关系并不是一件简单的事情。最简单的方法是直接分配一个可学习的参数张量来表示动态关系，但是这种方法的复杂性是 𝑂(𝑇 𝑁 𝑁)，其中 𝑇 是总时隙的数量，𝑁 是节点的数量，使得计算和覆盖变得困难。考虑到交通状况的周期性，我们假设一天中相同时间的交通可以共享同一个图。因此，我们的目标转变为一个邻接张量 𝐴 ∈ R 𝑁𝑡×𝑁 ×𝑁，其中 𝑁𝑡 是一天中的时间槽数。在这里，时隙 𝑡 的图是 𝐴𝜙 (𝑡)，其中 𝜙 (𝑡) 是获取一天中时间的函数。但是这种解决方案的复杂性仍然是 𝑂(𝑁𝑡𝑁 𝑁)，随着图的变大，它呈二次增长。实际上，动态图的一些结构可能会在时间和空间上共享。例如，两个相邻的路段可能在一天中保持相关性，人们在早上会从不同的居住区到不同的工作区。
 
 因此，我们提出了一种受 Tucker 分解 [24] 启发的方法，用于形成如图3所示的邻接张量。在交通速度预测中，我们的目标不是分解已知张量，而是用可学习的参数为空间依赖性组成未知张量。这个过程与原始的 Tucker 分解相反，并在训练过程中通过反向传播更新动态图。
 
-*Specifically, we assign three learnable matrices and one learnable core tensor including embedding of time slots E 𝑡 ∈ R 𝑁𝑡×𝑑 , embedding of source nodes E 𝑠 ∈ R 𝑁𝑠×𝑑 , embedding of target nodes E 𝑒 ∈ R 𝑁𝑒×𝑑 and a core tensor E 𝑘 ∈ R 𝑑×𝑑×𝑑 , where 𝑁𝑡 , 𝑁𝑠, 𝑁𝑒 , 𝑑 represent the number of time slots, number of original nodes, number of target nodes, and embedding dimension respectively. And the adjacency tensor is calculated as: A ′ 𝑡,𝑖,𝑗 = 𝑑 ≂ 𝑜=1 𝑑 ≂ 𝑞=1 𝑑 ≂ 𝑟=1 E 𝑘 𝑜,𝑞,𝑟E 𝑡 𝑡,𝑜E 𝑒 𝑖,𝑞E 𝑠 𝑗,𝑟, (1) A ′′ 𝑡,𝑖,𝑗 = max(0, A ′ 𝑡,𝑖,𝑗), (2) A𝑡,𝑖,𝑗 = 𝑒 A ′′ 𝑡,𝑖, 𝑗 ∺𝑁𝑠 𝑛=1 𝑒 A ′′ 𝑡,𝑖,𝑛 . (3) In this work, three tensors A𝑝 ∈ R 𝑁𝑡×𝑁𝑝×𝑁𝑝 , A𝑎 ∈ R 𝑁𝑡×𝑁𝑎×𝑁𝑎 and A𝑎𝑝 ∈ R 𝑁𝑡×𝑁𝑝×𝑁𝑎 are generated to represent dynamic graphs: graph among primary nodes G 𝑝 , graph among auxiliary nodes G 𝑎 , graph between primary nodes and auxiliary nodes G 𝑎𝑝 respectively.*
-
 具体而言，我们分配了三个可学习矩阵和一个可学习的核心张量，包括时间槽嵌入 E 𝑡 ∈ R 𝑁𝑡×𝑑、源节点嵌入 E 𝑠 ∈ R 𝑁𝑠×𝑑、目标节点嵌入 E 𝑒 ∈ R 𝑁𝑒×𝑑 以及一个核心张量 E 𝑘 ∈ R 𝑑×𝑑×𝑑，其中 𝑁𝑡、𝑁𝑠、𝑁𝑒、𝑑 分别表示时间槽数、原始节点数量、目标节点数量和嵌入维度。邻接张量的计算如下：
-$A ′_𝑡,𝑖,𝑗 = \sum_{o=1}^{d} \sum_{q=1}^{d} \sum_{r=1}^{d} E 𝑘_{o,q,r}E 𝑡_{t,o}E 𝑒_{i,q}E 𝑠_{j,r}$
+$A ′_{𝑡,𝑖,𝑗} = \sum_{o=1}^{d} \sum_{q=1}^{d} \sum_{r=1}^{d} E 𝑘_{o,q,r}E 𝑡_{t,o}E 𝑒_{i,q}E 𝑠_{j,r}$
 $A ′′_𝑡,𝑖,𝑗 = \max(0, A ′_𝑡,𝑖,𝑗)$
 $A_𝑡,𝑖,𝑗 = \frac{e^{A ′′_𝑡,𝑖,𝑗}}{\sum_{n=1}^{N_s} e^{A ′′_𝑡,𝑖,𝑛}}$
 
 在这项工作中，生成三个张量 $A_p \in R^{N_t \times N_p \times N_p}$、$A_a \in R^{N_t \times N_a \times N_a}$ 和 $A_{ap} \in R^{N_t \times N_p \times N_a}$ 用于表示动态图：主要节点之间的图 $G_p$、辅助节点之间的图 $G_a$、主要节点和辅助节点之间的图 $G_{ap}$。
 
+![image-20240529212429844](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202405292124104.png)
 
+> 动态图的构建。在单个时间槽上的图可以表示为一个矩阵，而在所有时间槽上的图可以通过添加时间维度表示为一个张量。为了简化模型，可以使用张量分解的思想来构建这个张量，并利用空间依赖的低秩特性。
 
 ### 3.2 动态图卷积
 
-*Spatial dependencies of the traffic speeds of different road segments could be used to improve the traffic speed prediction performance.Though the graph convolution could aggregate neighbor hidden states to handle the spatial dependencies between segments, majority of existing methods utilized it on a static graph. In this paper, to Research Track Paper KDD ’21, August 14–18, 2021, Virtual Event, Singapore model latent and time varying spatial dependencies between nodes, we propose a dynamic version of graph convolution to conduct it on different graphs at different time.*
+![image-20240627222044583](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202406272220948.png)
 
-*Given input X𝑡−𝑃+1:𝑡 , A𝜙 (𝑡) reflects spatial relationship between nodes at time 𝑡. As shown in Figure 4, input hidden states of each node are isolated at first, and after fetching A𝜙 (𝑡) from adjacency tensor, the hidden states can be organized as graph signal according to their dynamic spatial relationships. Moreover, the method to aggregate information is inspired by DCRNN [19], which views the traffic flow as the diffusion procedure on graph. In math form, this operation can be realized by matrix multiplication of the adjacency matrix, hidden states of nodes and learnable parameters. At each step, the hidden states of focal node are updated by aggregating neighbors’ hidden states through weighted links and the dynamic graph convolution can be defined as:*
-
-
+> 动态图卷积。输入是多个无序的孤立数据段。通过从动态图张量中获取随时间变化的邻接矩阵，可以将输入数据根据动态邻接矩阵进行组织，并在其上应用图卷积操作。根据最终的预测结果，邻接张量将通过反向传播进行更新。
 
 不同道路段的交通速度之间存在的空间依赖关系可用于提高交通速度预测的性能。尽管图卷积可以聚合相邻节点的隐藏状态以处理道路段之间的空间依赖关系，但大多数现有方法在静态图上使用它。在本文中，为了建模节点之间的潜在且时变的空间依赖关系，我们提出了图卷积的动态版本，以在不同时间上的不同图上进行操作。
 
@@ -96,15 +88,53 @@ $A_𝑡,𝑖,𝑗 = \frac{e^{A ′′_𝑡,𝑖,𝑗}}{\sum_{n=1}^{N_s} e^{A ′
 
 ![image-20240103111147679](C:\Users\zhf\AppData\Roaming\Typora\typora-user-images\image-20240103111147679.png)
 
-*where H𝑡 𝑙 represents output hidden states of temporal convolution layer in 𝑙-th block which serves as input of dynamic graph convolution in 𝑙-th block, W𝑘 is parameters for depth 𝑘 and 𝐾 is max diffusion steps.*
-
 其中，$H_{l}^{t}$ 代表第 $l$ 个块中时间卷积层的输出隐藏状态，它作为第𝑙个块中动态图卷积的输入。$W^{k}$ 是深度为𝑘的参数，而𝐾是最大扩散步数。
 
+> **动态图卷积（Dynamic Graph Convolution）** 是一种图神经网络操作，用于在动态或时间变化的图上进行卷积操作，以捕捉随时间变化的空间依赖关系。这里的动态图卷积扩展了传统的静态图卷积，使得卷积操作能够根据不同时间点的图结构进行自适应调整。下面我们分两个部分详细解释一下动态图卷积的概念和公式。
+>
+> ### 动态图卷积的概念
+>
+> #### **背景**
+> - **静态图卷积**: 传统的图卷积（Graph Convolution）方法在一个固定的图结构上进行操作，这种方法适用于捕捉节点之间的空间依赖关系，但不能处理随时间变化的图结构。
+> - **动态图卷积**: 为了解决这个问题，动态图卷积引入了时间维度，可以在不同时间点上动态调整图结构，从而更准确地捕捉节点之间的时空依赖关系。
+>
+> #### **目的**
+> 动态图卷积的主要目的是在不同时间点上，根据时间变化的图结构对节点的特征进行卷积操作。这对于处理交通流预测等需要考虑时空动态变化的任务特别有用。
+>
+> ### 公式解释
+>
+> 公式描述了动态图卷积操作的数学定义：
+>
+> $$ \mathbf{H}_l = \sum_{k=0}^{K} \left(\mathbf{A}_{\phi(t)}\right)^k \mathbf{H}_l^t \mathbf{W}^k $$
+>
+> - **$$\mathbf{H}_l$$**: 是动态图卷积输出的隐藏状态，表示在 \(l\) 层卷积后的特征矩阵。
+> - **$$\mathbf{H}_l^t$$**: 是在时间 \(t\) 的 \(l\) 层动态图卷积输入的隐藏状态。它是时序卷积层的输出，作为当前时间步的输入特征。
+> - **$$\mathbf{A}_{\phi(t)}$$**: 是在时间 \(t\) 的邻接矩阵，表示时间 \(t\) 的图结构。它反映了节点之间的动态空间关系。
+> - **$$\mathbf{W}^k$$**: 是学习到的权重参数，用于在深度 \(k\) 处的卷积操作。
+> - **$$K$$**: 是最大扩散步数，表示在图卷积中进行多少次扩散操作。
+>
+> #### 公式解读
+> 1. **矩阵乘积 $$\left(\mathbf{A}_{\phi(t)}\right)^k$$**: 这表示邻接矩阵的 $$k$$ 次幂，用来在 $$k$$ 步邻居范围内进行扩散操作。随着 $$k$$ 的增加，节点信息会向更远的邻居扩散。
+>   
+> 2. **聚合操作**: 对于每个扩散深度 $$k$$，执行矩阵乘积 $$\left(\mathbf{A}_{\phi(t)}\right)^k \mathbf{H}_l^t \mathbf{W}^k$$。这个操作将节点 $$l$$ 在时间 $$t$$ 的隐藏状态 $$\mathbf{H}_l^t$$ 通过邻接矩阵 $$\mathbf{A}_{\phi(t)}$$ 的 $$k$$ 次幂扩散，并与学习到的权重 $$\mathbf{W}^k$$ 相乘，完成邻居信息的聚合。
+>
+> 3. **求和操作**: 最终将不同扩散深度 $$k$$ 的结果求和，得到层 $$l$$ 的输出 $$\mathbf{H}_l$$。这个求和操作结合了不同扩散深度的信息，为每个节点提供了聚合后的特征。
+>
+> ### 举例说明
+>
+> 假设我们有一个交通网络的图，其中每个节点代表一个路段，边表示路段之间的相连关系。假设图在不同时刻的连接关系会变化，例如因交通流量变化或路障调整等。动态图卷积将：
+>
+> 1. **根据当前时间 $$t$$ 提取的邻接矩阵 $$\mathbf{A}_{\phi(t)}$$**，反映当前时间点的节点连接关系。
+> 2. **对每个节点进行扩散操作**，通过不同深度 $$k$$ 次扩散来捕捉从直接邻居到更远邻居的信息。
+> 3. **聚合这些信息**，结合每个节点的初始隐藏状态和学习到的权重，生成时间 $$t$$ 的特征输出。
+>
+> 通过这种方法，动态图卷积能够更精细地捕捉到随时间变化的交通流模式，从而提高交通速度预测的准确性。
+>
+> ### 总结
+>
+> 动态图卷积通过在不同时间点上动态调整图结构，来有效捕捉节点之间的时空依赖关系。公式 $$ \mathbf{H}_l = \sum_{k=0}^{K} \left(\mathbf{A}_{\phi(t)}\right)^k \mathbf{H}_l^t \mathbf{W}^k $$ 详细描述了如何利用时间变化的邻接矩阵 $$\mathbf{A}_{\phi(t)}$$ 和隐藏状态 $$\mathbf{H}_l^t$$ 在多层图卷积中进行信息聚合，从而在图上进行时空扩散并更新节点特征。
+
 ### 3.3 辅助特征
-
-*Auxiliary feature could not only affect primary feature at the same location, but also be helpful in predicting primary feature of highly related segments. For example, the increasing upstream flow will affect the downstream flow in the future and thus have an effect on the drop of the downstream traffic speed, which behaves as another diffusion pattern. So it is necessary to model spatial dependencies between primary nodes and auxiliary nodes. Here we propose a general framework powered by multi-faceted fusion module to integrate auxiliary feature with primary feature in graph perspective.*
-
-*Meanwhile, we argue that there also exists spatio-temporal dependencies among nodes with auxiliary feature. In each layer, we assign a separate spatio-temporal block for each type of feature (primary feature and auxiliary feature). After the separate structure of 𝑙-th layer, we can get hidden states for primary feature H 𝑝 𝑙 and hidden states for auxiliary feature H𝑎 𝑙 . To model inter-dependencies between auxiliary feature and primary feature, we follow a "propagation and aggregation" paradigm and propose the multi-faceted fusion module:*
 
 辅助特征不仅可以影响相同位置的主要特征，而且还有助于预测高度相关部分的主要特征。例如，上游流量的增加将影响未来的下游流量，从而对下游交通速度的降低产生影响，表现为另一种扩散模式。因此，有必要建模主节点和辅助节点之间的空间依赖关系。在这里，我们提出了一个由多方面融合模块驱动的通用框架，以在图的角度集成辅助特征与主要特征。
 
@@ -112,25 +142,15 @@ $A_𝑡,𝑖,𝑗 = \frac{e^{A ′′_𝑡,𝑖,𝑗}}{\sum_{n=1}^{N_s} e^{A ′
 
 ![image-20231122164113937](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202311221641136.png)
 
-*Specifically, instead of directly concatenating auxiliary hidden states with primary hidden states at same location, we generate a dynamic graph G 𝑎𝑝 represented as A𝑎𝑝 ∈ R 𝑁𝑡×𝑁𝑝×𝑁𝑎 to reflect spatial dependencies between them. The propagation module could propagate the most relative auxiliary hidden states to needed primary nodes and is calculated as:*
-
 具体而言，我们不是直接将辅助隐藏状态与相同位置的主要隐藏状态连接起来，而是生成一个动态图 $G_{ap}$，表示为 $A_{ap} \in \mathbb{R}^{N_t \times N_p \times N_a}$，以反映它们之间的空间依赖关系。传播模块可以将最相关的辅助隐藏状态传播到需要的主节点，计算公式如下：
 
 ![image-20231122164323516](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202311221643591.png)
-
-where H 𝑎𝑝 𝑙 ∈ R 𝑁𝑝×𝑃×𝑑𝑝 represents effects of the auxiliary feature on primary nodes and 𝑑𝑝 is the dimension of primary hidden states.
-
-To aggregate these unordered information (primary feature and effects of auxiliary feature), we choose SUM(·) as the aggregator function which is differentiable and maintains high representational capacity:
 
 其中，$H_{apl} \in \mathbb{R}^{N_p \times P \times d_p}$ 表示辅助特征对主节点的影响，$d_p$ 是主要隐藏状态的维度。
 
 为了聚合这些无序信息（主要特征和辅助特征的影响），我们选择 SUM(·) 作为聚合函数，这是可微的并且具有很高的表征能力：
 
 ![image-20231122164545348](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202311221645421.png)
-
-*And the aggregator function could also be chosen as MEAN(·), MAX(·), or CONCAT(·) according to different tasks. Our method passing auxiliary information in a graph perspective can not only consider spatial dependencies between primary nodes and auxiliary nodes, but also work in situation that auxiliary nodes are unaligned with primary nodes. Thanks to dynamic graph constructor, we can easily construct a dynamic graph for unaligned 𝑁𝑎 auxiliary nodes and 𝑁𝑝 primary nodes which could support the procedure of message passing. This makes our method more generic since situation of unaligned data is extremely common in real world: if we want to predict the customer flow in a mall, considering traffic volume of road segments around the mall will be helpful but it cannot be achieved by traditional concatenation methods. 
-
-*And traditional concatenation methods could be viewed as a special case of this framework where the graph at each time is represented as an identity matrix. Under situation where there exist multiple auxiliary features {H 𝑎1 𝑙 , H 𝑎2 𝑙 , · · · , H 𝑎𝑀 𝑙 } and numbers of auxiliary nodes are 𝑁𝑎𝑖 ,𝑖 ∈ [1, 𝑀], Equation 5-7 in our framework could be extended to:*
 
 这一部分讨论了如何根据不同的任务选择聚合函数，包括 MEAN(·)、MAX(·) 或 CONCAT(·)。
 
@@ -152,19 +172,43 @@ And compared to recurrent neural network, dilated convolution layers could be co
 
 一个路段的交通速度与其历史状态高度相关。这一部分在时间维度上处理数据，以捕捉交通的时间动态。如图2所示，我们采用了考虑到训练速度和简单性的时间卷积层 [23]。通过堆叠增大膨胀因子的膨胀卷积层，模型的感受野呈指数级增长。
 
-与循环神经网络相比，膨胀卷积层可以并行计算，因此大大降低了时间复杂度。同时，门控机制在处理序列数据方面显示出优势，因此在时间卷积层中使用了门控机制以提高模型容量。具体而言，时间卷积层的形式为
+与循环神经网络相比，膨胀卷积层可以并行计算，因此大大降低了时间复杂度。同时，==门控机制==在处理序列数据方面显示出优势，因此在时间卷积层中使用了门控机制以提高模型容量。具体而言，时间卷积层的形式为
 
 $ H_t^l = \tanh(W_{f,l} \star F_l) \odot \sigma(W_{g,l} \star F_l) $
 
 其中，⊙表示逐元素乘法运算符，𝜎(·)是一个 sigmoid 函数，★是膨胀卷积操作，W(·)是卷积滤波器的可学习参数。
 
+![image-20240530143911589](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202405301439748.png)
+
+> 是的，这个函数表达式 *H**t**l*=tanh(*W**f*,*l*⋆*F**l*)⊙*σ*(*W**g*,*l*⋆*F**l*) 使用了门控机制。
+>
+> 在这个表达式中，*H**t**l* 表示第 *l* 层在时间步 *t* 的输出。这里有两个主要的组成部分：
+>
+> 1. tanh(*W**f*,*l*⋆*F**l*)：这部分计算了一个候选状态，其中 *W**f*,*l* 是权重矩阵，⋆ 表示卷积操作（或者在其他上下文中可能是矩阵乘法），*F**l* 是第 *l* 层的输入特征图（或输入向量）。tanh 函数将结果映射到 [−1,1] 的范围内。
+> 2. *σ*(*W**g*,*l*⋆*F**l*)：这部分计算了一个门控信号，其中 *W**g*,*l* 是另一个权重矩阵，*σ* 是 sigmoid 函数。sigmoid 函数的输出在 [0,1] 范围内，可以解释为信息通过门控的比例。
+>
+> ⊙ 表示逐元素相乘（Hadamard乘积），它将候选状态与门控信号相乘，从而控制候选状态中哪些信息应该被保留或丢弃。这种机制允许网络学习在不同时间步和不同层之间选择性地传递信息，从而实现了门控机制。
+>
+> 这种门控机制在卷积LSTM（ConvLSTM）等网络结构中很常见，用于处理具有空间依赖性的序列数据，如视频或图像序列。
+
 ### 3.5 其他组件
 
 *In the proposed model, F (·) 𝑙 is input of 𝑙-th block and output of (𝑙 − 1)-th block. Before the first block, input data is transformed by a fully connected layer:*
 
-在提出的模型中，F (·) 𝑙 是第 𝑙 个块的输入和 (𝑙 − 1) 块的输出。在第一个块之前，输入数据通过一个全连接层进行转换：
+在提出的模型中，$F_l^{(\cdot)}$是第 𝑙 个块的输入和 (𝑙 − 1) 块的输出。在第一个块之前，输入数据通过一个全连接层进行转换：
 
 ![image-20231204163254411](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202312041632468.png)
+
+> 这个全连接层实现了：(B, 1, N, T) -> (B, residual_channels 32, N, T)
+>
+> 在深度学习中，特别是在处理序列数据（如音频、视频或时间序列数据）或空间数据（如图像）时，改变特征通道数（或称为特征维度、特征映射数量）是一个常见的操作。当你提到一个模型在输入之前使用一个全连接层（或卷积层，但在这里更可能是1x1卷积，因为它不改变空间维度）将特征通道数从1增加到32，这一操作的意义可能包括以下几点：
+>
+> 1. **增加模型容量**：更多的特征通道意味着模型可以学习更复杂的表示。每个新的通道都可以看作是一个新的“特征检测器”，它可以从输入数据中捕获不同的信息。
+> 2. **多模态或多元数据处理**：虽然在这个特定的例子中你只提到了从1个通道增加到32个通道，但在处理多模态数据（如同时包含音频和视频的数据）时，这样的操作很常见。每个通道可能对应于不同的模态或不同的特征集。
+> 3. **非线性变换**：全连接层（或带有激活函数的卷积层）可以对输入进行非线性变换，这有助于模型学习输入和输出之间的复杂关系。
+> 4. **减少过拟合风险**（在一定程度上）：虽然增加模型容量可能会增加过拟合的风险，但使用更多的特征通道（如果正确使用正则化技术，如Dropout、L1/L2正则化等）也可以帮助模型更好地泛化到未见过的数据。
+> 5. **适应预训练模型**：如果你的模型后面要连接到一个预训练的模型（如一个预训练的卷积神经网络），那么调整输入通道数以匹配预训练模型的输入要求是很常见的。
+> 6. **特征融合**：在某些情况下，你可能希望将来自不同来源或不同处理阶段的特征融合在一起。通过增加特征通道数，你可以轻松地将这些特征“堆叠”在一起，并将它们作为模型的输入。
 
 *And residual links are added for each block:*
 
@@ -227,25 +271,73 @@ Our experiments are conducted on three real-world datasets: PeMSD4, PeMSD8 and E
 
 这些数据集的详细统计信息请参见表2。
 
+![image-20240701190705157](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407011907262.png)
 
+### 4.2 基线
+
+为了验证DMSTGCN的性能，我们选择了包括统计方法、基于预定义图的方法、基于注意力的方法和基于自适应图的方法作为基线模型进行比较。这些基线模型的描述如下：
+
+• HA：历史平均法。考虑到交通的周期性，我们使用训练数据集中同一天相同时段的交通速度平均值作为预测值。
+
+• VAR [36]：一种用于捕捉多个量之间关系的统计模型。
+
+• LR：一种回归模型，利用输入和输出之间的线性相关性。
+
+• XGBoost [5]：一种基于梯度提升树的方法。
+
+• DCRNN [19]：一种时空网络，结合了扩散图卷积和递归神经网络。
+
+• ASTGCN [14]：一种模型，在应用空间和时间卷积之前应用空间和时间注意力机制。为了公平起见，我们只使用其最近的组件。
+
+• GMAN [35]：一种基于输入特征、空间嵌入和时间嵌入的考虑空间和时间相关性的图多注意力模型。
+
+• Graph Wavenet [27]：一种时空网络，介绍了一种生成自适应图的方法，并将扩散图卷积与一维膨胀卷积相结合。
+
+• MTGNN [26]：一种使用外部特征生成单向自适应图的时空网络。
 
 ### 4.3 实验设置
 
-*In our model, the number of blocks in each part is set to 8, dilated ratio of each layer is [1, 2, 1, 2, 1, 2, 1, 2] and the max depth of graph convolution layers is set to 2. Channel size of dilated convolution and graph convolution is 32 and hidden dimension in dynamic graph constructor is set to 16. Batch size is set to 64 and learning rate is set to 0.001. The main hypeparameters are tuned on validation set. The model is optimized by Adam optimizer and an early stop strategy is used with patience of 20. All datasets are split by ratio of 6:2:2 in chronological order. For PeMSD4 and PeMSD8, the missing values are filled by the linear interpolation. Predefined graph is initialized according distance between sensors. For the fairness of comparison experiments, except for HA and VAR, input features of each baseline include historical primary feature, historical auxiliary feature, time in a day and day in a week. For LR and XGBoost, we train a model for each prediction step. Every experiment is repeated 5 times and the average performance is reported. Experiments are executed on a machine with four TitanXp GPUs. Three metrics are adopted to evaluate performance of each model: Mean Absolute Error (MAE), Mean Absolute Percentage Error (MAPE), Root Mean Squared Error (RMSE) respectively.*
-
-在我们的模型中，每个部分的块数设置为 8，每个层的扩张比率为 [1, 2, 1, 2, 1, 2, 1, 2]，图卷积层的最大深度设置为 2。扩张卷积和图卷积的通道大小为 32，动态图构造器中的隐藏维度设置为 16。批量大小设置为 64，学习率设置为 0.001。主要超参数在验证集上进行了调整。模型由 Adam 优化器优化，采用了一个耐心值为 20的提前停止策略。所有数据集按照时间顺序按比例分为 6:2:2。对于 PeMSD4 和 PeMSD8，缺失值通过线性插值填充。预定义的图是根据传感器之间的距离初始化的。为了公平比较实验，在HA和VAR以外的所有基线模型中，每个基线的输入特征包括历史主要特征、历史辅助特征、一天中的时间和一周中的天。对于LR和XGBoost，我们为每个预测步骤训练一个模型。每个实验重复 5 次，报告平均性能。实验在一台配备有四个 TitanXp GPU 的机器上执行。采用三个指标来评估每个模型的性能：平均绝对误差（MAE）、平均百分比误差（MAPE）、平方根均方误差（RMSE）。
+在我们的模型中，每个部分的块数设置为 8，每个层的扩张比率为 [1, 2, 1, 2, 1, 2, 1, 2]，图卷积层的最大深度设置为 2。空洞卷积和图卷积的通道大小为 32，动态图构造器中的隐藏维度设置为 16。批量大小设置为 64，学习率设置为 0.001。主要超参数在验证集上进行了调整。模型由 Adam 优化器优化，采用了一个耐心值为 20的提前停止策略。所有数据集按照时间顺序按比例分为 6:2:2。对于 PeMSD4 和 PeMSD8，缺失值通过线性插值填充。预定义的图是根据传感器之间的距离初始化的。为了公平比较实验，在HA和VAR以外的所有基线模型中，每个基线的输入特征包括历史主要特征、历史辅助特征、一天中的时间和一周中的天。对于LR和XGBoost，我们为每个预测步骤训练一个模型。每个实验重复 5 次，报告平均性能。实验在一台配备有四个 TitanXp GPU 的机器上执行。采用三个指标来评估每个模型的性能：平均绝对误差（MAE）、平均百分比误差（MAPE）、平方根均方误差（RMSE）。
 
 
 
 ### 4.4 与现有模型的比较
 
-*The results of the comparison with baselines are shown in Table 1. On all three datasets which are collected at multiple locations and with various sampling rates, our proposed model always achieves the start-of-the-art performance whether long-term or short-term, which demonstrates the effectiveness of our proposed Research Track Paper KDD ’21, August 14–18, 2021, Virtual Event, Singapore model. Moreover, deep learning based models could achieve better performance than traditional statistic methods which demonstrates superior capacity of deep learning based models. Methods like DCRNN and ASTGCN highly rely on predefined graph which may not capture crucial dependencies between nodes leading to a worse performance. Although GMAN achieves competitive performance in Horizon 12, the results of short-term prediction has a distinct margin with our method. But compared with other work, GMAN has a clear improvement in Horizon 12, which may owe to the transform attention layer. Except for our model, Graph Wavenet and MTGNN perform well generally which might benefit from that they adopt adaptive graph to model relationships between nodes, indicating that adaptive graph based methods could effectively exploit valuable but latent spatial dependencies from historical traffic data. However, dynamic characteristic of traffic spatial dependencies and spatial dependencies between multi-faceted features are omitted in these work. The design of dynamic graph constructor and dynamic graph convolution help our model capture the subtler correlations between nodes. Moreover, as another way containing information of time in a day, our method has a better performance compared with taking it as input directly. And the interactions between auxiliary features and primary feature by multi-faceted fusion module also contribute a lot in this match. Taking these two factors into consideration make our model perform better than these methods consistently.*
-
 与基准方法的比较结果如表1所示。在收集自多个位置且具有不同采样率的三个数据集上，我们提出的模型始终在长期和短期方面取得了最先进的性能，这证明了我们提出的研究模型的有效性。此外，基于深度学习的模型能够比传统统计方法实现更好的性能，这表明了深度学习模型的卓越能力。像DCRNN和ASTGCN这样的方法高度依赖于预定义图，这可能无法捕捉节点之间的关键依赖关系，从而导致性能较差。尽管GMAN在Horizon 12方面取得了竞争性能，但短期预测的结果与我们的方法有明显的差距。但与其他工作相比，GMAN在Horizon 12方面有明显的改善，这可能归功于变换注意力层。除了我们的模型之外，Graph Wavenet和MTGNN总体表现良好，这可能得益于它们采用自适应图来建模节点之间的关系，表明自适应图方法可以有效地利用历史交通数据中有价值但潜在的空间依赖关系。
 
 然而，这些工作忽略了交通空间依赖关系的动态特性以及多方面特征之间的空间依赖关系。动态图构造器和动态图卷积的设计有助于我们的模型捕捉节点之间更微妙的相关性。此外，作为包含一天时间信息的另一种方式，我们的方法与直接将其作为输入的方法相比具有更好的性能。多方面融合模块通过辅助特征与主要特征之间的交互也在此匹配中起到了很大的作用。考虑到这两个因素使得我们的模型在一致性上表现更好。
 
+![image-20240701190734556](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407011907693.png)
 
+### 4.5 评估提出模型中关键设计的有效性
+
+我们提出的模型的两个关键设计是动态图构造器，用于捕获节点随时间变化的空间依赖性，以及多面融合模块，用于从图的视角将辅助特征与主要特征相结合。为了验证我们提出的组件的有效性，我们设计了三个变体：不带多面融合模块的DMSTGCN（DMSTGCN w/o multi-faceted fusion）、不带辅助部分的DMSTGCN（DMSTGCN w/o auxiliary part）以及不带动态图的DMSTGCN（DMSTGCN w/o dynamic graph）：
+
+• DMSTGCN w/o multi-faceted fusion：在这个变体中，我们没有使用基于图的融合模块，而是直接将辅助隐藏状态和主要隐藏状态相加，以展示我们提出的模块的有效性。
+
+• DMSTGCN w/o auxiliary part：在这个变体中，我们完全移除了辅助模块，以展示辅助信息的重要性。
+
+• DMSTGCN w/o dynamic graph：在这个变体中，我们将时间槽的数量设置为1，只生成一个静态自适应图，以展示动态图构造器的有效性。
+
+消融研究的结果如图5所示，从中可以看出，关键设计都对所提出模型的改进有所贡献。与不带多面融合模块的DMSTGCN相比，DMSTGCN取得了更好的性能，这表明主要特征受到多个邻居辅助特征的影响，因此在动态图上进行聚合可以更好地支持主要特征的预测。与不带辅助部分的DMSTGCN相比，不带多面融合模块的DMSTGCN表现更好，这显示了辅助特征的重要性。DMSTGCN相对于不带动态图的DMSTGCN的优势表明，建模节点之间动态空间依赖性的重要性。
+
+![image-20240701191059208](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407011910321.png)
+
+### 4.6 动态图研究
+
+我们学习的动态图也可以用于发现节点之间的依赖关系，这将有利于诸如交通控制等应用。它是否能够发现合理的交通模式也是判断自适应图是否训练良好的一个标准。我们在PeMSD4数据集上进行了一个案例研究。对于同类节点之间的相关性，图6(a)展示了两个路段的历史平均交通速度，而图6(b)则展示了经过平滑和归一化后，我们的模型学习到的所有时间槽的边权重。在第一时段，两个路段的速度随机波动，并且学习到的动态图中的边权重较低。在第二时段，两个路段的趋势相似，其中一个领先于另一个，这有助于预测后者的速度。在这个时段，学习到的动态图中的边权重较高。在第三时段，由于晚高峰，一个路段的速度下降，而另一个路段的速度变化不大，学习到的动态图中的边权重较低。
+
+对于辅助特征与主要特征之间的依赖关系，图6(c)展示了一个传感器的历史平均交通速度和另一个传感器的历史平均交通量。在第一时段和第二时段，交通量总是先于交通速度发生变化，这显示了它们之间的高度相关性。这种交通量的特性可以用来预测即将发生的交通速度变化，而这种变化是很难仅从历史交通速度数据中挖掘出来的。在第三时段，交通量迅速下降，而交通速度回升并随机波动，显示它们之间的相关性较低。图6(d)显示了学习到的动态图中的边权重，第一时段和第二时段权重较高，第三时段权重较低，这验证了我们在现实世界中的观察。总之，我们提出的动态图构造器能够有效地挖掘路段之间以及多方面特征之间的动态空间依赖关系。
+
+![image-20240701191706494](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407011917661.png)
+
+### 4.7 利用未对齐辅助信息的研究
+
+与直接将辅助特征和同一路段的主要特征进行拼接相比，我们的方法能够在这些特征未对齐的情况下将辅助特征整合到主要特征中。这种特性在现实世界中非常有用，比如使用周边路段的交通量来预测商场的客流量。为了探索利用未对齐辅助特征的能力，我们在PeMSD4数据集上设计了一组实验，通过改变辅助信息的比例来检验模型性能。具体来说，输入包含所有路段的主要特征以及不同比例（包括0%、25%、50%、75%和100%）的路段的辅助特征。如图7所示，随着更多辅助特征的加入，性能变得更好。这表明我们的方法在处理辅助信息与主要信息未对齐的场景下是有效的，并且总是能够利用相关的辅助信息来提高主要特征的预测性能。
+
+![image-20240701191833912](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407011918003.png)
+
+> 添加的辅助信息越多，我们的模型就能达到越高的性能。
 
 
 

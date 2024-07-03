@@ -491,7 +491,7 @@ logfile logfile "/export/servers/redis/logs/redis.log"
 因为已经配置了后台启动模式，所以可以直接启动服务，进入到redis安装文件的bin目录下：
 
 ```sh
-redis-server ../etc/redis.conf
+./redis-server ../etc/redis.conf
 ```
 
 通过ps查看状态：
@@ -553,10 +553,6 @@ cd /tmp/redis-6.2.4/src
 redis-cli --cluster create --cluster-replicas 1 glnode07:6379 glnode08:6379 glnode09:6379 glnode03:6379 glnode05:6379 glnode11:6379
 ```
 
-```sh
-redis-cli --cluster create --cluster-replicas 1 192.168.150.101:7001 192.168.150.101:7002 192.168.150.101:7003 192.168.150.101:8001 192.168.150.101:8002 192.168.150.101:8003
-```
-
 命令说明：
 
 - `redis-cli --cluster`或者`./redis-trib.rb`：代表集群操作命令
@@ -578,7 +574,7 @@ redis-cli --cluster create --cluster-replicas 1 192.168.150.101:7001 192.168.150
 通过命令可以查看集群状态：
 
 ```sh
-redis-cli -p 7001 cluster nodes
+redis-cli cluster nodes
 ```
 
 ![image-20240313103212594](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202403131032720.png)
@@ -659,3 +655,27 @@ redis-cli shutdown
 **参考**
 
 [redisNode is not empty](https://blog.csdn.net/PacosonSWJTU/article/details/113852320)
+
+
+
+
+
+
+
+### reids 集群全部节点宕机问题解决
+
+
+
+执行命令报错 (error) CLUSTERDOWN The cluster is down
+
+redis-cli --cluster check 127.0.0.1:6379 给出问题原因 not all 16384 slots are covered by nodes 因此是部分slot分配的节点已经挂掉了
+
+输入命令 redis-cli --cluster fix 127.0.0.1:6379 问题解决
+
+
+
+
+
+##### 参考
+
+[CLUSTERDOWN The cluster is down 的解决办法](https://juejin.cn/post/6971713870616330254)

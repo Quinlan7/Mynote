@@ -122,3 +122,30 @@ Pluggable database altered.
 
 ```
 
+
+
+## oracle重启
+
+首先进入oracle用户
+
+```
+启动 Oracle 监听服务
+
+$ lsnrctl start
+
+启动 Oracle 服务
+
+$ sqlplus /nolog
+
+SQL > conn / as sysdba
+
+SQL > startup
+
+验证：
+
+SQL > select * from dual;
+
+SQL > exit
+————————————————
+```
+

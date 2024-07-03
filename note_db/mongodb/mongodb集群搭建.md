@@ -463,7 +463,7 @@ replication:
 
 2. 启动数据库
 
-以下命令在 glnode04、glnode05、glnode06三台服务器上运行
+以下命令在 glnode10、glnode11、glnode12三台服务器上运行
 
 ```
 [root@glnode10 bin]# ./mongod -f ./mongod.conf 

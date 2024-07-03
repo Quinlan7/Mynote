@@ -44,6 +44,12 @@ Previous work on this topic falls into two categories: classical statistical met
 
 
 
+## 二、相关工作
+
+
+
+
+
 
 
 ## 三、预备知识
@@ -158,11 +164,7 @@ Let q be sampling frequency (q times/day), t be current time, Tp be the size of 
 
 空间-时间注意力机制（STAtt）包括两种类型的注意力，即空间注意力（SAtt），捕捉空间维度上节点之间的动态关系，和时间注意力（TAtt），捕捉时间维度上的交通状况。我们从一批输入Hs中提取和组织SAtt和TAtt（如图2所示，H ∈ R N×F×T是STBlock的输入），记为H ∈ R batch×N×F×T。具体而言，空间注意力S' ∈ R N×N 定义为
 
-
-
-
-
-
+![image-20240701123940121](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407011239283.png)
 
 ### 4.4 空间和时间模块
 
@@ -200,11 +202,9 @@ MISTAGCN包括两个阶段。在第一阶段（对应于模型的第一部分，
 
 ### 5.1 数据描述和预处理
 
-*Haikou online car-hailing data: This traffic dataset is collected and published by Didi Chuxing GAIA Initiative, in Haikou city, China. The city area is located between 110◦07′ ∼ 110◦42′ east longitude and 19◦31′ ∼ 20◦04′ north latitude, which is divided into 20 × 10 regions of the same size. The time duration of this dataset ranges from Aug. 1st, 2017 to Oct 31st, 2017, which is divided into equal time slices, each spans 1 h. There are 24 attributes and 14160162 records in the dataset, indicating people’s travel types (by Didi), service types, departure time, departure locations, travel duration and arrival time, etc. Fig. 3 shows a portion of the accumulative distribution of travel order events. Based on the division, we calculate traffic flows from and to each region i, at each time slice t, respectively. Meanwhile, we collect weather and air conditions of Haikou city in the same time duration and combine them with traffic flows. Finally, we get a large table representing traffic flow centered multidimensional time series.*
-
 海口在线打车数据：这个交通数据集是由滴滴出行GAIA计划收集和发布的，在中国海口市。该城市区域位于东经110°07′∼110°42′和北纬19°31′∼20°04′之间，被划分为20×10个相同大小的区域。该数据集的时间跨度为2017年8月1日至2017年10月31日，被划分为相等的时间片段，每个时间片段跨足1小时。数据集中有24个属性和14160162条记录，表示人们的出行类型（由滴滴提供）、服务类型、出发时间、出发地点、行程持续时间和到达时间等。图3显示了出行订单事件的累积分布的部分情况。基于这个划分，我们计算了每个时间片段t中每个区域i的流入和流出交通流量。同时，我们收集了海口市在相同时间段内的天气和空气条件，并将它们与交通流量结合起来。最终，我们得到了一个表示以交通流为中心的多维时间序列的大表。
 
-*New York yellow taxi trip data: The yellow taxi trip records include fields capturing pick-up and drop-off dates/times, pickup and drop-off locations, trip distances, itemized fares, rate types, payment types, and driver-reported passenger counts. The data used in the attached dataset were collected and provided to the NYC Taxi and Limousine Commission (TLC) by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs (TPEP/LPEP). The regions of this dataset derive from administrative plan of the city. Time duration ranges from Jan. 1st, 2022 to Feb. 28, 2022, with each time slice spans 1 h.*
+![image-20240701192227373](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407011922503.png)
 
 纽约黄色出租车行程数据：黄色出租车行程记录包括捕捉上车和下车的日期/时间、上车和下车的位置、行程距离、详细票价、费率类型、支付类型和司机报告的乘客数量等字段。所附数据集中使用的数据是由纽约市出租车和豪华轿车委员会（TLC）授权的技术提供商在出租车和豪华轿车乘客增强计划（TPEP/LPEP）下收集并提供的。该数据集的区域来源于该城市的行政计划。时间跨度从2022年1月1日到2022年2月28日，每个时间片段跨足1小时。
 
@@ -220,31 +220,25 @@ MISTAGCN包括两个阶段。在第一阶段（对应于模型的第一部分，
 
 ![image-20240416135937375](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202404161359524.png)
 
-*We implemented MISTAGCN based on MXNet framework, version 1.9.1, on a single workstation with 2 NVIDIA TITAN Xp GPUs, 16 kernel CPUs and 64G memory. The key parameters and settings of our experiments are summarized in Table 2.*
-
 我们基于MXNet框架（版本1.9.1）实现了MISTAGCN，使用了一台装有2块NVIDIA TITAN Xp GPU、16核CPU和64GB内存的工作站。我们实验的关键参数和设置总结如表2所示。
 
 ### 5.4 不同模型之间的比较和结果分析
 
-*We repeat the training process of each model 10 times (runs) and report the average results. As shown in Table 3 and Fig. 4, MISTAGCN outperforms all competing baselines by achieving the lowest RMSE and MAE on Yellow Trip dataset for traffic forecasting; meanwhile, on Haikou dataset, MISTAGCN outperforms the others on RMSE and performs almost the same on MAE as ASTGCN. In particular, MISTAGCN performs significantly better than all the competing baselines in the early stages.*
+![image-20240701192503391](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407011925463.png)
 
 我们对每个模型进行了10次训练（运行）的重复，并报告了平均结果。如表3和图4所示，MISTAGCN在黄色出租车数据集上的交通预测中取得了最低的RMSE和MAE，优于所有竞争对手；与此同时，在海口数据集上，MISTAGCN在RMSE上优于其他模型，并在MAE上表现几乎与ASTGCN相同。特别是在早期阶段，MISTAGCN明显优于所有竞争对手。
 
-*In brief, the traditional non GCN based methods (FC-LSTM, VAR, etc.) ignore spatial correlations among nodes and perform worse in traffic prediction than well designed GCN based models. While several single structured GCN based models (ASTGCN, Graph WaveNet, etc.) achieve good results, the convergence speed and accuracy of the models are limited. Well designed self learning GCN based models (DGCNN, GMAN, etc.) also achieve good prediction precision, however, the performance of such models are heavily affected by the definition of the embedding functions. Multiple structured models (MSTIF-Net, MISTAGCN, etc.) utilize more graph structures and gain more knowledge in spatial relations of traffic data, which lead to better performance achievement. On the other hand, extraction of multiple information in time dimension helps us gain more knowledge in time dimension of traffic data, thus improve model prediction precision (ASTGCN, MISTAGCN, etc.).*
-
 简而言之，传统的非GCN方法（如FC-LSTM、VAR等）忽视节点间的空间相关性，在交通预测中表现较差，不如设计良好的基于GCN的模型。虽然一些单一结构的基于GCN的模型（如ASTGCN、Graph WaveNet等）取得了不错的结果，但其收敛速度和准确性受到限制。设计良好的自学习GCN模型（如DGCNN、GMAN等）也取得了良好的预测精度，但这些模型的性能受到嵌入函数定义的影响较大。多结构模型（如MSTIF-Net、MISTAGCN等）利用更多的图结构，获得了更多有关交通数据空间关系的知识，从而取得更好的性能。另一方面，多维度时间信息的提取有助于我们获得更多有关交通数据时间维度的知识，从而提高了模型的预测精度（如ASTGCN、MISTAGCN等）。
 
-
+![](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407011925285.png)
 
 ### 5.5 模型与结果分析的比较
 
-*Comparison of the effect of different graph structures on performance：Since there are three graph structures involved in MISTAGCN, we conduct comparative experiments on all possible occurrences of these graph structures to the model. Comparison results are shown in Table 4 and Fig. 5. In general, the model has good performance regardless of the graph structure combinations. Further more, when compared with single structure based cases, the combined structure based cases utilize more useful information and thus obtain better prediction accuracy. In particular, the model achieves the best performance when combining all three structures simultaneously.*
+![image-20240701192757781](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407011927859.png)
 
 不同图结构对性能的影响比较：由于MISTAGCN涉及三种不同的图结构，我们对所有可能出现的这些图结构进行了比较实验。比较结果如表4和图5所示。总体而言，无论是哪种图结构的组合，该模型都表现出良好的性能。此外，与基于单一结构的情况相比，基于组合结构的情况利用了更多有用的信息，因此获得了更好的预测准确性。特别是，在同时结合所有三种结构的情况下，该模型达到了最佳性能。
 
-
-
-*Parameter comparison and performance analysis. We also conduct comparative experiments on the effects of different parameters on average performance of MISTAGCN. As shown in Fig. 6(a), with the other parameters unchanged, the change of Tr will affect performance of the model. In particular, prediction accuracy is not a monotonically increasing function of Tr . On Haikou dataset, the optimal performance is achieved when Tr = 8; while on YellowTrip dataset, the optimal performance is achieved when Tr = 6. As shown in Fig. 6(b), (c), when simply changing Td or Tw, respectively, similar results are obtained as changing of Tr .As shown in Fig. 6(d), with the other parameters unchanged, the change of Td will affect performance of the model. In particular, prediction accuracy is not a monotonically decreasing function of Tp. On Haikou dataset, the optimal performance is achieved when Tp = 4; while on YellowTrip dataset, the optimal performance is achieved when Tp = 5.*
+![image-20240701192811779](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407011928926.png)
 
 *参数比较和性能分析。我们还对MISTAGCN的不同参数对平均性能的影响进行了比较实验。如图6(a)所示，在其他参数不变的情况下，改变Tr将影响模型的性能。特别是，预测准确性并非Tr的单调递增函数。在海口数据集上，当Tr = 8时达到最佳性能；而在YellowTrip数据集上，当Tr = 6时达到最佳性能。如图6(b)、(c)所示，当分别改变Td或Tw时，得到的结果与改变Tr时类似。*
 
