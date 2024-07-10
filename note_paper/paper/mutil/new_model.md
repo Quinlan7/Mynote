@@ -11,21 +11,28 @@
     >
     > 问题： 作者的数据集中训练输入有两个维度的数据是交通流数据，一个是流入一个是流出，但是标签数据中只有流出车流量数据的预测值，训练结果也只有流出车流量，我现在输入的时候 流入车流量的数据集 是当作 多模态信息还是 主要特征的数据。
     >
-    > HAikou
+    > HaiKou
     >
-    > | 模型\结果                                  | MAE    | RMSE   | MAPE   |
-    > | ------------------------------------------ | ------ | ------ | ------ |
-    > | MFF-64B-dim32-runs1-200epoch               | 1.97   | 7.17   |        |
-    > | MFF-64B-dim32-runs1-1000epoch              | 3.59   | 14.05  |        |
-    > | MFF-32B-dim32-runs1-870epoch               | 1.67   | 5.85   |        |
-    > | MFF-64B-dim32-runs1-870epoch               | 1.41   | 4.80   |        |
-    > | MFF-64B-dim32-runs1-850epoch               | 1.5145 | 5.3820 | 0.4540 |
-    > | MFF-64B-dim32-runs1-850epoch-noAirQuality  | 1.6940 | 6.0739 | 0.4736 |
-    > | MFF-64B-dim32-runs1-850epoch-noHoliday     | 1.4043 | 4.7844 | 0.4660 |
-    > | MFF-64B-dim32-runs1-850epoch-noWeather     | 1.6443 | 5.7489 | 0.5271 |
-    > | MFF-64B-dim32-runs1-850epoch-noWind        | 1.8200 | 6.7797 | 0.5135 |
-    > | MFF-64B-dim32-runs1-850epoch-noTemperature | 2.4077 | 8.9624 | 0.5633 |
-    > | MFF-64B-dim32-runs1-2000epoch              | 1.1035 | 3.5433 | 0.4796 |
+    > | 模型\结果                        | MAE    | RMSE   | MAPE   |
+    > | -------------------------------- | ------ | ------ | ------ |
+    > | MFFDSTGCN-200epoch               | 1.97   | 7.17   |        |
+    > | MFFDSTGCN-1000epoch              | 3.59   | 14.05  |        |
+    > | MFFDSTGCN-870epoch               | 1.41   | 4.80   |        |
+    > | MFFDSTGCN-850epoch               | 1.5145 | 5.3820 | 0.4540 |
+    > | MFFDSTGCN-850epoch-noAirQuality  | 1.6940 | 6.0739 | 0.4736 |
+    > | MFFDSTGCN-850epoch-noHoliday     | 1.5949 | 5.5003 | 0.4697 |
+    > | MFFDSTGCN-850epoch-noWeather     | 1.6443 | 5.7489 | 0.5271 |
+    > | MFFDSTGCN-850epoch-noWind        | 1.8200 | 6.7797 | 0.5135 |
+    > | MFFDSTGCN-850epoch-noTemperature | 2.4077 | 8.9624 | 0.5633 |
+    > | MFFDSTGCN-2000epoch              | 1.1035 | 3.5433 | 0.4796 |
+    >
+    > HaiKou-ablation
+    >
+    > | 模型\结果                      | MAE    | RMSE   | MAPE   |
+    > | ------------------------------ | ------ | ------ | ------ |
+    > | MFFDSTGCN-850epoch             | 1.5145 | 5.3820 | 0.4540 |
+    > | MFFDSTGCN-850epoch-noMFFmoudle | 1.7550 | 6.1579 | 0.4955 |
+    > |                                |        |        |        |
     >
     > Yellowtrip
     >

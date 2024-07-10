@@ -40,7 +40,7 @@ int binarySearch(int[] nums, int target) {
 
 ### 堆排序
 
-#### 实现堆的数据解构
+#### 实现堆的数据结构
 
 ### 归并排序
 
