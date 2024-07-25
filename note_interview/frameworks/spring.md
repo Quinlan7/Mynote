@@ -226,12 +226,53 @@ Spring事务定义了7种传播机制：
 
 
 
+### 1.4 Spring MVC
 
+#### 1.4.1 SpringMVC的执行流程
 
-## 二、Spring MVC
+![image-20240725010230199](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407250102451.png)
+
+我不太了解视图的那部分流程，因为我开始学的时候就已经是前后端分离开发了，都是直接使用@ResponseBody 来返回 JSON 数据的形式：
+
+1. 用户发送出请求到前端控制器DispatcherServlet，这是一个调度中心
+2. DispatcherServlet 根据请求信息调用 HandlerMapping 。 HandlerMapping 根据 uri 去匹配查找能处理的 Handler （也就是我们平常说的 Controller 控制器） ，并会将请求涉及到的拦截器一起封装,返回给DispatcherServlet。
+
+4. DispatcherServlet调用HandlerAdapter（处理器适配器）。
+
+5. HandlerAdapter经过适配调用具体的处理器（Handler/Controller）。
+
+6. 方法上添加了 @ResponseBody，就通过HttpMessageConverter 来返回结果并且转换为JSON
 
 
 
 ## 三、Spring Boot
+
+### 3.1 优点
+
+Spring Boot 以 **约定大于配置** 核心思想开展工作，相比Spring具有如下优势： 
+
+1. Spring Boot 内嵌了如Tomcat，Jetty这样的web容器，也就是说可以直接跑起来，用不着再做部署工作了。 
+2. Spring Boot 无需再像Spring一样使用繁琐的xml文件配置，可以自动配置(核心)Spring。
+3. 通过Spring Boot Starters，可以快速整合常用依赖。
+
+### 3.2 自动配置原理
+
+自动装配就是把别人（官方）写好的配置类加载到spring容器，然后根据这个配置类生成一些项目需要的bean对象。
+
+1. 启动类上`@springbootapplication`是个复合注解，里面包含一个`@enableAutoConfigration`注解，是实现自动化配置的核心注解。 
+2. `@enableautoconfigration`注解也是一个复合注解，里面含有一个`@import`注解
+3. @import导入了一个**`autoConfigrationImportSelector`**类，通过它的`selectImports`方法去读取该项目和该项目引用的Jar包的的classpath路径下**META-INF/spring.factories**文件中的所配置的类的全类名。 
+4. 在这些配置类中所定义的Bean会根据条件注解所**指定的条件来决定**是否需要将其导入到Spring容器中。一般条件判断会有像`@ConditionalOnClass`这样的注解，判断是否有对应的class文件，如果有则加载该类，把这个配置类的所有的Bean放入spring容器中使用。
+
+
+### 3.3 Spring Boot Starters
+
+Spring Boot Starters 是一系列依赖关系的集合，因为它的存在，项目的依赖之间的关系对我们来说变的更加简单了。 
+
+举个例子：在没有 Spring Boot Starters 之前，我们开发 REST 服务或 Web 应用程序时; 我们需要使用像 Spring MVC，Tomcat 和 Jackson 这样的库，这些依 赖我们需要手动一个一个添加。但是，有了 Spring Boot Starters 我们只需要⼀ 个只需添加一个spring-boot-starter-web⼀个依赖就可以了，这个依赖包含的子依赖中包含了我们开发 REST 服务需要的所有依赖。
+
+
+
+
 
 ## 四、Spring Cloud
