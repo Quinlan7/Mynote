@@ -1,3 +1,38 @@
+循环删除数据
+```sql
+DECLARE
+  v_limit NUMBER := 500000; -- 每次处理的记录数
+  v_count NUMBER := 1; -- 记录已删除的总数
+BEGIN
+  -- 循环直到没有更多的重复数据需要删除
+  WHILE v_count > 0 LOOP
+    -- 删除重复数据，保留每组重复数据的第一个记录
+    DELETE FROM MY_TABLE
+    WHERE ID IN (
+      SELECT ID FROM (
+        SELECT ID, ROW_NUMBER() OVER (PARTITION BY COLUMN1, COLUMN2 ORDER BY ID) AS rn
+        FROM MY_TABLE
+      )
+      WHERE rn > 1
+      AND ROWNUM <= v_limit
+    );
+
+    -- 提交事务
+    COMMIT;
+
+    -- 获取刚刚删除的记录数
+    v_count := SQL%ROWCOUNT;
+
+    -- 输出处理情况
+    DBMS_OUTPUT.PUT_LINE('Deleted ' || v_count || ' rows');
+  END LOOP;
+END;
+/
+
+```
+
+
+
 第一个sql 140s，第二个0.6s
 原因是这个表会每分钟插入200条数据 sql执行时间不稳定
 
