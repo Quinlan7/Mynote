@@ -342,6 +342,12 @@ leetcode152：无法通过dp[i-k]求出 dp[i]，定义两个 dp[] 数组
 
 leetcode5：二维动态规划，也可以不用动态规划
 
+**技巧**
+
+leetcode136：异或操作
+
+leetcode169：多数元素
+
 
 
 
