@@ -198,13 +198,13 @@ for (int j = 0; j <= amount; j++) { // 遍历背包容量
 
 ##### 数组题目
 
-[leetcode209](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Array/209.md)：滑动窗口；     
-[leetcode704](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Array/704.md)：二分查找；      
-[leetcode977](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Array/977.md)：头尾指针；     
+[leetcode209](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Array/209.md)：滑动窗口;						√
+[leetcode704](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Array/704.md)：二分查找;						√
+[leetcode977](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Array/977.md)：头尾指针；     				√
 
 ##### 链表题目
 
-[leetcode142](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Linked_Tables/142.md)：快慢指针；      
+[leetcode142](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Linked_Tables/142.md)：快慢指针；
 [leetcode203](https://github.com/Quinlan7/Mynote/blob/main/note_leetcode/Linked_Tables/203.md)：递归/迭代；     
 
 ##### 哈希表题目
