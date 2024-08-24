@@ -38,9 +38,9 @@
 
 以上这些内容咱们统统都会给小伙伴们讲解清楚，让大家充分理解如何使用Redis
 
+![image-20240823083245328](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202408230832505.png)
 
 
-![1653056228879](.\Redis实战篇.assets\1653056228879.png)
 
 ## 1、短信登录
 
@@ -52,7 +52,7 @@
 
 在tomcat支撑起并发流量后，我们如果让tomcat直接去访问Mysql，根据经验Mysql企业级服务器只要上点并发，一般是16或32 核心cpu，32 或64G内存，像企业级mysql加上固态硬盘能够支撑的并发，大概就是4000起~7000左右，上万并发， 瞬间就会让Mysql服务器的cpu，硬盘全部打满，容易崩溃，所以我们在高并发场景下，会选择使用mysql集群，同时为了进一步降低Mysql的压力，同时增加访问的性能，我们也会加入Redis，同时使用Redis集群使得Redis对外提供更好的服务。
 
-![1653059409865](.\Redis实战篇.assets\1653059409865.png)
+![image-20240824212804539](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202408242128695.png)
 
 
 

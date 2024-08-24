@@ -160,7 +160,7 @@ Redis从4.0开始引入RDB-AOF混合持久化模式。Redis服务器在执行AOF
 
 ### 六、Redis的数据过期策略
 
-在redis中提供了两种数据过期删除策略
+在redis中使用的是两种数据过期删除策略：惰性删除 + 定期删除
 
 **第一种是 惰性删除**：在设置该key过期时间后，我们不去管它，当访问该key时，我们检查其是否过期，如果过期，我们就删掉它。这种方式的优点是每次访问的时候才会检查key是否过期，对cpu友好，不怎么消耗cpu资源，但同样的缺点就是对于内存不友好。
 
@@ -392,7 +392,7 @@ zset 集合对象有2种编码方案，ziplist 和 skiplist与dict相结合的�
 * ZipList是连续内存，因此score和element是紧挨在一起的两个entry， element在前，score在后
 * score越小越接近队首，score越大越接近队尾，按照score值升序排列
 
-skiplist 加 dict 的实现 是因为 dict 只能提供键值存储，还有根据member来查找score，但是没法排序所以使用 skiplist 来实现对zset的排序，这种方案相当于所有数据存储两次，非常消耗内存，所以有了ziplist的方案。
+skiplist 加 dict 的实现 是因为 dict 只能提供键值存储，**还有根据member来查找score**，但是没法排序所以使用 skiplist 来实现对zset的排序，这种方案相当于所有数据存储两次，非常消耗内存，所以有了ziplist的方案。
 
 
 
