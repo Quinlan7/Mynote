@@ -74,7 +74,7 @@
 
 > 方便在当前请求的后续中使用用户的个人信息
 
-![1653066208144](.\Redis实战篇.assets\1653066208144.png)
+![image-20240825155830235](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202408251558389.png)
 
 
 
@@ -82,7 +82,7 @@
 
 **温馨小贴士：tomcat的运行原理**
 
-![1653068196656](.\Redis实战篇.assets\1653068196656.png)
+![image-20240825155932966](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202408251559126.png)
 
 当用户发起请求时，会访问我们像tomcat注册的端口，任何程序想要运行，都需要有一个线程对当前端口号进行监听，tomcat也不例外，当监听线程知道用户想要和tomcat连接连接时，那会由监听线程创建socket连接，socket都是成对出现的，用户通过socket像互相传递数据，当tomcat端的socket接受到数据后，此时监听线程会从tomcat的线程池中取出一个线程执行用户请求，在我们的服务部署到tomcat后，线程会找到用户想要访问的工程，然后用这个线程转发到工程中的controller，service，dao中，并且访问对应的DB，在用户执行完请求后，再统一返回，再找到tomcat端的socket，再将数据写回到用户端的socket，完成请求和响应
 
@@ -110,7 +110,7 @@
 
 所以咱们后来采用的方案都是基于redis来完成，我们把session换成redis，redis数据本身就是共享的，就可以避免session共享的问题了
 
-![1653069893050](.\Redis实战篇.assets\1653069893050.png)
+![image-20240825155947371](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202408251559581.png)
 
 ### 1.7 Redis代替session的业务流程
 
@@ -118,7 +118,7 @@
 
 首先我们要思考一下利用redis来存储数据，那么到底使用哪种结构呢？由于存入的数据比较简单，我们可以考虑使用String，或者是使用哈希，如下图，如果使用String，同学们注意他的value，用多占用一点空间，如果使用哈希，则他的value中只会存储他数据本身，如果不是特别在意内存，其实使用String就可以啦。
 
-![1653319261433](.\Redis实战篇.assets\1653319261433.png)
+![image-20240825160002862](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202408251600032.png)
 
 #### 1.7.2、设计key的具体细节
 
@@ -136,9 +136,7 @@
 
 当注册完成后，用户去登录会去校验用户提交的手机号和验证码，是否一致，如果一致，则根据手机号查询用户信息，不存在则新建，最后将用户数据保存到redis，并且生成token作为redis的key，当我们校验用户是否登录时，会去携带着token进行访问，从redis中取出token对应的value，判断是否存在这个数据，如果没有则拦截，如果存在则将其保存到threadLocal中，并且放行。
 
-![1653319474181](.\Redis实战篇.assets\1653319474181.png)
-
-
+![image-20240825160026692](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202408251600877.png)
 
 
 
@@ -150,7 +148,9 @@
 
 **前言**:**什么是缓存?**
 
-就像自行车,越野车的避震器![](.\Redis实战篇.assets\避震器.gif)
+就像自行车,越野车的避震器
+
+![](.\Redis实战篇.assets\避震器.gif)
 
 举个例子:越野车,山地自行车,都拥有"避震器",**防止**车体加速后因惯性,在酷似"U"字母的地形上飞跃,硬着陆导致的**损害**,像个弹簧一样;
 
@@ -180,7 +180,9 @@
 
 但是缓存也会增加代码复杂度和运营的成本:
 
-![](.\Redis实战篇.assets\image-20220523214414123.png)
+![image-20240825160117309](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202408251601483.png)
+
+
 
 #### 2.1.2 如何使用缓存
 
@@ -194,7 +196,7 @@
 
 **CPU缓存：**当代计算机最大的问题是 cpu性能提升了，但内存读写速度没有跟上，所以为了适应当下的情况，增加了cpu的L1，L2，L3级的缓存
 
-![](.\Redis实战篇.assets\image-20220523212915666.png)
+![image-20240825160129673](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202408251601810.png)
 
 
 
@@ -206,7 +208,9 @@
 
 标准的操作方式就是查询数据库之前先查询缓存，如果缓存数据存在，则直接从缓存中返回，如果缓存数据不存在，再查询数据库，然后将数据存入redis。
 
-![1653322097736](.\Redis实战篇.assets\1653322097736.png)
+![image-20240825160217529](C:/Users/quinlan/AppData/Roaming/Typora/typora-user-images/image-20240825160217529.png)
+
+
 
 
 

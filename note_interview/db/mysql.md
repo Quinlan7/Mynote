@@ -407,7 +407,7 @@ SELECT ... LOCK IN SHARE MOD
 
 当我们使用mysql的执行计划explain来去查看这条sql的执行情况时，我们一般重点关注几个字段：
 
-+ **key 和 key_len 字段**：可以通过key和key_len检查是否命中了索引，如果是联合索引可以通过 key_len 判断命中了几个索引字段，也可以判断索引是否有失效的情况，
++ **key 和 key_len 字段**：key 列表示 MySQL 实际使用到的索引。可以通过key和key_len检查是否命中了索引，如果是联合索引可以通过 key_len 判断命中了几个索引字段，也可以判断索引是否有失效的情况，
 + **type 字段**：type显示的是访问类型，主要有这几种类型：system > const > eq_ref > ref > range > index > all。阿里巴巴的java开发手册推荐，至少要达到 range 级别，要求是 ref 级别，如果可以是 const 最好。 说明： 
   + const：表示使用唯一索引扫描，并且只匹配一条数据。
   + eq_ref：唯一性索引扫描，并且也只匹配一条数据，与const不同的是eq_ref用于联表的查询。
