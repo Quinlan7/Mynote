@@ -287,6 +287,116 @@ Heap dump file created
 
 
 
+##### 链表排序
+
+```java
+// 主函数，接收链表头节点并返回排序后的链表头节点
+    public ListNode sortList(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;  // 空链表或只有一个节点，直接返回
+        }
+
+        // 找到链表的中间节点
+        ListNode mid = getMid(head);
+        ListNode left = head;
+        ListNode right = mid.next;
+        mid.next = null;  // 将链表分成两部分
+
+        // 递归排序左右两部分
+        left = sortList(left);
+        right = sortList(right);
+
+        // 合并排序后的链表
+        return merge(left, right);
+    }
+
+    // 找到链表的中间节点（快慢指针法）
+    private ListNode getMid(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast.next != null && fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;  // slow 最终指向中间节点
+    }
+
+    // 合并两个有序链表
+    private ListNode merge(ListNode left, ListNode right) {
+        ListNode dummy = new ListNode(0);  // 临时的哨兵节点
+        ListNode tail = dummy;
+
+        while (left != null && right != null) {
+            if (left.val <= right.val) {
+                tail.next = left;
+                left = left.next;
+            } else {
+                tail.next = right;
+                right = right.next;
+            }
+            tail = tail.next;
+        }
+
+        // 将剩余的节点接到尾部
+        if (left != null) {
+            tail.next = left;
+        } else {
+            tail.next = right;
+        }
+
+        return dummy.next;  // 返回合并后的链表头节点
+    }
+```
+
+##### 手写正则
+
+```java
+private boolean matchHelper(String text, String pattern, int i, int j) {
+        // 如果模式串和输入串都到达结尾，匹配成功
+        if (j == pattern.length()) {
+            return i == text.length();
+        }
+
+        // 判断当前字符是否匹配
+        boolean firstMatch = (i < text.length() &&
+                              (pattern.charAt(j) == text.charAt(i) ||
+                               pattern.charAt(j) == '.'));
+
+        // 处理 '*' 和 '?'
+        if (j + 1 < pattern.length() && pattern.charAt(j + 1) == '*') {
+            // '*' 情况：要么跳过'*'和前一个字符，要么匹配第一个字符后继续处理
+            return matchHelper(text, pattern, i, j + 2) ||
+                   (firstMatch && matchHelper(text, pattern, i + 1, j));
+        } else if (j + 1 < pattern.length() && pattern.charAt(j + 1) == '?') {
+            // '?' 情况：要么跳过'?'和前一个字符，要么匹配第一个字符后继续处理
+            return matchHelper(text, pattern, i, j + 2) ||
+                   (firstMatch && matchHelper(text, pattern, i + 1, j + 2));
+        } else {
+            // 普通匹配或 '.' 匹配
+            return firstMatch && matchHelper(text, pattern, i + 1, j + 1);
+        }
+    }
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 职业规划
+
+1. 提升技术能力：首先对自己专业上的技术能力要有深入的掌握，我现在对一些技术点，因为没有使用场景很多只是一个了解的状态，后面要结合工作上的使用场景有更深入的了解，并且实时关注一些Java新特性的发展，累计自己的项目经验。拓展自己的技术栈，比如像mongodb，es这样经常听到的技术，但是也是没有使用场景只是跟着视频学习过，希望对这些技术栈有更深入的了解。
+2. 拓展技术领域：也可以逐步的拓展自己所掌握的技术领域，比如向大数据这个领域多了解一些技术，比如 hadoop，spark，Hbase，横向拓展自己的技术栈。
+3. 培养软实力：无论是沟通能力还是团队协作能力，这些在团队合作中，都是非常重要的，并且学习了解一些业务场景下的解决方案。并且提升自己的学习能力，借鉴一些前辈的学习方式，提升自己的学习效率。也可以和团队的leader学习项目的管理经验。
+4. 实践与进阶：参与开源项目，了解最最先进的技术，拓展自己的视野，关注行业动态和技术趋势，了解新技术和新应用场景，为自己的职业发展做好准备。并且可以开始主键的学习了解如何带领团队、激发团队成员的潜力以及做出明智的决策。
+5. 建立人脉关系：加入一些技术社区、参加技术大会和研讨会，与同行交流心得，扩展人脉圈。在社交媒体或博客平台上分享自己的技术和见解，提升自己的知名度。与行业专家互动交流，了解他们的成功经验和发展建议，为自己的职业发展提供指导。
+
 
 
 
