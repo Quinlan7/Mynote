@@ -1,12 +1,16 @@
 ### 自我介绍
 
-各位面试官你们好，我叫郑海飞，我本科就读于天津工业大学，网络空间安全专业，硕士就读于河北工业大学人工智能专业，研一下学期的时候曾在火星先驱公司实习了五个月，一起为河工大电气学院开发了一个三全育人系统，前期我们使用了低代码平台进行开发，后期由于效果不理想转换为传统的前后端开发模式，并把之前的两个系统重构合并作为基础，在此基础上开发，我的主要职责就是做后端开发，使用的框架就是Spring boot 和 MybatisPlus。
+各位面试官你们好，我叫郑海飞，我本科就读于天津工业大学，网络空间安全专业，硕士就读于河北工业大学人工智能专业，在此期间曾在火星先驱公司实习了五个月，一起为河工大电气学院开发了一个三全育人系统，前期我们使用了低代码平台进行开发，后期由于效果不理想转换为传统的前后端开发模式，并把之前的两个系统重构合并作为基础，在此基础上开发，我的主要职责就是做后端开发，使用的框架就是Spring boot 和 MybatisPlus。
 
-在研二的时候在天津市公路局实习了一整年，期间我的主要工作任务有两个，一个是进行数据同步工作，因为公路单位有很多部门，很多数据我们并不是数据源，但是我们也有相关业务，所以需要同步很多的数据，主要是使用 DataX 和 SeaTunnel 平台来进行的数据同步，这个 SeaTunnel 是被别的公司二开过后的产品，我们直接使用的。另一个任务就是后台开发，我们当时主要的工作是为每个业务开发一个 可视化的看板。
+在研二的时候在天津市公路局实习了一整年，期间我的主要工作任务有两个，一个是进行数据同步工作，因为公路单位有很多部门，很多数据我们并不是数据源，但是我们也有相关业务，所以需要同步很多的数据，主要是使用 DataX 和 SeaTunnel 平台来进行的数据同步，我们直接使用的。另一个任务就是后台开发，我们当时主要的工作是为每个业务开发一个 可视化的看板。
 
 我在研究生期间的主要工作都是在做后端开发，有一些相关的实战经验，所以求职方向也是后端开发，希望能获得这次工作机会！谢谢。
 
-
+> Hello, interviewers. My name is Zheng Haifei. I completed my undergraduate studies at Tiangong University, majoring in Cyberspace Security, and I pursued a master's degree in Artificial Intelligence at Hebei University of Technology. During the time, I interned at 火星先驱 Company for five months. 
+>
+> During my second year of graduate school, I interned at the Tianjin Highway Bureau for a full year. My main tasks were twofold: First, I was responsible for data synchronization. we primarily used the DataX and SeaTunnel platforms. The second task involved back-end development, where our team mainly developed visual dashboards for each business functions.
+>
+> Throughout my master's studies, I focused on back-end development, gaining experience in real projects. so, I am seeking opportunities in back-end development, and I hope to secure this position. Thank you!
 
 ### 项目中的技术应用
 
@@ -51,6 +55,44 @@
 
 
 
+**代码实现**
+
+```java
+		// 创建线程池
+		ExecutorService executor = Executors.newFixedThreadPool(3);
+		// 创建线程1
+		Callable<List<Map<String, Object>>> alarmDetailsTask = () -> {
+            System.out.println("Callable running: " + Thread.currentThread().getId());
+            String sql = String.format("", date);
+            return oracleJdbc.queryForList(sql);
+        };
+		// 创建线程2
+        Callable<List<Map<String, Object>>> anomalousChangesTask = () -> {
+            System.out.println("Callable running: " + Thread.currentThread().getId());
+            String sql = String.format("",date);
+            return oracleJdbc.queryForList(sql);
+        };
+		// 创建线程3
+        Callable<Integer> maxHeightTask = () -> {
+            System.out.println("Callable running: " + Thread.currentThread().getId());
+            String sql = String.format("",date);
+            return oracleJdbc.queryForObject(sql, Integer.class);
+        };
+		
+		// 提交线程
+		Future<List<Map<String, Object>>> alarmDetailsFuture = executor.submit(alarmDetailsTask);
+        Future<List<Map<String, Object>>> anomalousChangesFuture = executor.submit(anomalousChangesTask);
+        Future<Integer> maxHeightFuture = executor.submit(maxHeightTask);
+		//获取线程结果
+		List<Map<String, Object>> alarmDetails = alarmDetailsFuture.get();
+		List<Map<String, Object>> anomalousChanges = anomalousChangesFuture.get();
+        Integer maxHeight = maxHeightFuture.get();
+```
+
+
+
+
+
 #### 4 你们的数据量那么大，有没有分库分表
 
 我们的业务时存在水平分表的，比如我们的ETC或者MTC数据，大约数据量一天在 20 到 40万之间，我们对这个数据的处理就是水平分表，因为它一个月的数据在一千万左右，我们当时是按照它的年月来分表的，一张表一个月的数据，表名中会带有年月，我们在代码中，或者数据同步中，都是用年月拼接表名，访问对应的数据。
@@ -87,6 +129,17 @@
   + 然后我使用了物化视图（使用中，我发现只有对应模式的用户可以创建物化视图，即使是管理员也没有权限，即使管理员给自己赋权也不能）使插入和检索分离开，并且将String类型的日期在物化视图中改为Date类型的，且只在物化视图中保留必要的字段，大大提高了检索速度，然后也是使用定时任务来更新物化视图。
 
 **R：**优化之后整体接口的速度基本在五百毫秒左右，响应速度大幅提升，但是相应的实时性上要比之前差一点，因为是定时更新的物化视图嘛。
+
+> This issue arose in a tunnel project we took over. The interface for a large-screen display function took about five minutes to respond. We were tasked with optimizing the response speed of this interface.
+>
+> - Location problem
+>
+>   : We identified that SQL queries in this interface were extremely slow, taking around two to three minutes each. 
+>
+>   - I first considered optimizing the SQL queries. However, I noticed that the execution time was inconsistent. Most of the time, it still took around three minutes to complete. I suspected that the main issue was related to locking, possibly caused by a scheduled task inserting data every minute, which locked the table. 
+>   - To address this, I used materialized views to separate the insert and select operations. Additionally, I used a scheduled task to update the materialized view.
+>
+> After optimization, the interface's response time was reduced to around 500 milliseconds. However, the trade-off was a slight reduction in real-time accuracy since the materialized view is updated on a schedule.
 
 
 

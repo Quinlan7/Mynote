@@ -429,6 +429,12 @@ Java Io流共涉及40多个类，看上去杂乱，其实都存在一定的关�
 
 ![image-20240813221345223](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202408132213380.png)
 
+**反射的原理**
+
+Java是一种编译与解释并存的语言，程序的执行分为编译和运行两步，编译之后会生成字节码(.class)文 件，JVM进行类加载的时候，会加载字节码文件，将类型相关的所有信息加载进方 法区，反射就是在JVM运行时通过类的全限定名、实例的`getClass()`方法等获取Class对象信息，然后从方法区中匹配到该类的Class对象，它保存了类的类型、方法信息，构造器、字段等。然后从Class对象中动态获取类信息或者构造类对象，完成反射过程。
+
+
+
 **反射的应用场景**
 
 一般我们平时都是在在写业务代码，很少会接触到直接使用反射机制的场景。
@@ -463,11 +469,15 @@ Java Io流共涉及40多个类，看上去杂乱，其实都存在一定的关�
 
 #### 2.1.1 ArrayList 的扩容机制
 
+**ArrayList 使用 Object数组存储**
+
 首先 ArrayList 可以初始化为指定大小容量，或者默认初始化容量10，不过如果是无参初始化的话是懒加载策略，只有第一次添加元素才真正的初始化为容量大小为10的数组。扩容就是当当前容量+1超过数组长度时，会创建一个1.5倍容量的新数组，然后把原数组的值拷贝上去。
 
 #### 2.1.3 ArrayList 和 LinkedList 的区别
 
-它们两个主要是底层使用的数据结构不一样，ArrayList 是动态数组，LinkedList 是双向链表。数据结构的不同是一切不同的根源。
+> List 结构提供了插入任意位置的功能，add(int index, E element)
+
+它们两个主要是底层使用的数据结构不一样，**ArrayList 是数组**，**LinkedList 是双向链表**。数据结构的不同是一切不同的根源。
 
 1. 是否支持随机访问
 
@@ -480,6 +490,7 @@ Java Io流共涉及40多个类，看上去杂乱，其实都存在一定的关�
 + LinkedList每个节点，需要存储前驱和后继，所以每个节点会占用更多的空
 
 3. 从线程安全来说，ArrayList和LinkedList都不是线程安全的
+3. 多数情况下，ArrayList更利于查找，LinkedList更利于增删
 
 #### 2.1.4 ArrayList 和 LinkedList 不是线程安全的，你们在项目中是如何解决这个的线程安全问题的？
 
@@ -515,7 +526,13 @@ synchronized (list) {
 }
 ```
 
+#### 2.1.5 ArrayList插入元素的过程是怎样的？
 
+1. 检查容量是否足够，若不足则扩容。
+
+2. 将元素插入到指定位置，并在必要时移动后面的元素。
+
+3. 更新数组的大小。
 
 
 
@@ -622,7 +639,7 @@ Java 中有 HashTable、Collections.synchronizedMap、以及 ConcurrentHashMap �
 #### 2.2.12 ConcurrentHashmap的实现
 
 1. concurrentHashmap在jdk1.7的时候，使用的是分段锁（reentrantlock 锁住一个segment数组）
-   + 大小数组，大数组是segment，每个segment包含一个HashEntry数组，每个HashEntry又是一个链表结构的元素，对同一个segment相关操作用reentrantlock 加锁。多个segment之间操作可以并发执行。但是Segment 的个数⼀旦初始化就不能改变。 Segment 数组的大小默认是 16，也就是说默认可以同时⽀持 16 个线程并发写。
+   + **大小数组**，**大数组是segment**，**每个segment包含一个HashEntry数组**，每个HashEntry又是一个链表结构的元素，对同一个segment相关操作用reentrantlock 加锁。多个segment之间操作可以并发执行。但是Segment 的个数⼀旦初始化就不能改变。 **Segment 数组的大小默认是 16**，也就是说默认可以同时⽀持 16 个线程并发写。
 2. jdk1.8后用的cas和synchronized实现。
    + 若是Node结点没有分配就使用CAS，若是已经分配了就使用synchronized加锁，锁住当前链表或者红红黑树的首节点，这样只要 hash 不 冲突，就不会产生并发，就不会影响其他 Node 的读写，效率⼤幅提升。
 
@@ -650,7 +667,7 @@ LinkedHashMap 与普通的 HashMap 相比，多了一个特性就是它保留了
 
 ![image-20240711154740546](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407111547752.png)
 
-分别是
+共有**六种状态**，分别是
 
 * NEW：当一个线程对象被创建，但还未调用 start 方法时处于**新建**状态
 * RUNNABLE：调用了 start 方法，就会由**新建**进入**可运行**
@@ -658,6 +675,15 @@ LinkedHashMap 与普通的 HashMap 相比，多了一个特性就是它保留了
 * BLOCKED：当获取锁失败后，由**可运行**进入**阻塞**状态，等待其他线程释放锁
 * WAITING：成功获取锁的线程，由于调用了 wait() 或者别的方法（join()方法，park()方法），此时从**可运行**状态进入等待状态，等待其他线程的特定操作。
 * TIME_WAITING：超时等待状态，可以在指定的时间后自行返回而不是像 WAITING 那样⼀直等待
+
+> + wait()：当一个线程A调用一个共享变量的 wait()方法时， 线程A会被阻塞挂起， 发生下面几种情况才会返回 ： 
+>   + （1） 线程A调用了共享对象 notify()或者 notifyAll()方法； 
+>   + （2）其他线程调用了线程A的 interrupt() 方法，线程A抛出 InterruptedException异常返回。
+> + notify() : 一个线程A调用共享对象的 notify() 方法后，会唤醒一个在这个共享变 量上调用 wait 系列方法后被挂起的线程。 一个共享变量上可能会有多个线程在 等待，具体唤醒哪个等待的线程是随机的。
+> + join()：Thread类提供的方法，如果一个线程A执行了thread.join()语句，其含义是：当前线程A等待 thread线程终止（运行结束）之后才 从thread.join()返回。
+> + `park()` 是 `LockSupport` 类中的一个静态方法，用于阻塞当前线程，直到它被其他线程唤醒。与 `join()` 不同的是，`park()` 通常用于更加灵活的线程同步控制，而不依赖于线程的生命周期。
+>   + t1线程中执行：LockSupport.park();  // t1 被阻塞，
+>   + LockSupport.unpark(t1);  // 唤醒 t1
 
 #### 3.1.2 run() 和 start() 的区别
 
@@ -675,7 +701,7 @@ LinkedHashMap 与普通的 HashMap 相比，多了一个特性就是它保留了
 
 + sleep() 是 Thread 的静态方法，而 wait() 是 Object 的成员方法
 + wait() 方法被调用后，线程不会自动苏醒，需要别的线程调用同一个对象的 notify() 或者 notifyAll() 方法。带参数的 wait 方法 和 sleep 方法会在等待响应的时间后自动唤醒。
-+ wait 方法的调用必须先获取 wait 对象的锁，wait 方法执行后会释放对象锁，允许其它线程获得该对象锁，而 sleep 如果在 synchronized 代码块中执行，并不会释放对象锁
++ wait 方法的调用**必须先获取 wait 对象的锁**，wait 方法执行后会释放对象锁，允许其它线程获得该对象锁，而 sleep 如果在 synchronized 代码块中执行，并不会释放对象锁
 
 
 
@@ -721,7 +747,7 @@ CAS 涉及到三个操作数：
 
 #### 3.2.3 synchronized
 
-synchronized 主要解决的是多个线程之间访问资源的同步性，可以保 证被它修饰的方法或者代码块在任意时刻只能有⼀个线程执行。 在 Java 早期版本中， synchronized 属于 重量级锁，效率低下。 因为监视器锁（monitor）是依赖于 底层的操作系统的互斥锁 来实现的，需要频繁的内核态和用户态的转换。
+synchronized 主要解决的是多个线程之间访问资源的同步性，可以保 证被它修饰的方法或者代码块在任意时刻只能有⼀个线程执行。 在 Java 早期版本中， synchronized 属于 重量级锁，效率低下。 因为**监视器锁（monitor）是依赖于底层的操作系统的互斥锁** 来实现的，需要频繁的内核态和用户态的转换。
 
  不过，在 Java 6 之后，Java 官方对从 JVM 层面对 synchronized 优化，所以现在的 synchronized 锁效率也优化得很不错了。JDK1.6 对锁的实现引⼊了大量的优化，如自旋锁、适应性 自旋锁、偏向锁、轻量级锁等技术来减少锁操作的开销。
 
@@ -733,7 +759,9 @@ synchronized 主要解决的是多个线程之间访问资源的同步性，可�
 
 ##### 3.2.3.2 synchronized 重量级锁（monitor） 底层原理
 
-重量级锁的底层由monitor实现的，线程获得锁需要使用对象（锁）关联monitor，在monitor内部有三个属性，分别是owner、entrylist、waitset。其中owner是关联的获得锁的线程，并且只能关联一个线程；entrylist关联的是处于阻塞状态的线程；waitset关联的是处于Waiting状态的线程。monitor指令的执行是JVM通过调用操作系统的互斥原语mutex来实现，被阻塞的线程会被挂起、等待重新调度，会导致“用户态和内核态”两个态之间来回切换，对性能有较大影响。
+重量级锁的底层由monitor实现的，线程获得锁需要使用对象（锁）关联monitor，**就是我们对象头中的MarkWord字段会存储一个指向 Monitor 的指针**，在monitor内部有三个属性，分别是owner、entrylist、waitset。其中owner是关联的获得锁的线程，并且只能关联一个线程；entrylist关联的是处于阻塞状态的线程；waitset关联的是处于Waiting状态的线程。**monitor指令的执行是JVM通过调用操作系统的互斥原语mutex来实现**，被阻塞的线程会被挂起、等待重新调度，会导致“用户态和内核态”两个态之间来回切换，对性能有较大影响。
+
+> monitor是jvm级别的对象（ C++实现），线程获得锁需要使用对象（锁）关联monitor，当锁升级为重量级锁时，Mark Word 中会存储一个指向 **ObjectMonitor** 对象的指针。
 
 ##### 3.2.3.3 锁升级
 
@@ -769,7 +797,13 @@ JMM就是Java的内存模型，是一种抽象的概念，并不真实存在，�
 
 Java 内存模型（JMM）本质上是为了解决多线程环境下内存可见性问题、指令重排序问题和线程间操作的有序性问题。它通过一系列的规范（如 **happens-before** 原则）以及语言级别的工具（如 `volatile`、`synchronized` 等）来实现这些目标。
 
-可见性、原子性和有序性。
+保证 可见性、原子性和有序性。
+
+JMM 提供了 "**先行发生 (Happens-Before)**" 规则来确保操作的有序性。
+
+> Happens-Before 规则定义了内存操作的顺序性要求。如果一个操作 A 先行发生于操作 B，那么在多线程环境下，操作 A 的结果对操作 B 是可见的，并且操作 A 在时间上发生在操作 B 之前。
+
+
 
 具体而言就是每个线程有自己的工作内存，所有线程都共享主内存。当我们要同步更新共享变量的值的时候，JMM规定在加锁前，必须读取主内存中的最新变量值到当前线程的工作内存中，然后在线程解锁前，必须把共享变量写回主内存中，以此来确保线程间的安全性和可见性。
 
@@ -787,7 +821,7 @@ volatile用于修饰变量，可以用来保证可见性与有序性，但volati
 
 **有序性问题：**有序性问题指的是，JVM会在不影响结果的前提下，进行指令重排。但是在多线程模式下这样肯定会带来问题。
 
-**有序性问题解决：**volatile会通过插入内存屏障来禁止指令重排，具体来说在对变量的写操作前会插入写屏障，会确保指令重排的时候，不会将写屏障前的代码排在写屏障之后。在读操作后加入读屏障，确保读屏障后的代码不会重排到读屏障之前。
+**有序性问题解决：**volatile会通过插入**内存屏障**来禁止指令重排，具体来说在对变量的写操作前会插入写屏障，会确保指令重排的时候，不会将写屏障前的代码排在写屏障之后。在读操作后加入读屏障，确保读屏障后的代码不会重排到读屏障之前。
 
 
 
@@ -795,7 +829,7 @@ volatile用于修饰变量，可以用来保证可见性与有序性，但volati
 
 单例模式：该模式只会有一个实例对象。
 
-volatile有个比较经典的应用就是双层校验锁的单例模式DCL（double check lock）单例
+volatile有个比较经典的应用就是双层校验锁的单例模式DCL（double check lock），它内部的静态私有变量，就是用了 volatile 关键字，因为若不加volatile则多线程情况下，**对象初始化**和**引用指向地址**这步骤可能发生指令重排，导致得到该单例的线程，这个单例是没有完全初始化的。
 
 ```java
 class A{
@@ -816,7 +850,7 @@ class A{
 
 双层校验锁：为了减少 syncronized 锁住的范围。
 
-若不加volatile则多线程情况下，对象初始化和引用指向地址这步骤可能发生指令重排，导致得到该单例的线程，这个单例是没有完全初始化的。
+
 
 
 
@@ -873,14 +907,14 @@ ReentrantLock主要利用CAS+AQS队列来实现。它同时支持公平锁和非
 
 > **可中断锁和不可中断锁有什么区别？**
 >
-> - **可中断锁**：获取锁的过程中可以被中断，不需要一直等到获取锁之后 才能进行其他逻辑处理。`ReentrantLock` 就属于是可中断锁。
+> - **可中断锁**：获取锁的过程中可以被中断，不需要一直等到获取锁之后 才能进行其他逻辑处理。`ReentrantLock` 就属于是可中断锁。它可以响应中断请求：Thread.currentThread().interrupt();
 > - **不可中断锁**：一旦线程申请了锁，就只能等到拿到锁以后才能进行其他的逻辑处理。 `synchronized` 就属于是不可中断锁。
 
 ##### 3.2.6.4  如何控制某个方法允许并发访问线程的数量？（Semaphore）
 
 在juc中提供了一个Semaphore[seməfɔːr]类（信号量），其实就和操作系统中的信号量是相同的机制。我们在需要控制并发量的线程中使用，在进入线程前先定义能并发的最大数量，在线程中先用semaphore.acquire() 请求信号量，一个线程获取了信号量则信号量数量减一，到0的时候就不许其他线程获取信号量了，使用semaphore.release()方法，可以释放信号量。
 
-##### 3.2.6.4  如何控制线程的同步？（Semaphore）
+##### 3.2.6.4  如何控制线程的同步？
 
 两种方法：1. CountDownLatch等待线程完成 2. Future 类接受线程返回数据
 
@@ -956,7 +990,7 @@ Future 类的get方法可以等待我们的线程数据返回后，获取这个�
 
 1.ArrayBlockingQueue：基于数组结构的有界阻塞队列，FIFO。需要在初始化的时候指定长度。
 
-2.LinkedBlockingQueue：基于链表结构的有界阻塞队列，FIFO。默认长度为 Integer.MAX_VALUE，默认长度创建的话，可能会堆积大量的请求，导致OOM。
+2.**LinkedBlockingQueue**：基于链表结构的有界阻塞队列，FIFO。默认长度为 Integer.MAX_VALUE，默认长度创建的话，**可能会堆积大量的请求，导致OOM**。
 
 3.DelayedWorkQueue ：是一个优先级队列，可以自定义比较器。
 
@@ -1022,7 +1056,7 @@ ScheduledThreadPool：可定时执行的线程池
 
 #### 3.4.1 ThreadLocal
 
-ThreadLocal 主要是解决在多线程环境下的共享变量的隔离，并且实现在线程内的资源共享。比较经典的例子就是用于保存用户登录信息，这样每个线程可以保存自己的用户信息，并且在同一个线程中的任何地方都可以获取到登录信息。但是我的项目中并没有这样使用过ThreadLocal，因为我们使用了成熟的安全框架，比如shiro和springsecurity，都内置了获取用户信息的方式。
+ThreadLocal 主要是解决在**多线程环境下的共享变量的隔离**，并且实现在**线程内的资源共享**。比较经典的例子就是用于保存用户登录信息，这样每个线程可以保存自己的用户信息，并且在同一个线程中的任何地方都可以获取到登录信息。但是我的项目中并没有这样使用过ThreadLocal，因为我们使用了成熟的安全框架，比如shiro和springsecurity，都内置了获取用户信息的方式。
 
 #### 3.4.2 ThreadLocal的原理
 
@@ -1082,6 +1116,42 @@ ThreadLocalMap 它是一个定制的哈希表，专门用于保存每个线程�
 - 核心线程数选择的128，最大线程数选择的128（因为项目部署的服务器的64核的，然后处理的任务是获取不同数据源数据，本质是网络IO。所以选择了经验值2 * 8。）
 - 阻塞队列选择的是链表阻塞队列，大小1024，这个是经验值。
 - 拒绝策略选择是任务调用线程去执行。
+
+
+
+**代码实现**
+
+```java
+		// 创建线程池
+		ExecutorService executor = Executors.newFixedThreadPool(3);
+		// 创建线程1
+		Callable<List<Map<String, Object>>> alarmDetailsTask = () -> {
+            System.out.println("Callable running: " + Thread.currentThread().getId());
+            String sql = String.format("", date);
+            return oracleJdbc.queryForList(sql);
+        };
+		// 创建线程2
+        Callable<List<Map<String, Object>>> anomalousChangesTask = () -> {
+            System.out.println("Callable running: " + Thread.currentThread().getId());
+            String sql = String.format("",date);
+            return oracleJdbc.queryForList(sql);
+        };
+		// 创建线程3
+        Callable<Integer> maxHeightTask = () -> {
+            System.out.println("Callable running: " + Thread.currentThread().getId());
+            String sql = String.format("",date);
+            return oracleJdbc.queryForObject(sql, Integer.class);
+        };
+		
+		// 提交线程
+		Future<List<Map<String, Object>>> alarmDetailsFuture = executor.submit(alarmDetailsTask);
+        Future<List<Map<String, Object>>> anomalousChangesFuture = executor.submit(anomalousChangesTask);
+        Future<Integer> maxHeightFuture = executor.submit(maxHeightTask);
+		//获取线程结果
+		List<Map<String, Object>> alarmDetails = alarmDetailsFuture.get();
+		List<Map<String, Object>> anomalousChanges = anomalousChangesFuture.get();
+        Integer maxHeight = maxHeightFuture.get();
+```
 
 
 
@@ -1150,10 +1220,10 @@ JVM——Java虚拟机，它是Java实现平台无关性的基石。
 
 在JVM中对象的创建，虚拟机遇到new指令开始：
 
-+ 类加载检查：首先检查这个指令的参数是否能在自己的运行时常量池中定位到一个类的符号引用，检查这个符号引用代表的类是否已被加载、解析和初始化过。如果没有，就先执 行相应的类加载过程 
-+ 内存分配：类加载检查通过后，接下来虚拟机将为新生对象分配内存。 **分配方式**有 **“指针碰撞”** 和 **“空闲列表”** 两种。
-+ 初始化零值：内存分配完成之后，虚拟机将分配到的内存空间（但不包括对象头）都初始化为零值。 
-+ 设置对象头：对象头里包含了对象是哪个类的实例、如何才能找到类的元数据信息、对象的哈希码、对象的GC分代年龄等信息。
++ **类加载检查**：首先检查这个指令的参数是否能在自己的运行时常量池中定位到一个类的符号引用，检查这个符号引用代表的类是否已被加载、解析和初始化过。如果没有，就先执 行相应的类加载过程 
++ **内存分配**：类加载检查通过后，接下来虚拟机将为新生对象分配内存。 **分配方式**有 **“指针碰撞”** 和 **“空闲列表”** 两种。
++ **初始化零值**：内存分配完成之后，虚拟机将分配到的内存空间（但不包括对象头）都初始化为零值。 
++ **设置对象头**：对象头里包含了对象是哪个类的实例、如何才能找到类的元数据信息、对象的哈希码、对象的GC分代年龄等信息。
 + 执行 init 方法
 
 
@@ -1164,11 +1234,11 @@ JVM——Java虚拟机，它是Java实现平台无关性的基石。
 
 **内存分配的两种方式** ：
 
-- 指针碰撞： 
+- **指针碰撞**： 
   - 适用场合：堆内存规整（即没有内存碎片）的情况下。
   - 原理：用过的内存全部整合到一边，没有用过的内存放在另一边，中间有一个分界指针，只需要向着没用过的内存方向将该指针移动对象内存大小位置即可。
   - 使用该分配方式的 GC 收集器：Serial, ParNew
-- 空闲列表： 
+- **空闲列表**： 
   - 适用场合：堆内存不规整的情况下。
   - 原理：虚拟机会维护一个列表，该列表中会记录哪些内存块是可用的，在分配的时候，找一块儿足够大的内存块儿来划分给对象实例，最后更新列表记录。
   - 使用该分配方式的 GC 收集器：CMS
@@ -1259,7 +1329,7 @@ HotSpot 虚拟机主要使用的就是这种方式来进行对象访问。
 
 类从加载到虚拟机中开始，直到卸载为止，它的整个生命周期包括了：加载、验证、准备、解析、初始化、使用和卸载这7个阶段。其中，验证、准备和解析这三个部分统称为连接（linking）
 
-1. 加载：查找和导入class文件
+1. **加载**：查找和导入class文件
 
    a. 根据类的**全限定名称**定位到.class文件
 
@@ -1267,17 +1337,17 @@ HotSpot 虚拟机主要使用的就是这种方式来进行对象访问。
 
    c. 在堆中生成一个class对象，作为访问这个类的入口
 
-2. 验证：确保 Class 文件的字节码符合 JVM 规范
+2. **验证**：确保 Class 文件的字节码符合 JVM 规范
 
-3. 准备：将类变量（静态变量）分配内存并且赋予初始值。
+3. **准备**：将类变量（静态变量）分配内存并且赋予初始值。
 
-4. 解析：把类中的符号引用转换为直接引用
+4. **解析**：把类中的符号引用转换为直接引用
 
-5. 初始化：对类的静态变量，静态代码块执行初始化操作
+5. **初始化**：对类的静态变量，静态代码块执行初始化操作
 
-6. 使用
+6. **使用**
 
-7. 卸载：卸载类即该类的 Class 对象被 GC
+7. **卸载**：卸载类即该类的 Class 对象被 GC
 
 #### 4.2.4 双亲委派模型
 
