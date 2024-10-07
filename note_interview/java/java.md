@@ -974,27 +974,29 @@ Future 类的get方法可以等待我们的线程数据返回后，获取这个�
 
 #### 3.3.3 拒绝策略
 
-1.AbortPolicy：直接抛出异常，默认策略；
+**1.AbortPolicy：直接抛出异常，默认策略；**
 
-2.CallerRunsPolicy：用调用者所在的线程来执行任务；
+**2.CallerRunsPolicy：用调用者所在的线程来执行任务；**
 
-3.DiscardOldestPolicy：丢弃阻塞队列中靠最前的任务，并执行当前任务；
+**3.DiscardOldestPolicy：丢弃阻塞队列中靠最前的任务，并执行当前任务；**
 
-4.DiscardPolicy：直接丢弃任务；
+**4.DiscardPolicy：直接丢弃任务；**
 
 
 
 #### 3.3.4 常用的阻塞队列
 
-比较常见的有4个，用的最多是ArrayBlockingQueue和LinkedBlockingQueue
+**比较常见的有5个，用的最多是ArrayBlockingQueue和LinkedBlockingQueue**
 
-1.ArrayBlockingQueue：基于数组结构的有界阻塞队列，FIFO。需要在初始化的时候指定长度。
+**1.ArrayBlockingQueue：基于数组结构的有界阻塞队列，FIFO。需要在初始化的时候指定长度。**
 
-2.**LinkedBlockingQueue**：基于链表结构的有界阻塞队列，FIFO。默认长度为 Integer.MAX_VALUE，默认长度创建的话，**可能会堆积大量的请求，导致OOM**。
+**2.LinkedBlockingQueue：基于链表结构的有界阻塞队列，FIFO。默认长度为 Integer.MAX_VALUE，默认长度创建的话，可能会堆积大量的请求，导致OOM。**
 
-3.DelayedWorkQueue ：是一个优先级队列，可以自定义比较器。
+**3.PriorityBlockingQueue：是一个优先级队列，可以自定义比较器。**
 
-4.SynchronousQueue：不存储元素的阻塞队列，每个插入操作都必须等待一个移出操作。
+**4.SynchronousQueue：不存储元素的阻塞队列，每个插入操作都必须等待一个移出操作。**
+
+**5.DelayQueue：只有当元素的延迟时间到期后，才能从队列中取出该元素。**
 
 
 
@@ -1113,6 +1115,7 @@ ThreadLocalMap 它是一个定制的哈希表，专门用于保存每个线程�
 
 在接口中，用了线程池进行优化
 主要的参数：
+
 - 核心线程数选择的128，最大线程数选择的128（因为项目部署的服务器的64核的，然后处理的任务是获取不同数据源数据，本质是网络IO。所以选择了经验值2 * 8。）
 - 阻塞队列选择的是链表阻塞队列，大小1024，这个是经验值。
 - 拒绝策略选择是任务调用线程去执行。
@@ -1317,11 +1320,11 @@ HotSpot 虚拟机主要使用的就是这种方式来进行对象访问。
 
 常见的类加载器有4个：
 
-+ 启动类加载器(BootStrap ClassLoader)：其是由C++编写实现。用于加载JAVA_HOME/jre/lib目录下的类库。
++ **启动类加载器(BootStrap ClassLoader)**：其是由C++编写实现。用于加载JAVA_HOME/jre/lib目录下的类库。
 
-+ 扩展类加载器(ExtClassLoader)：该类是ClassLoader的子类，主要加载JAVA_HOME/jre/lib/ext目录中的类库。
++ **扩展类加载器(ExtClassLoader)**：该类是ClassLoader的子类，主要加载JAVA_HOME/jre/lib/ext目录中的类库。
 
-+ 应用类加载器(AppClassLoader)：该类是ClassLoader的子类，主要用于加载classPath下的类，也就是加载开发者自己编写的Java类。
++ **应用类加载器(AppClassLoader)**：该类是ClassLoader的子类，主要用于加载classPath下的类，也就是加载开发者自己编写的Java类。
 
 + 自定义类加载器：开发者自定义类继承ClassLoader，实现自定义类加载规则。
 
@@ -1357,6 +1360,11 @@ HotSpot 虚拟机主要使用的就是这种方式来进行对象访问。
 2. 把这个请求委派给父类加载器去完成（调用父加载器 `loadClass()`方法来加载类）。父类再调用父类的父类，最终都会传送到顶层的启动类加载器 `BootstrapClassLoader` 中。
 3. 只有当父加载器反馈自己无法完成这个加载请求（它的搜索范围中没有找到所需的类）时，子加载器才会尝试自己去加载（调用自己的 `findClass()` 方法来加载类）。
 4. 如果子类加载器也无法加载这个类，那么它会抛出一个 `ClassNotFoundException` 异常。
+
+> 在 Java 的双亲委派模型中，判断一个类是否已经被当前类加载器加载过，主要是通过以下步骤实现的：
+>
+> 1. **查找缓存**：每个类加载器都有一个类加载缓存（`ClassLoader` 的 `cache`）。当类加载器加载一个类时，它会将该类的引用存储在这个缓存中，以便在下次请求该类时能够快速返回。
+> 2. **使用 `findClass` 方法**：当类加载器接收到加载类的请求时，它会先在缓存中查找。如果缓存中找到了该类的引用，类加载器就直接返回这个类；如果找不到，类加载器会调用 `findClass` 方法进行实际的类加载。
 
 ##### 4.2.4.2 双亲委派模型的好处
 
@@ -1492,10 +1500,10 @@ Java堆划分为新生代 （Young Generation）和老年代（Old Generation）
 
 ![CMS 收集器](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407281709657.png)
 
-CMS收集齐的垃圾收集分为四步： 
+CMS收 集齐的垃圾收集分为四步： 
 
 + 初始标记 （CMS initial mark）：单线程运行，需要STW，标记GC Roots能直达的对象。 
-+ 并发标记 （（CMS concurrent mark）：无停顿，和用户线程同时运行，标记所有可达对象。 
++ 并发标记 （CMS concurrent mark）：无停顿，和用户线程同时运行，标记所有可达对象。 
   + 浮动垃圾：标记为可达，但是用户线程执行过程变为不可达。
   + 漏标：没有标记，但是用户线程执行过程中引用了。
 + 重新标记 （CMS remark）：多线程运行，需要STW，解决上一步的漏标问题。 
@@ -1637,8 +1645,8 @@ JDK性能监控工具
 堆配置：
 
 + -Xms:初始堆大小 
-+ -Xms：最大堆大小 
-+ -XX:NewSize=n:设置年轻代大小 
++ -Xmx:最大堆大小 
++ -Xmn:设置年轻代大小 
 + -XX:NewRatio=n:设置年轻代和年老代的比值。如：为3表示年轻代和年老代比值 为1：3，年轻代占整个年轻代年老代和的1/4 
 + -XX:SurvivorRatio=n:年轻代中Eden区与两个Survivor区的比值。注意Survivor区 有两个。如3表示Eden： 3 Survivor：2，一个Survivor区占整个年轻代的1/5 -
 + XX:MaxPermSize=n:设置持久代大小
@@ -1682,13 +1690,19 @@ JDK性能监控工具
 + printf "%x\n" PID 把线程ID转换为16进制。 
 + jstack PID 打印出进程的所有线程信息，从打印出来的线程信息中找到上一步转 换为16进制的线程ID对应的线程信息。 
 
+> 会输出每个线程的状态（RUNNABLE、WAITING。。。）
+>
+> 以及堆栈信息 就是一堆 at。。。
+
+![](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202409111620992.png)
+
 4、最后根据线程的堆栈信息定位到具体业务方法,从代码逻辑中找到问题所在。 
 
 + 查看是否有线程长时间的watting 或blocked，如果线程长期处于watting状态下， 关注 watting on xxxxxx，说明线程在等待这把锁，然后根据锁的地址找到持有锁的线程。
 
 #### 4.5.5 内存飙高问题怎么排查？
 
-内存飚高如果是发生在java进程上，有两种可能：
+内存飚高如果是发生在java进程上，说明堆内存爆了，一定会频繁fgc,有两种可能：
 
 1. 创建了大量对象所导致，持续飚高说明垃圾回收跟不上对象创建的速度
 2. 内存泄露导致对象无法回收。
@@ -1697,8 +1711,45 @@ JDK性能监控工具
 
 1、先观察垃圾回收的情况 
 
-+ jstat -gc PID 1000 查看GC次数，时间等信息，每隔一秒打印一次。 
-+ jmap -histo PID | head -20 查看堆内存占用空间最大的前20个对象类型,可初步查 看是哪个对象占用了内存。 
++ **jstat -gc PID 1000 查看GC次数，时间等信息，每隔一秒打印一次。** 
+
+> **YGC**：Young Generation GC Count
+>
+> - 新生代垃圾回收的次数。指发生在新生代的垃圾回收次数，也称为 minor GC。
+>
+> **FGC**：Full GC Count
+>
+> - 全堆垃圾回收的次数。即老年代和新生代一起进行的垃圾回收次数，也称为 major GC 或 full GC。
+>
+> **FGCT**：Full Garbage Collection Time
+>
+> - 全堆垃圾回收的总耗时（单位：秒）。full GC 花费的总时间。
+>
+> **GCT**：Total Garbage Collection Time
+>
+> - 垃圾回收总耗时（单位：秒）。这是新生代和老年代垃圾回收时间的总和。
+>
+> **EC**：Eden Space Capacity
+>
+> - Eden 区的容量（单位：KB）。Eden 区是新生代的一部分，大部分新创建的对象都分配在这个区域。
+>
+> **EU**：Eden Space Utilization
+>
+> - Eden 区的使用量（单位：KB）。当前 Eden 区中正在被占用的内存。
+
+![image-20240911113712863](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202409111137114.png)
+
++ **jmap -histo PID | head -20 查看堆内存占用空间最大的前20个对象类型,可初步查 看是哪个对象占用了内存。** 
+
+> **num**：对象按占用内存排序后的序号。`1` 表示内存中占用空间最大的对象类型，依次类推。
+>
+> **#instances**：该类的实例数量。表示 JVM 中该类的对象实例个数。
+>
+> **#bytes**：该类实例总共占用的内存量（以字节为单位）。
+>
+> **class name**：类的名称。对象所属的类或数组的类型。
+
+![image-20240911155243391](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202409111552538.png)
 
 如果每次GC次数频繁，而且每次回收的内存空间也正常，那说明是因为对象创建速度快导致内存一直占用很高；如果每次回收的内存非常少，那么很可能是因为内存泄露导致内存一直无法被回收。 
 
@@ -1747,12 +1798,12 @@ jmap -dump:format=b,file=heap pid
 
 #### 4.5.8 有没有处理过内存泄漏问题？是如何定位的？
 
-内存泄漏是内在病源，外在病症表现可能有： 
+**内存泄漏是内在病源，外在病症表现可能有：** 
 
 + 应用程序长时间连续运行时性能严重下降 
-+ CPU 使用率飙升，甚至到 100% 
-+ 频繁 Full GC，各种报警，例如接口超时报警等 
-+ 应用程序抛出 OutOfMemoryError 错误 
++ **CPU 使用率飙升，甚至到 100%** 
++ **频繁 Full GC，各种报警，例如接口超时报警等** 
++ **应用程序抛出 OutOfMemoryError 错误** 
 
 严重内存泄漏往往伴随频繁的 Full GC，所以分析排查内存泄漏问题首先还得从查 看 Full GC 入手。主要有以下操作步骤： 
 
@@ -1763,7 +1814,7 @@ jmap -dump:format=b,file=heap pid
 5. 使用 jstat -gcutil [pid] 5000 10 每隔 5 秒输出 GC 信息，输出 10 次， 查看 YGC 和 Full GC 次数。通常会出现 YGC 不增加或增加缓慢，而 Full GC 增加很快。
 6. 如果发现 Full GC 次数太多，就很大概率存在内存泄漏了 
 7. 使用 jmap -histo:live [pid] 输出每个类的对象数量，内存大小(字节单位) 及全限定类名。 
-8. 生成 dump 文件，借助工具分析哪 个对象非常多，基本就能定位到问题在那了 使用 jmap 生成 dump 文件：
+8. 生成 dump 文件（某一时刻的），借助工具分析哪 个对象非常多，基本就能定位到问题在那了 使用 jmap 生成 dump 文件：
 
 ```bash
 # jmap -dump:live,format=b,file=29471.dump 29471

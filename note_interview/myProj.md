@@ -1,8 +1,8 @@
 ### 自我介绍
 
-各位面试官你们好，我叫郑海飞，我本科就读于天津工业大学，网络空间安全专业，硕士就读于河北工业大学人工智能专业，在此期间曾在火星先驱公司实习了五个月，一起为河工大电气学院开发了一个三全育人系统，前期我们使用了低代码平台进行开发，后期由于效果不理想转换为传统的前后端开发模式，并把之前的两个系统重构合并作为基础，在此基础上开发，我的主要职责就是做后端开发，使用的框架就是Spring boot 和 MybatisPlus。
+各位面试官你们好，我叫郑海飞，我本科就读于天津工业大学，网络空间安全专业，本科期间获得过三次校长奖学金，一次国家励志奖学金，硕士就读于河北工业大学人工智能专业，在此期间曾在火星先驱公司实习了五个月。
 
-在研二的时候在天津市公路局实习了一整年，期间我的主要工作任务有两个，一个是进行数据同步工作，因为公路单位有很多部门，很多数据我们并不是数据源，但是我们也有相关业务，所以需要同步很多的数据，主要是使用 DataX 和 SeaTunnel 平台来进行的数据同步，我们直接使用的。另一个任务就是后台开发，我们当时主要的工作是为每个业务开发一个 可视化的看板。
+在研二的时候在天津市公路局实习了一整年，期间我的主要工作任务有两个，一个是进行数据同步工作，使用 SeaTunnel 代替 DataX 平台来进行的数据同步。另一个任务就是做可视化大屏的后台开发。
 
 我在研究生期间的主要工作都是在做后端开发，有一些相关的实战经验，所以求职方向也是后端开发，希望能获得这次工作机会！谢谢。
 
@@ -13,6 +13,196 @@
 > Throughout my master's studies, I focused on back-end development, gaining experience in real projects. so, I am seeking opportunities in back-end development, and I hope to secure this position. Thank you!
 
 ### 项目中的技术应用
+
+#### 1. 利用 Redis Geo 实现了水位告警地道附近道路的快速查找，显著提高了查询效率
+
+当时我们的业务需求是根据地道的坐标来查找地道附近的两条车道的交通状况，用以判断是否因为地道水位上涨导致交通堵塞。因为这个功能和经纬度的坐标有关系，一开始我们是直接每次请求那个地道的时候我们就计算所有路段和它的距离，但是这样计算速度有点慢，然后我们优化的时候，选择使用redis的GEO数据结构来实现，GEO底层使用的就是 Zset 的结构存储的，它把经纬度经过它的 GEOhash 算法计算为一个得分，作为 zset 的排序依据，然后由于这个算法的特性呢，地理位置距离近的元素排序总是接近的。所以它获取某个经纬度的临近数据就很快，当时我们是先把所有路段的经纬度和路段id存储了redis中，每当请求某个地道的时候，我们就直接用REDIS的GEO Search 去找离他最近的两个路段，然后用路段 id 再去找交通量。
+
+
+
+#### 2. 利用 Oracle 物化视图实现读写分离，通过定期刷新策略，确保物化视图数据的实时性与业务需求的平衡；
+
+**P：**这个是在我们接手的地道项目中遇到的问题，当时的一个大屏的展示功能接口，基本是在五分钟左右才会有响应，当时是要求我们优化这个接口的响应速度。这是一个统计当天每个辖区普通公路观测站流量的接口。这个表存储的是每分钟的每个观测站的流量。
+
+**A：**
+
++ **定位**：我们定位到了这个接口中的两个sql执行很慢基本在两三分钟。这两个sql都是查询的一张表，一个是设备在线的数据，一个是设备不在线的数据。我在 navicat 中执行对应的sql，发现很慢。
++ **解决：**
+  + 首先想到的是优化sql语句，可以它的sql语句并不复杂，没有联表，只是有个日期的where，和聚合函数。但是这个日期字段他是个String，它使用了toDate函数将所有日期转为Date类型判断的，我没有想到什么好的方法可以处理这个String的日期字段，然后我就先尝试优化这个聚合函数，直接在代码逻辑中去处理聚合函数，我是把这个查询作为了子查询，把聚合函数提出到外层，进行尝试。第一次执行我发现就几百毫秒，很意外，我还以为优化很有效呢，但是我多尝试了几次就发现，这个sql的执行时间是不稳定的，它大多数时间还是要三分钟才能执行完毕。然后我就觉得可能主要问题是锁，可能是每分钟的定时任务插入数据的时候都上了行锁，然后sql查询的也是最新的一段时间的数据，可能导致了慢sql。
+  + 然后我使用了物化视图（使用中，我发现只有对应模式的用户可以创建物化视图，即使是管理员也没有权限，即使管理员给自己赋权也不能）使插入和检索分离开，并且将String类型的日期在物化视图中改为Date类型的，且只在物化视图中保留必要的字段，大大提高了检索速度，然后也是使用定时任务来更新物化视图。
+
+**R：**优化之后整体接口的速度基本在五百毫秒左右，响应速度大幅提升，但是相应的实时性上要比之前差一点，因为是定时更新的物化视图嘛。
+
+> This issue arose in a tunnel project we took over. The interface for a large-screen display function took about five minutes to respond. We were tasked with optimizing the response speed of this interface.
+>
+> - Location problem
+>
+>   : We identified that SQL queries in this interface were extremely slow, taking around two to three minutes each. 
+>
+>   - I first considered optimizing the SQL queries. However, I noticed that the execution time was inconsistent. Most of the time, it still took around three minutes to complete. I suspected that the main issue was related to locking, possibly caused by a scheduled task inserting data every minute, which locked the table. 
+>   - To address this, I used materialized views to separate the insert and select operations. Additionally, I used a scheduled task to update the materialized view.
+>
+> After optimization, the interface's response time was reduced to around 500 milliseconds. However, the trade-off was a slight reduction in real-time accuracy since the materialized view is updated on a schedule.
+
+
+
+#### 3 . 利用线程池优化多表数据计算，使接口平均响应时间缩短 79%（从 12 秒降至 2.5 秒）
+
+这也是一个接口优化的任务，这本来是一个计算型接口，需要通过四张表的数据源（MTC进，ETC进，MTC出，ETC出）来计算当日高速流量数据。
+
+原本的处理逻辑是串行获取四张表的数据然后计算，接口响应速度太慢了，我们优化的处理手段就是使用了一个 Executors.newFixedThreadPool 直接初始化了四个线程，因为我们这个业务就四个线程，并行的去获取四张表的数据，然后通过 Future 的 get 方法获取到所有线程的结果后再计算。
+
+#### 4. 使用不同 topic 隔离业务数据，通过线程池提高 Consumer 消费能力，缓解消息积压问题；
+
+在业务高峰期，节假日的时候，单线程处理业务数据会出现消息堆积的问题，使用线程池提升我们的consumer的消费能力。
+
+```yaml
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        concurrency: 5   # 最小消费者线程数
+        max-concurrency: 10  # 最大消费者线程数
+        prefetch: 1  # 一次只拉取一条消息，处理完后再拉取下一条
+
+```
+
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
+@Configuration
+public class ThreadPoolConfig {
+
+    @Bean("consumerThreadPool")
+    public Executor consumerThreadPool() {
+        return Executors.newFixedThreadPool(10); // 使用固定大小的线程池
+    }
+}
+
+```
+
+```java
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.Executor;
+
+@Service
+public class RabbitMQConsumer {
+
+    // 注入自定义线程池
+    @Autowired
+    private Executor consumerThreadPool;
+
+    // 监听指定的队列，并发处理消息
+    @RabbitListener(queues = "testQueue")
+    public void receiveMessage(String message) {
+        // 将任务提交给线程池处理
+        consumerThreadPool.execute(() -> processMessage(message));
+    }
+
+    // 消息处理逻辑
+    private void processMessage(String message) {
+        try {
+            System.out.println("Processing message: " + message);
+            // 模拟消息处理的耗时操作
+            Thread.sleep(1000);  // 假设每条消息处理时间为1秒
+            System.out.println("Message processed: " + message);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.err.println("Message processing interrupted: " + message);
+        }
+    }
+}
+
+```
+
+
+
+#### 5. 实现基于策略模式的流量计算框架，支持对出津、入津、跨域等多种场景的动态切换，降低代码耦合；
+
+当时是因为我们的流量计算任务每次在节假日的时候都要切换算法，并且手动切换我觉得这太离谱了，但是由于每年的节假日都是当年才公布的，所以也无法提前得知，于是我们就优化这个接口，当时就是让前端负责每年吧，节假日数据记录下来，根据日期传参我们来判断是否为节假日，自动使用不同的算法，优化的时候发现这四个业务的计算输入输出基本都一样，连查数据的sql都一样，代码很冗余，于是就整体优化了一下。直接把八种策略，放进我们的静态的 contextholder的map中，根据前端传来的业务直接过去对应的算法来计算。
+
+
+
+#### 6. 实现基于 Redis ZSet 的 IP 请求频率限制过滤器，进行高效的访问频率统计和排名，限制不同部门 IP 的访问次数；
+
+我们使用 Redis 的 ZSet（有序集合）来存储 IP 请求的时间戳，并根据时间窗口来计算每个 IP 的访问次数。通过 ZSet 的自动排序特性，可以实时进行排名统计。
+
+**主要步骤**
+
+1. **请求记录**：将每个请求的时间戳添加到 Redis ZSet 中，使用 IP 作为成员值，时间戳作为分数。
+2. **清理过期请求**：惰性清理（每次请求进来清理）掉超出统计时间窗口的请求记录，以便统计最新的请求频率。
+3. **访问频率计算**：在每次请求到达时，统计 ZSet 中属于当前时间窗口的请求个数，如果超过限制则拒绝访问。
+4. **按部门设置限制**：可以根据 IP 的所属部门在 Redis 中设置不同的限流值。
+
+3. **Redis 数据结构设计**
+
+- 使用 Redis ZSet，键的格式为 `rate_limit:{ip}`，每个 IP 的请求时间戳存储为 ZSet 的成员，时间戳作为分数。
+
+```java
+import redis.clients.jedis.Jedis;
+
+public class RateLimiter {
+    private static final int TIME_WINDOW = 60; // 时间窗口为60秒
+
+    private Jedis redis;
+
+    public RateLimiter(Jedis jedis) {
+        this.redis = jedis;
+    }
+
+    public boolean isAllowed(String ip, String department, long currentTime) {
+        String key = "rate_limit:" + ip;
+        long windowStart = currentTime - TIME_WINDOW;
+
+        // 删除过期请求记录
+        redis.zremrangeByScore(key, 0, windowStart);
+
+        // 获取当前时间窗口内的请求数
+        long requestCount = redis.zcount(key, windowStart, currentTime);
+
+        // 获取该部门的访问限制值
+        String limitKey = "rate_limit:dept_limit:" + department;
+        int limit = Integer.parseInt(redis.hget(limitKey, "limit_value"));
+
+        if (requestCount >= limit) {
+            return false; // 请求频率超出限制
+        }
+
+        // 添加当前请求的时间戳到 ZSet
+        redis.zadd(key, currentTime, String.valueOf(currentTime));
+
+        return true;
+    }
+
+    // 获取 IP 访问排名
+    public void getTopIps(int topN) {
+        // 查询前 N 个访问最多的 IP
+        redis.zrevrangeByScore("rate_limit:{ip}", "+inf", "-inf", 0, topN).forEach(ip -> {
+            System.out.println("IP: " + ip);
+        });
+    }
+}
+
+```
+
+
+
+
+
+
 
 #### 1. 自己项目中的 AOP
 
@@ -25,6 +215,10 @@
 #### 2. Redis GEO
 
 当时我们的业务需求是根据地道的坐标来查找地道附近的两条车道的交通状况，用以判断是否因为地道水位上涨导致交通堵塞。因为这个功能和经纬度的坐标有关系，一开始我们是直接每次请求那个地道的时候我们就计算所有路段和它的距离，但是这样计算速度有点慢，然后我们优化的时候，选择使用redis的GEO数据结构来实现，GEO底层使用的就是 Zset 的结构存储的，它把经纬度经过它的 GEOhash 算法计算为一个得分，作为 zset 的排序依据，然后由于这个算法的特性呢，地理位置距离近的元素排序总是接近的。所以它获取某个经纬度的临近数据就很快，当时我们是先把所有路段的经纬度和路段id存储了redis中，每当请求某个地道的时候，我们就直接用REDIS的GEO Search 去找离他最近的两个路段，然后用路段 id 再去找交通量。
+
+
+
+
 
 #### 3 我的项目中的线程池使用
 
@@ -116,38 +310,19 @@
 
 
 
-#### 5 oracle 物化视图
 
-**P：**这个是在我们接手的地道项目中遇到的问题，当时的一个大屏的展示功能接口，基本是在五分钟左右才会有响应，当时是要求我们优化这个接口的响应速度。
 
-**A：**
 
-+ **定位**：我们定位到了这个接口中的两个sql执行很慢基本在两三分钟。这两个sql都是查询的一张表，一个是设备在线的数据，一个是设备不在线的数据。我在 navicat 中执行对应的sql，发现很慢。
-+ **解决：**
-  + 首先，我先看了下数据量，是由三千多万的数据，并且没有主键，我觉得可能是数据量太大了，这种情况加索引也是很费时间的，我通过几个列查了一下发现有两千多万的重复的数据，这是因为这个表是记录地道水位高度的，传感器的更新频率并不稳定，有的一分多有的两分钟更新一次，然后我们的定时任务是一分钟一执行的，所以我先写了个循环删除数据的sql，一次50w然后commit，删除完数据之后，通过oracle Scheduler写了个定时任务，定时删除重复的数据。可以sql执行时间还是不理想，所以应该不是数据量的问题。 
-  + 然后想到的都是优化sql语句，可以它的sql语句并不复杂，没有联表，只是有个日期的where，和聚合函数。但是这个日期字段他是个String，它使用了toDate函数将所有日期转为Date类型判断的，我没有想到什么好的方法可以处理这个String的日期字段，然后我就先尝试优化这个聚合函数，我是把这个查询作为了子查询，把聚合函数提出到外层，进行尝试。第一次执行我发现就几百毫秒，很意外，我还以为优化很有效呢，但是我多尝试了几次就发现，这个sql的执行时间是不稳定的，它大多数时间还是要三分钟才能执行完毕。然后我就觉得可能主要问题是锁，可能是每分钟的定时任务插入数据的时候都上了行锁，然后sql查询的也是最新的一段时间的数据，可能导致了慢sql。
-  + 然后我使用了物化视图（使用中，我发现只有对应模式的用户可以创建物化视图，即使是管理员也没有权限，即使管理员给自己赋权也不能）使插入和检索分离开，并且将String类型的日期在物化视图中改为Date类型的，且只在物化视图中保留必要的字段，大大提高了检索速度，然后也是使用定时任务来更新物化视图。
 
-**R：**优化之后整体接口的速度基本在五百毫秒左右，响应速度大幅提升，但是相应的实时性上要比之前差一点，因为是定时更新的物化视图嘛。
-
-> This issue arose in a tunnel project we took over. The interface for a large-screen display function took about five minutes to respond. We were tasked with optimizing the response speed of this interface.
->
-> - Location problem
->
->   : We identified that SQL queries in this interface were extremely slow, taking around two to three minutes each. 
->
->   - I first considered optimizing the SQL queries. However, I noticed that the execution time was inconsistent. Most of the time, it still took around three minutes to complete. I suspected that the main issue was related to locking, possibly caused by a scheduled task inserting data every minute, which locked the table. 
->   - To address this, I used materialized views to separate the insert and select operations. Additionally, I used a scheduled task to update the materialized view.
->
-> After optimization, the interface's response time was reduced to around 500 milliseconds. However, the trade-off was a slight reduction in real-time accuracy since the materialized view is updated on a schedule.
+#### 6 
 
 
 
 
 
-### 问题实战
+### 三、面试实战
 
-#### 柠檬微趣
+#### 3.1 柠檬微趣
 
 ##### 1. 很多个请求，每个请求用一个线程，如何同时写日志文件
 
@@ -432,6 +607,305 @@ private boolean matchHelper(String text, String pattern, int i, int j) {
 
 
 
+#### 3.2 美团
+
+##### 1. 手写多线程题目: T1线程输出都是A，T2线程输出的都是B，T3线程输出的都是C要求三个线程启动后输出顺序: ABCABCABC
+
+```java
+import java.util.concurrent.Semaphore;
+
+public class ABCThreadsSemaphoreLoop {
+
+    // 初始化信号量，只有A的信号量初始为1，表示T1可以首先执行，其他为0，表示T2和T3需要等待
+    private static final Semaphore semaphoreA = new Semaphore(1);
+    private static final Semaphore semaphoreB = new Semaphore(0);
+    private static final Semaphore semaphoreC = new Semaphore(0);
+
+    public static void main(String[] args) {
+        // 线程T1输出'A'
+        Thread T1 = new Thread(() -> {
+            for (int i = 0; i < 3; i++) {  // 循环三次
+                try {
+                    semaphoreA.acquire();  // 获取信号量，T1开始执行
+                    System.out.print("A");
+                    semaphoreB.release();  // 释放T2的信号量
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        // 线程T2输出'B'
+        Thread T2 = new Thread(() -> {
+            for (int i = 0; i < 3; i++) {  // 循环三次
+                try {
+                    semaphoreB.acquire();  // 获取信号量，T2开始执行
+                    System.out.print("B");
+                    semaphoreC.release();  // 释放T3的信号量
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        // 线程T3输出'C'
+        Thread T3 = new Thread(() -> {
+            for (int i = 0; i < 3; i++) {  // 循环三次
+                try {
+                    semaphoreC.acquire();  // 获取信号量，T3开始执行
+                    System.out.print("C");
+                    semaphoreA.release();  // 释放T1的信号量，让下一轮A执行
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        // 启动线程
+        T1.start();
+        T2.start();
+        T3.start();
+    }
+}
+
+```
+
+##### 2.手撕阻塞队列
+
+使用 synchronized 实现
+
+```java
+public class BlockingQueueSync<T> {
+    private final Queue<T> queue;
+    private final int capacity;
+    private final Object lock = new Object();  // 锁对象
+
+    public BlockingQueueSync(int capacity) {
+        this.queue = new LinkedList<>();
+        this.capacity = capacity;
+    }
+
+    public void put(T element) throws InterruptedException {
+        synchronized (lock) {
+            while (queue.size() == capacity) {
+                lock.wait();  // 在锁对象上调用 wait
+            }
+            queue.add(element);
+            lock.notifyAll();  // 在锁对象上调用 notifyAll
+        }
+    }
+
+    public T take() throws InterruptedException {
+        synchronized (lock) {
+            while (queue.isEmpty()) {
+                lock.wait();  // 在锁对象上调用 wait
+            }
+            T element = queue.poll();
+            lock.notifyAll();  // 在锁对象上调用 notifyAll
+            return element;
+        }
+    }
+}
+
+```
+
+使用 ReentrantLock 实现
+
+```java
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class BlockingQueueReentrantLock<T> {
+    private final Queue<T> queue;
+    private final int capacity;
+    private final Lock lock = new ReentrantLock();  // 使用ReentrantLock
+    private final Condition notFull = lock.newCondition();  // 条件变量：队列非满
+    private final Condition notEmpty = lock.newCondition();  // 条件变量：队列非空
+
+    public BlockingQueueReentrantLock(int capacity) {
+        this.queue = new LinkedList<>();
+        this.capacity = capacity;
+    }
+
+    // put 方法
+    public void put(T element) throws InterruptedException {
+        lock.lock();
+        try {
+            // 当队列已满，等待直到有空间
+            while (queue.size() == capacity) {
+                notFull.await();  // 阻塞等待，直到有空间
+            }
+
+            // 添加元素到队列
+            queue.add(element);
+            // 通知等待的消费者线程队列不再为空
+            notEmpty.signalAll();
+        } finally {
+            lock.unlock();  // 确保锁的释放
+        }
+    }
+
+    // take 方法
+    public T take() throws InterruptedException {
+        lock.lock();
+        try {
+            // 当队列为空，等待直到有元素
+            while (queue.isEmpty()) {
+                notEmpty.await();  // 阻塞等待，直到有元素可取
+            }
+
+            // 移除并返回队列头部的元素
+            T element = queue.poll();
+            // 通知等待的生产者线程队列不再满
+            notFull.signalAll();
+            return element;
+        } finally {
+            lock.unlock();  // 确保锁的释放
+        }
+    }
+```
+
+
+
+
+
+
+
+#### 3.3 去哪儿
+
+##### 1. 写一个能打满cpu的代码
+
+```java
+public static void main(String[] args) {
+        while (true) {
+            new Thread(() -> {
+                while (true) {
+                    // 无限循环，导致CPU满载
+                }
+            }).start();
+        }
+    }
+```
+
+
+
+##### 2. Jstack的输出信息
+
+`jstack` 是一个用于生成 Java 线程的堆栈跟踪的工具，通常用于诊断 Java 应用程序的性能问题和死锁。在运行 `jstack` 后，你会得到一段关于当前 Java 进程中所有**线程的状态信息**。以下是 `jstack` 输出信息的主要组成部分：
+
+1. **线程名称**：每个线程的名称，比如 `Thread-0`、`main` 等。
+
+2. **线程ID**：每个线程的唯一标识符，例如 `0x00007f2a6c001800`。
+
+3. **线程状态**：线程当前的状态，如 `RUNNABLE`、`BLOCKED`、`WAITING`、`TIMED_WAITING`、`TERMINATED` 等。
+
+4. **堆栈帧**：显示线程在运行时的调用堆栈，包括每个方法的调用顺序和参数。例如：
+   ```
+   at com.example.MyClass.myMethod(MyClass.java:10)
+   at com.example.MyClass.main(MyClass.java:5)
+   ```
+
+5. **锁信息**：如果线程在等待某个锁或被阻塞，输出中会包含锁的信息，如：
+   
+   - 所持有的锁（例如，锁的对象及其哈希码）
+   - 等待的锁
+   
+6. **线程优先级**：线程的优先级，如 `5 (NORMAL)`。
+
+7. **本地变量和寄存器**（可选）：某些情况下，`jstack` 可能会显示当前执行的本地变量的值。
+
+以下是一个 `jstack` 输出的示例：
+
+```
+"main" #1 prio=5 os_prio=0 tid=0x00007f2a6c001800 nid=0x2f03 waiting for monitor entry [0x00007f2a6c4c6000]
+   java.lang.Thread.State: BLOCKED (on object monitor)
+        at com.example.MyClass.myMethod(MyClass.java:10)
+        - waiting to lock <0x00000000c0f3f3f0> (a java.lang.Object)
+        at com.example.MyClass.main(MyClass.java:5)
+
+"Thread-0" #2 prio=5 os_prio=0 tid=0x00007f2a6c002000 nid=0x2f04 runnable [0x00007f2a6c5c7000]
+   java.lang.Thread.State: RUNNABLE
+        at com.example.MyClass.run(MyClass.java:15)
+```
+
+使用 `jstack` 的时候，确保你有适当的权限来访问目标 Java 进程。
+
+
+
+#### 3.4 深信服
+
+##### 1. leetcode155：最小栈
+
+##### 2. [LCR 094. 分割回文串 II](https://leetcode.cn/problems/omKAoA/)
+
+```java
+public int minCut(String s) {
+        int n = s.length();
+        int[] dp = new int[s.length()];
+        boolean[][] check = new boolean[n][n];
+        for(int i = n - 1; i >= 0 ; i--){
+            for(int j = i ; j < n ; j++){
+                if(s.charAt(i) == s.charAt(j) && (j - i <= 1 || check[i + 1][j - 1])){
+                    check[i][j] = true;
+                }
+            }
+        }
+        dp[0] = 0;
+        for(int i = 0; i < n ; i++){
+            if(check[0][i]){
+                dp[i] = 0;
+                continue;
+            }
+            dp[i] = i;
+            for(int j = 1 ; j <= i ; j++){
+                if(check[j][i]){
+                    dp[i] = Math.min(dp[i],dp[j-1] + 1);
+                }
+            }
+
+        }
+        return dp[n-1];
+    }
+```
+
+##### 3. 死锁会导致负载增加还是降低？分情况分析一下，言之有理即可。
+
+死锁通常会导致系统负载降低，但具体影响取决于系统对死锁的检测和处理机制、死锁线程数量以及其他并发任务的负载情况。以下是分情况的分析：
+
+1. **没有死锁检测的情况**
+
+如果系统中没有启用死锁检测机制，死锁线程会永远等待资源释放，无法继续执行。此时：
+
+- **系统负载通常会降低**：死锁的线程在等待资源时会处于阻塞状态，不再消耗 CPU 资源。因此，整体的 CPU 使用率会降低。
+- **资源利用率下降**：死锁导致的资源无法被其他线程使用，会让一些其他线程等待或者受阻，但不会显著增加 CPU 的负载。
+- **内存等资源可能会被占用**：尽管 CPU 负载降低，但内存等资源依然被占用，导致资源得不到有效释放，进而影响其他任务的执行效率。
+
+2. **有死锁检测机制的情况**
+
+如果系统具备死锁检测机制，且频繁检测死锁或尝试恢复死锁：
+
+- **负载可能会增加**：死锁检测机制会消耗 CPU 资源。如果系统频繁地检查死锁，特别是在死锁检测算法复杂的情况下（如银行家算法），可能会对系统负载造成较大影响。
+- **短期内可能导致 CPU 负载上升**：如果系统采取重试策略，在死锁线程反复重试获取资源时，会导致一定的 CPU 消耗，并增加系统负载。
+
+##### 4. 60亿条32位整数数据，求某个重复出现的数字？
+
+**方法 1：位图法（Bitmap）**
+
+位图法适用于内存受限且数据范围已知的情况。在32位整数范围内，有 2322^{32}232 个可能值（约42亿个），刚好在一个32位整数数组中使用位图的方法就可以存储重复信息。
+
+**步骤**：
+
+1. 创建一个大小为 232/82^{32} / 8232/8 字节（约512MB）的位数组，称为 `bitmap`。每一位代表一个整数是否出现。
+2. 遍历这60亿个整数，将相应位设置为1。如果一个数字已经对应为1，则说明该数字是重复的。
+3. 记录找到的重复数字并终止遍历。
+
+**方法二：布隆过滤器**
+
+##### 5.Leetcode146 LRU缓存
+
 
 
 
@@ -462,6 +936,7 @@ private boolean matchHelper(String text, String pattern, int i, int j) {
 2. 咱们公司的晋升机制是怎么样的？多久考核一次？有没有量化指标？
 3. 如果进入贵公司，我会进入那个部门，做什么样的业务，就是岗位职责是什么，技术栈是什么
 4. 我们的对接人或者是客户是谁？是开发中间件还是面向用户
+5. 请问您对于我今天的表现有什么建议吗？
 
 
 

@@ -35,7 +35,7 @@ Spring中的单例Bean不是线程安全的。
 
 ![image-20240722220759240](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202407222207439.png)
 
-大致分为五个步骤：初始化，属性赋值，初始化，使用，销毁
+大致分为五个步骤：实例化，属性赋值，初始化，使用，销毁
 
 1. 实例化：首先会通过一个叫做BeanDefinition获取bean的定义信息，调用==推断==构造函数，创建一个对象实例。（延伸:==推断构造方法==）
 2. 属性赋值：将实例中相关的依赖进行注入，这里可能涉及到**循环依赖问题**（延伸：循环依赖问题）
@@ -132,7 +132,7 @@ Spring中的单例Bean不是线程安全的。
 如果只存在两层缓存的话；
 
 1. 若是将A实例化后的对象放入二级缓存，那么最后注入B的依赖不是我们期望的A动态代理后对象。而是普通对象。
-2. 若是将A实例化后，提前动态代理后再放入二级缓存，那么完全违背了spring最初bean生命周期创建过程（动态代理再初始化的后置处理器的方法中实现`postProcessAfterInitialization`）
+2. 若是将A实例化后，提前动态代理后再放入二级缓存，那么完全违背了spring最初bean生命周期创建过程（动态代理在初始化的后置处理器的方法中实现`postProcessAfterInitialization`）
 
 **三层缓存不能解决的情况**
 
@@ -147,6 +147,7 @@ Spring中的单例Bean不是线程安全的。
 + @Autowired 是 Spring 提供的注解， @Resource 是 JDK 提供的注解。 
 + Autowired 默认的注入方式为 byType （根据类型进行匹配）， @Resource 默认注入方式为 byName （根据名称进行匹配）。 
 + 当⼀个接口存在多个实现类的情况下， @Autowired 和 @Resource 都需要通过名称才能正确匹 配到对应的 Bean。 Autowired 可以通过 @Qualifier 注解来显示指定名称， @Resource 可以通 过 name 属性来显示指定名称。
++ 依赖注入的用法支持不同：**@Autowired 既支持构造方法注入，又支持属性注入和setter注入**，而**@Resource只支持属性注入和Setter注入**。
 
 
 
@@ -166,9 +167,9 @@ Spring的AOP是通过动态代理来实现的，动态代理主要有两种方�
 
 1. Interface ：对于 JDK 动态代理，目标类需要实现一个Interface。 
 
-2. InvocationHandler ：InvocationHandler是一个接口，可以通过实现这个接口，定义横切逻辑，再通过反射机制（invoke）调用目标类的代码，在此过程，可以包装逻辑，对目标方法进行前置后置处理。 
+2. **InvocationHandler** ：InvocationHandler是一个接口，可以通过实现这个接口，定义横切逻辑，再通过反射机制（invoke）调用目标类的代码，在此过程，可以包装逻辑，对目标方法进行前置后置处理。 
 
-3. Proxy ：Proxy利用InvocationHandler动态创建一个实现了目标类实现的接口的实例，生成目标类的代理对象。 代理类与目标类的关系类似于兄弟，都实现了一个接口。
+3. **Proxy** ：Proxy利用InvocationHandler动态创建一个实现了目标类实现的接口的实例，生成目标类的代理对象。 代理类与目标类的关系类似于兄弟，都实现了一个接口。
 
 **CgLib 动态代理** 
 
@@ -220,9 +221,9 @@ Spring事务定义了7种传播机制：
 
 #### 1.3.3 事务失效的情况
 
-1. @Transactional 应用在非 public 修饰的方法上：因为内部的computeTransactionAttribute方法，获取Transactional 注解的事务配置信息的时候，会检查目标方法是否为 public，不是public 则不会获取 Transactional 注解配置信息。
-2. @Transactional 注解属性 rollbackFor 设置错误：如果方法抛出检查异常（如FileNotFound异常时），也会导致事务失效，因为 Transactional 注解的默认 rollbackFor 属性为运行时异常，所以无法捕获检查异常。我们只需要配置rollbackFor属性为Exception，这样别管是什么异常，都会回滚事务。
-3. 同一个类中方法调用，导致@Transactional失效：同一个类中，A方法调用B方法，A没有事务，B声明了事务，外部调用方法A的话，会导致B的事务失效。因为要想一个方法的事务生效，就要调用这个类的代理对象，可是当一个类中的方法直接调用同类中的另一个方法时，调用不会通过Spring生成的代理对象，而是通过 `this` 直接调用。这种情况下，Spring AOP无法拦截这个内部调用，事务管理逻辑就不会被触发。
+1. **@Transactional 应用在非 public 修饰的方法上**：因为内部的computeTransactionAttribute方法，获取Transactional 注解的事务配置信息的时候，会检查目标方法是否为 public，不是public 则不会获取 Transactional 注解配置信息。
+2. **@Transactional 注解属性 rollbackFor 设置错误**：如果方法抛出检查异常（如FileNotFound异常时），也会导致事务失效，因为 Transactional 注解的默认 rollbackFor 属性为运行时异常，所以无法捕获检查异常。我们只需要配置rollbackFor属性为Exception，这样别管是什么异常，都会回滚事务。
+3. **同一个类中方法调用，导致@Transactional失效**：同一个类中，A方法调用B方法，A没有事务，B声明了事务，外部调用方法A的话，会导致B的事务失效。因为要想一个方法的事务生效，就要调用这个类的代理对象，可是当一个类中的方法直接调用同类中的另一个方法时，调用不会通过Spring生成的代理对象，而是通过 `this` 直接调用。这种情况下，Spring AOP无法拦截这个内部调用，事务管理逻辑就不会被触发。
 
 
 

@@ -38,7 +38,43 @@ int binarySearch(int[] nums, int target) {
 
 ## 二、排序算法
 
+![image-20240918125720890](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202409181257057.png)
+
 ### 2.1 快速排序
+
+快速排序：用数组的第一个数作为基准数据，然后将所有比它小的数都放到它左边，所有比它大的数都放到它右边，这个过程称为一趟快速排序。值得注意的是，快速排序不是一种稳定的排序算法，也就是说，多个相同的值的相对位置也许会在算法结束时产生变动。
+
+1.2、算法过程
+
+1. 数组为arr，设置两个变量left、right，排序开始的时候：left=0，right=arr.length-1
+2. 以第一个数组元素作为关键数据，赋值给key，即key=A[left]
+3. 从right开始向前搜索，即从后向前搜索(right–)，找到第一个小于key的值 arr[right]，将 arr[right] 和 arr[left] 的值交换，如果不满足（即3中arr[right]不小于key），则right=right-1
+4. 从left开始向后搜索，即从前向后搜索(left++)，找到第一个大于key的 arr[left]，将arr[left] 和 arr[right] 的值交换，如果不满足（即4中arr[left]不大于key），则left=left+1
+5. 重复第3、4步，直到left\==right (3,4步中，找到符合条件的值，进行交换的时候left， right指针位置不变。另外，left\==right 时循环结束）
+
+```java
+    private static void quickSort(int[] nums , int left , int right){
+        if(left < right){
+            int pivot = partition(nums,left,right);
+            quickSort(nums,left,pivot - 1);
+            quickSort(nums, pivot + 1, right);
+        }
+    }
+
+    private static int partition(int[] nums, int left, int right) {
+        int k = nums[left];
+        while(left < right){
+            while(left < right && nums[right] >= k) right--;
+            nums[left] = nums[right];
+            while(left < right && nums[left] <= k) left++;
+            nums[right] = nums[left];
+        }
+        nums[left] = k;
+        return left;
+    }
+```
+
+
 
 ### 2.2 堆排序
 

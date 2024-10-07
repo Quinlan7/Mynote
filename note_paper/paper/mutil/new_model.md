@@ -15,9 +15,6 @@
     >
     > | 模型\结果                        | MAE    | RMSE   | MAPE   |
     > | -------------------------------- | ------ | ------ | ------ |
-    > | MFFDSTGCN-200epoch               | 1.97   | 7.17   |        |
-    > | MFFDSTGCN-1000epoch              | 3.59   | 14.05  |        |
-    > | MFFDSTGCN-870epoch               | 1.41   | 4.80   |        |
     > | MFFDSTGCN-850epoch               | 1.5145 | 5.3820 | 0.4540 |
     > | MFFDSTGCN-850epoch-noAirQuality  | 1.6940 | 6.0739 | 0.4736 |
     > | MFFDSTGCN-850epoch-noHoliday     | 1.5949 | 5.5003 | 0.4697 |
@@ -28,11 +25,18 @@
     >
     > HaiKou-ablation
     >
-    > | 模型\结果                      | MAE    | RMSE   | MAPE   |
-    > | ------------------------------ | ------ | ------ | ------ |
-    > | MFFDSTGCN-850epoch             | 1.5145 | 5.3820 | 0.4540 |
-    > | MFFDSTGCN-850epoch-noMFFmoudle | 1.7550 | 6.1579 | 0.4955 |
-    > |                                |        |        |        |
+    > + MFFDSTGCN-850epoch-noMFFmoudle：在这个实验中我们移除掉多模态特征融合模块（图卷积部分），只是把提取完特征的交通流信息和多模态信息叠加到一起
+    > + MFFDSTGCN-850epoch-noMImoudle：在这个实验中，我们移除掉专门处理多模态信息的并行模块，我们直接把辅助信息叠加到我们的交通流信息上，来验证这个并行模块的作用
+    >
+    > | 模型\结果                              | MAE    | RMSE   | MAPE   |
+    > | -------------------------------------- | ------ | ------ | ------ |
+    > | MFFDSTGCN-850epoch                     | 1.5145 | 5.3820 | 0.4540 |
+    > | MFFDSTGCN-850epoch-noMFFmoudle         | 1.7550 | 6.1579 | 0.4955 |
+    > | MFFDSTGCN-850epoch-noMImoudle-allInfor | 1.3775 | 4.0976 | 0.4490 |
+    > | MFFDSTGCN-850epoch-noMImoudle-noInfor  | 2.2108 | 7.7609 | 0.5444 |
+    > |                                        |        |        |        |
+    >
+    > 
     >
     > Yellowtrip
     >
