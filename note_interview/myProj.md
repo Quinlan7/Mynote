@@ -906,6 +906,107 @@ public int minCut(String s) {
 
 ##### 5.Leetcode146 LRU缓存
 
+##### 6.手写生产者消费者
+
+阻塞队列
+
+```java
+public class MyBlockingQueue {
+
+    private int maxSize;
+    private List<Long> queue;
+
+    public MyBlockingQueue(int maxSize) {
+        this.maxSize = maxSize;
+        this.queue = new ArrayList<>();
+    }
+
+    public synchronized void put() {
+        while (queue.size() == maxSize) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        Long value = System.currentTimeMillis();
+        queue.add(value);
+        System.out.println("put:" + value);
+        notify();
+    }
+
+    public synchronized void take() {
+        while (queue.isEmpty()) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        Long value = queue.get(0);
+        System.out.println("take:" + value);
+        queue.remove(0);
+        notify();
+
+    }
+}
+```
+
+生产者
+
+```java
+public class Producer implements Runnable {
+
+    private MyBlockingQueue queue;
+
+    public Producer(MyBlockingQueue queue) {
+        this.queue = queue;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            queue.put();
+        }
+    }
+}
+```
+
+消费者
+
+```java
+public class Consumer implements Runnable {
+
+    private MyBlockingQueue queue;
+
+    public Consumer(MyBlockingQueue queue) {
+        this.queue = queue;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            queue.take();
+        }
+    }
+}
+```
+
+使用
+
+```java
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+        MyBlockingQueue queue = new MyBlockingQueue(100);
+        Producer producer = new Producer(queue);
+        Consumer consumer = new Consumer(queue);
+        new Thread(producer).start();
+        Thread.sleep(10);
+        new Thread(consumer).start();
+    }
+}
+```
+
 
 
 
