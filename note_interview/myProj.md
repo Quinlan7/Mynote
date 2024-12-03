@@ -200,6 +200,53 @@ public class RateLimiter {
 
 
 
+#### 7. 实际项目中的锁的使用
+
+在活动审批的功能中呢，我们有审批通过和审批撤销的功能，我们的上一个审批通过的节点可以撤销审批，所以我们在审批通过和撤销时，都需要对其上锁，保证并发安全。
+
+
+
+```java
+// 使用 Map 存储每个活动的 ReentrantLock
+private final Map<String, ReentrantLock> activityLocks = new ConcurrentHashMap<>();
+
+// 获取活动的锁
+private ReentrantLock getLock(String activityId) {
+    return activityLocks.computeIfAbsent(activityId, k -> new ReentrantLock());
+}
+
+// 审批通过方法
+public void approve(String activityId) {
+    ReentrantLock lock = getLock(activityId);
+    lock.lock(); // 阻塞直到获取到锁
+    try {
+        // 执行审批通过的逻辑
+        System.out.println("活动 " + activityId + " 审批通过");
+    } finally {
+        lock.unlock(); // 确保锁释放
+    }
+}
+
+// 审批回撤方法
+public void rollbackApproval(String activityId) {
+    ReentrantLock lock = getLock(activityId);
+    lock.lock(); // 阻塞直到获取到锁
+    try {
+        // 执行审批回撤的逻辑
+        System.out.println("活动 " + activityId + " 审批回撤");
+    } finally {
+        lock.unlock(); // 确保锁释放
+    }
+}
+
+```
+
+
+
+
+
+
+
 
 
 
@@ -1007,13 +1054,381 @@ public class Main {
 }
 ```
 
+**基于自旋锁的生产者消费者**
+
+```java
+public class ProducerConsumerWithSpinLock {
+    private static int BUFFER_SIZE;
+    private final ArrayList<Integer> buffer;
+    private final AtomicInteger count = new AtomicInteger(0);
+
+    public static void main(String[] args) {
+        ProducerConsumerWithSpinLock pc = new ProducerConsumerWithSpinLock(5);
+        Thread producerThread = new Thread(pc::produce);
+        Thread consumerThread = new Thread(pc::consume);
+        producerThread.start();
+        consumerThread.start();
+    }
+
+    public ProducerConsumerWithSpinLock(int size) {
+        this.BUFFER_SIZE = size;
+        buffer = new ArrayList<>(size);
+    }
+
+    // 生产者方法
+    public void produce() {
+        int item = 0;
+        while (true) {
+            while (count.get() == BUFFER_SIZE) {
+                // 缓冲区已满，自旋等待
+            }
+            buffer.add(item++);
+            count.incrementAndGet();
+            System.out.println("Produced: " + (item - 1));
+        }
+    }
+
+    // 消费者方法
+    public void consume() {
+        while (true) {
+            while (count.get() == 0) {
+                // 缓冲区为空，自旋等待
+            }
+            int consumedItem = buffer.removeFirst();
+            count.decrementAndGet();
+            System.out.println("Consumed: " + consumedItem);
+        }
+    }
+}
+
+```
 
 
 
+#### 3.5 用友二面
+
+##### 1. 你了解开发环境、测试环境、生产环境是如何切换的吗？
+
+通过 yaml 的配置属性，spring.profiles.active 来配置对应环境。
+
+为每个环境创建不同的配置文件，通过 spring.profiles.active 来决定激活哪个环境
+
+- `application-dev.yml`：开发环境配置
+- `application-test.yml`：测试环境配置
+- `application-prod.yml`：生产环境配置
+
+##### 2. 谈谈你对spring、springboot对开发的优势，在架构方面提供了哪些便利性？
+
+Spring和Spring Boot是Java生态系统中非常流行的框架，它们为开发提供了许多优势，并且在架构方面提供了极大的便利性。以下是它们的主要优势和在架构方面的贡献：
+
+1. **Spring的优势**
+
+- **松耦合与依赖注入**：Spring通过依赖注入（Dependency Injection）和控制反转（IoC）来实现松耦合，使得组件之间的依赖关系管理更加灵活。开发者不需要手动管理对象的创建和依赖关系，Spring会自动完成这些任务。
+- **AOP（面向切面编程）**：Spring提供了AOP支持，可以轻松实现横切关注点，例如日志记录、事务管理、安全性等。这减少了代码的重复，并使得核心业务逻辑更加清晰。
+- **丰富的生态系统**：Spring拥有庞大的生态系统，包括Spring MVC、Spring Data、Spring Security、Spring Batch等。开发者可以快速集成各种功能模块，减少开发时间。
+- **事务管理**：Spring为事务管理提供了方便的抽象，使得开发者可以通过注解或XML配置实现事务控制。这在处理数据库操作时非常有用，确保了数据的完整性和一致性。
+
+2. **Spring Boot的优势**
+
+- **快速启动和配置**：Spring Boot极大地简化了Spring应用的配置。通过自动配置（Auto Configuration），开发者可以在无需手动配置的情况下启动一个Spring应用，减少了配置文件的复杂性。
+- **嵌入式服务器**：Spring Boot集成了嵌入式Tomcat、Jetty等服务器，开发者可以将应用打包成一个独立的可执行JAR文件，无需依赖外部的应用服务器，简化了部署流程。
+- **依赖管理**：Spring Boot利用“起步依赖（Starter Dependencies）”来简化依赖管理。开发者只需添加相应的起步依赖，Spring Boot会自动导入所需的库，大幅减少了配置的复杂性。
+- **生产级特性**：Spring Boot内置了许多生产级特性，例如应用监控（Actuator）、健康检查、度量监控等，便于在生产环境中管理和维护应用。
+
+##### 3. 实习的最大收获
+
+跳出技术（后端）思维，需要更高的视野来看我们的项目。通过几个需求快速的了解，整个业务的上下游关系，搞明白我们业务部门的大致业务点。从业务赋能，当需求过来考虑技术解决方案，来确定这个需求的成本，
+
+##### 4. 你是怎么理解线程不安全呢？为什么会发生线程不安全呢？
+
+线程不安全是指在多线程环境下，多个线程对共享资源进行访问时，由于未能正确同步，导致数据不一致或程序出现意外行为的现象。线程不安全的问题会在高并发场景下频繁出现，影响程序的正确性和稳定性。
+
+1. **线程不安全的原因**
+
+线程不安全通常是由于多个线程同时访问和修改共享资源，而这些操作未加以正确同步控制导致的。其根本原因包括：
+
+- **原子性缺失**：一个操作是不可分割的，即在操作执行过程中不能被其他线程中断。例如，`i++` 这样的操作不是原子操作，它包括读取变量、加1、再写入变量三个步骤，若不加同步控制，多个线程对同一变量同时执行该操作时，可能会导致数据错误。
+- **可见性问题**：在多线程环境下，各个线程可能会缓存变量的值，这导致一个线程对变量的修改，另一个线程可能不可见。例如，某线程修改了一个共享变量的值，其他线程可能不会立刻感知到这个变化，从而读取到旧值。
+- **有序性问题**：编译器、CPU 或内存可能会对代码进行重排序，以优化执行效率。然而，这可能导致程序执行的顺序与代码顺序不同，从而引发不可预测的行为。在多线程环境下，重排序可能导致其他线程观察到不同步的操作顺序。
+
+##### 5. 你碰到过数据库中过的死锁吗？请你结合数据库的锁机制描述一个死锁的实际实例；
+
+实例：**银行转账中的死锁**
+
+考虑一个银行转账场景，其中两个账户 A 和 B 在同一个数据库表 `accounts` 中，事务 T1 和事务 T2 分别操作账户 A 和 B，产生了死锁。
+
+1. **事务 T1** 先读取并锁定账户 A，计划转账一部分金额到账户 B。
+
+   ```
+   sql复制代码BEGIN TRANSACTION;
+   UPDATE accounts SET balance = balance - 100 WHERE account_id = 'A';
+   -- 行级排他锁 X 锁在账户 A 上
+   ```
+
+2. **事务 T2** 几乎在同时开始，读取并锁定账户 B，计划转账一部分金额到账户 A。
+
+   ```
+   sql复制代码BEGIN TRANSACTION;
+   UPDATE accounts SET balance = balance - 200 WHERE account_id = 'B';
+   -- 行级排他锁 X 锁在账户 B 上
+   ```
+
+3. **事务 T1** 尝试锁定账户 B，以完成转账操作：
+
+   ```
+   sql复制代码UPDATE accounts SET balance = balance + 100 WHERE account_id = 'B';
+   -- T1 试图申请账户 B 的 X 锁，但账户 B 当前被 T2 锁定，因此 T1 进入等待状态
+   ```
+
+4. **事务 T2** 尝试锁定账户 A，以完成转账操作：
+
+   ```
+   sql复制代码UPDATE accounts SET balance = balance + 200 WHERE account_id = 'A';
+   -- T2 试图申请账户 A 的 X 锁，但账户 A 当前被 T1 锁定，因此 T2 也进入等待状态
+   ```
+
+此时，**死锁**发生了，因为：
+
+- T1 持有账户 A 的锁，等待 T2 释放账户 B 的锁。
+- T2 持有账户 B 的锁，等待 T1 释放账户 A 的锁。
+- 形成循环等待，两者都无法释放锁，所有相关的事务都陷入等待，无法继续执行。
+
+**如何解决和避免死锁**
+
+1. **事务中固定访问资源的顺序**：通过设计所有事务按相同的顺序访问资源，避免形成循环等待。例如，始终先锁定账户 ID 较小的，再锁定账户 ID 较大的。
+2. **使用短事务，及时提交或回滚**：在代码逻辑上减少持锁时间，不让事务长时间占有锁资源。事务中应避免长时间的等待或阻塞操作。
+3. **设置超时机制**：许多数据库允许为事务设置锁等待时间（如 `SET LOCK_TIMEOUT`），如果超过时间限制，会自动回滚操作并释放锁资源。
+4. **数据库的死锁检测与回滚**：大部分数据库管理系统（如 MySQL、Oracle 等）都有死锁检测机制。一旦检测到死锁，会主动选择一个事务进行回滚，以释放锁资源，解除死锁。
+
+##### 6. Linux命令，怎么杀死进程，kill -9什么意思
+
+**使用 `kill` 命令**：
+
+- `kill <PID>`：发送默认的 `SIGTERM`（信号 15），请求进程正常终止。进程可以选择忽略这个信号。
+- `kill -9 <PID>` 或 `kill -SIGKILL <PID>`：发送 `SIGKILL` 信号，强制终止进程。此信号不能被进程捕获或忽略。
 
 
 
+#### 3.6 途虎养车一面
 
+##### 1. fib通项公式
+
+![image-20241017132533551](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202410171325738.png)
+
+
+
+#### 3.7 菜鸟一面
+
+##### 1. 多态原理
+
+虚拟机运行角度解释多态实现原理 **方法的动态绑定**、方法表
+
+1. 将一个方法调用同一个方法主体关联起来被称作绑定，JAVA中分为前期绑定和后期绑定（动态绑定）
+2. 在程序执行之前进行绑定（由编译器和连接程序实现）叫做前期绑定
+   1. 因为在编译阶段被调用方法的直接地址就已经存储在方法所属类的常量池中了，程序执行时直接调用 (invokestatic指令) ，如，final，static，private，构造方法，成员变量（包括静态及非静态）
+3. 后期绑定含义就是在程序运行时根据对象的类型信息进行绑定 实例调用 (invokevirtual)
+   1. 想实现后期绑定，需要在运行时能判断对象的类型，从而找到对应的方法，即必须在对象中安置某种“类型信息”，JAVA中除了static方法、final方法（private方法属于）之外，其他的方法都是后期绑定
+   2. 后期绑定会涉及到JVM管理下【每个类里都有】的一个重要的数据结构——**方法表**，方法表以数组的形式记录当前类及其所有父类的可见方法字节码在内存中的直接地址
+
+##### 2. 索引类型
+
+MySQL目前主要有以下几种索引类型：
+1.普通索引
+2.唯一索引
+3.主键索引
+4.组合索引
+5.全文索引
+
+
+
+#### 3.8 虾皮 一面
+
+##### 1. 快排
+
+```java
+public static int[] quickSort(int[] nums, int left, int right){
+        if(left < right){
+            int pivot = partition(nums, left, right);
+            quickSort(nums, left, pivot - 1);
+            quickSort(nums, pivot + 1, right);
+        }
+        return nums;
+    }
+
+    private static int partition(int[] nums, int left, int right) {
+        int k = nums[left];
+        while(left < right){
+            while(left < right && nums[right] >= k) right--;
+            nums[left] = nums[right];
+            while(left < right && nums[left] <= k) left++;
+            nums[right] = nums[left];
+        }
+        nums[left] = k;
+        return left;
+
+    } 
+```
+
+##### 2. 进程间的通信方式
+
+1. 管道：通信的方式是**单向**的，shell 命令中的「`|`」竖线就是匿名管道
+2. 消息队列：
+3. 共享内存
+4. 信号量
+5. 信号 ：比如说，Ctrl+C 这样的信号，或者说 kill 命令这种就是信息
+6. Socket
+
+##### 3. 死锁
+
+**死锁怎么产生的**：
+
+死锁是在多线程中，当多个线程相互等待对方释放资源，时产生的一种“僵局”
+
+**死锁的排查**：
+
+Jstack 线程堆栈分析工具，最后可以直接输出死锁。
+
+**避免死锁：**
+
+1.资源编号，按顺序获取
+
+2.资源预分配
+
+##### 4. cpu飙高
+
+当Java后端系统中CPU飙高时，需要快速定位并缓解问题，以下是1分钟内的应急处理步骤：
+
+1. **定位高CPU线程**：
+   - 使用命令行工具（`top`）找到消耗CPU最高的Java进程，记下其PID（进程ID）。
+   - 使用`top -H -p <PID>`查看该Java进程中哪个线程的CPU使用率最高，记录下高CPU线程的TID（线程ID）。
+2. **将TID转换为十六进制**：
+3. **打印线程堆栈信息**：
+   - 使用`jstack <PID> | grep TID`，打印出堆栈信息，然后找到最上边的堆栈信息，查看对应代码，分析问题
+4. **快速缓解**：
+   - 如果发现是死循环或特定业务逻辑导致CPU飙高，可能需要临时禁用相关功能或接口，或者做接口的限流、熔断降级。
+
+通过以上步骤，可以迅速定位并采取应急措施，为进一步优化或修复争取时间。
+
+##### 5. mysql语句的执行逻辑
+
+- 连接器：建立连接，管理连接、校验用户身份；
+
+- 查询缓存：查询语句如果命中查询缓存则直接返回，否则继续往下执行。MySQL 8.0 已删除该模块；
+- 解析 SQL，通过解析器对 SQL 查询语句进行词法分析、语法分析，然后构建语法树，方便后续模块读取表名、字段、语句类型；
+- 执行 SQL：执行 SQL 共有三个阶段：
+  - 预处理阶段：检查表或字段是否存在；将 `select *` 中的 `*` 符号扩展为表上的所有列。
+  - 优化阶段：基于查询成本的考虑， 选择查询成本最小的执行计划；
+  - 执行阶段：根据执行计划执行 SQL 查询语句，从存储引擎读取记录，返回给客户端；
+
+##### 6. 索引失效场景
+
++ or语句：若是or条件中有一个没有索引，那么就不走索引。
++ 如果字段类型是字符串，where时一定用引号括起来，否则会因为隐式类型转换，索引失效 
++ 模糊查询，如果%号在前面也会导致索引失效。 
++ 联合索引，在使用的时候没有遵循最左匹配法则，导致失效；
++ 在索引列上使用mysql的内置函数或者运算，索引失效。；
++ ==还有一种比较复杂的情况：就是使用联合索引的时候，where语句有 and 的两个并列条件，第一个条件使用了范围查询，第二个条件会索引失效，但是在MySQL5.6 之后，有了索引下推，解决了这个问题，索引下推，把where里的第二个条件放到存储引擎去判断，减少回表次数。==
+
+通常情况下，想要判断出这条sql是否有索引失效的情况，可以使用explain执行计划来分析
+
+##### 7. mysql explain
+
+当我们使用mysql的执行计划explain来去查看这条sql的执行情况时，我们一般重点关注几个字段：
+
++ **key 和 key_len 字段**：key 列表示 MySQL 实际使用到的索引。可以通过key和key_len检查是否命中了索引，如果是联合索引可以通过 key_len 判断命中了几个索引字段，也可以判断索引是否有失效的情况，
++ **type 字段**：type显示的是访问类型，主要有这几种类型：system > const > eq_ref > ref > range > index > all。阿里巴巴的java开发手册推荐，至少要达到 range 级别，要求是 ref 级别，如果可以是 const 最好。 说明： 
+  + const：表示使用唯一索引扫描，并且只匹配一条数据。
+  + eq_ref：唯一性索引扫描，并且也只匹配一条数据，与const不同的是eq_ref用于联表的查询。
+  + ref：非唯一索引扫描，返回匹配某个单独值的所有行。
+  + range：只检索给定范围的行，返回匹配指定区间的所有行。
+  + index：全索引扫描，一般是因为没有where条件。
+  + all：全表扫描。
+
++ **extra字段**：这列包含了 MySQL 解析查询的额外信息。
+  + Using index：表示使用了覆盖索引，且不需要访问表的数据行
+  + Using index condition：表示使用了索引条件下推
+  + Using where：表明where语句中的条件无法完全使用索引过滤，MYSQL服务器层将在存储引擎层返回行以后再应用WHERE过滤条件。表示我们的sql语句依然有优化空间避免在服务器层应用where
+
+##### 8. redis 内存淘汰策略
+
+1. no-eviction：禁止驱逐数据，也就是说当内存不足以容纳新写⼊数据时，新写入操作会报错。  
+2. volatile-ttl：从已设置过期时间的数据集中挑选最快要过期的数据淘汰 
+3. volatile-random：从已设置过期时间的数据集中任意选择数据淘汰 
+4. allkeys-random：从数据集中任意选择数据淘汰 
+5. volatile-lru：从已设置过期时间的数据集中挑 选最近最少使用的数据淘汰 
+6. allkeys-lru：在所有键中，移除最近最少使用的 key（这个是最常⽤的） 
+7. volatile-lfu：从已设置过期时间的数据集中挑选最不经常使用的数据淘汰 
+8. allkeys-lfu：在所有键中，移除最不经常使用的 key
+
+
+
+#### 3.9 京东 一面
+
+##### 1. Java运行线程的几种方式
+
+**实现线程的方式**
+
+1. 实现thread类
+2. 继承 callable 接口
+3. 继承 runnable 接口
+
+**运行线程的方式**
+
+1. 通过 `.start()` 运行一个线程
+2. 通过 `.run()` 运行一个线程
+
+3. 通过线程池 `.submit()` 运行一个线程
+
+##### 实现一个接口的方式
+
+1. 直接用 类 实现接口
+
+2. 用匿名内部类实现接口 
+
+```java
+   Callable<String> t2 = new Callable<String>() {
+               @Override
+               public String call() throws Exception {
+                   return "";
+               }
+           };
+```
+
+3. 用 lambda 表达式 实现
+
+```java
+Callable<String> t1 = () -> {
+            return "";
+        };
+```
+
+
+
+##### 2. 类加载过程，实际中类加载会遇到哪些问题
+
+**类加载过程**
+
+![image-20241203214020653](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202412032140870.png)
+
++ **加载**：通过类的全限定名（包名 + 类名），获取到该类的.class文件的二进制字节流，将二进制字节流所代表的静态存储结构，转化为方法区运行时的数据结构，在内存中生成一个代表该类的Java.lang.Class对象，作为方法区这个类的各种数据的访问入口
+
++ **连接**：验证、准备、解析 3 个阶段统称为连接。
+
+  + **验证**：确保class文件中的字节流包含的信息，符合当前虚拟机的要求，保证这个被加载的class类的正确性，不会危害到虚拟机的安全。验证阶段大致会完成以下四个阶段的检验动作：文件格式校验、元数据验证、字节码验证、符号引用验证。
+  + **准备**：为类中的静态字段分配内存，并设置默认的初始值，比如int类型初始值是0。被final修饰的static字段不会设置，因为final在编译的时候就分配了。
+  + **解析**：解析阶段是虚拟机将常量池的「符号引用」直接替换为「直接引用」的过程。符号引用是以一组符号来描述所引用的目标，符号可以是任何形式的字面量，只要使用的时候可以无歧义地定位到目标即可。直接引用可以是直接指向目标的指针、相对偏移量或是一个能间接定位到目标的句柄，直接引用是和虚拟机实现的内存布局相关的。如果有了直接引用， 那引用的目标必定已经存在在内存中了。
+
+  > 符号引用：
+  >
+  > + 每个字段（包括成员变量和静态变量）在类文件中都以符号引用的方式存储。
+  > + 类中定义的每个方法（包括构造方法、普通方法、静态方法等）在类文件中也以符号引用的形式存储。
+  > + 对于每个类的符号引用，虚拟机需要通过查找类的符号表（如常量池）来定位它的实际内存位置。
+
++ **初始化**：初始化是整个类加载过程的最后一个阶段，初始化阶段简单来说就是执行类的构造器方法（() ），要注意的是这里的构造器方法()并不是开发者写的，而是编译器自动生成的。
+
++ **使用**：使用类或者创建对象。
+
++ **卸载**：如果有下面的情况，类就会被卸载：1. 该类所有的实例都已经被回收，也就是Java堆中不存在该类的任何实例。2. 加载该类的ClassLoader已经被回收。 3. 类对应的Java.lang.Class对象没有任何地方被引用，无法在任何地方通过反射访问该类的方法。
 
 
 
@@ -1033,7 +1448,7 @@ public class Main {
 
 #### 技术面
 
-1. 我想了解一下咱们公司对于应届生的培养与管理时怎么样的
+1. ​	`我想了解一下咱们公司对于应届生的培养与管理时怎么样的
 2. 咱们公司的晋升机制是怎么样的？多久考核一次？有没有量化指标？
 3. 如果进入贵公司，我会进入那个部门，做什么样的业务，就是岗位职责是什么，技术栈是什么
 4. 我们的对接人或者是客户是谁？是开发中间件还是面向用户
@@ -1049,3 +1464,4 @@ public class Main {
 4. 公司/部门的氛围如何？工作节奏怎么样？
 5. 公司的薪资结构是什么样的，公积金的缴纳比例。
 6. 能不能提前进入公司实习，实习期多长能转正
+

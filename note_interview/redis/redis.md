@@ -456,3 +456,11 @@ value占用内存较大，string类型可能是value本身过大；set，zset，
 > 1. 不能使用del，会造成阻塞。redis是单线程，会影响其他操作。
 > 2. 版本小于4.0可以用`scan`+`del`做分批次先改名再删除
 > 3. redis版本大于4.0可以用`unlink`进行异步删除，不会阻塞主线程。
+
+
+
+
+
+### 十三、一致性哈希
+
+[Redis用哈希槽，而不是一致性哈希，为什么](https://www.cnblogs.com/crazymakercircle/p/18018466)

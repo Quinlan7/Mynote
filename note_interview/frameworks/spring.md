@@ -151,6 +151,21 @@ Spring中的单例Bean不是线程安全的。
 
 
 
+#### 1.1.6 Bean的作用域
+
++ singleton : IoC 容器中只有唯⼀的 bean 实例。Spring 中的 bean 默认都是单例的，是对单例设 计模式的应⽤。 
++ prototype : 每次获取都会创建⼀个新的 bean 实例。也就是说，连续 getBean() 两次，得到的 是不同的 Bean 实例。 
++ request （仅 Web 应⽤可⽤）: 每⼀次 HTTP 请求都会产⽣⼀个新的 bean（请求 bean），该 bean 仅在当前 HTTP request 内有效。 
++ session （仅 Web 应⽤可⽤） : 每⼀次来⾃新 session 的 HTTP 请求都会产⽣⼀个新的 bean （会话 bean），该 bean 仅在当前 HTTP session 内有效。 
++ application/global-session （仅 Web 应⽤可⽤）： 每个 Web 应⽤在启动时创建⼀个 Bean （应⽤ Bean），，该 bean 仅在当前应⽤启动时间内有效。 
++ websocket （仅 Web 应⽤可⽤）：每⼀次 WebSocket 会话产⽣⼀个新的 bean。
+
+
+
+
+
+
+
 ### 1.2 AOP
 
 #### 1.2.1 对于 Spring AOP 的理解
@@ -221,8 +236,12 @@ Spring事务定义了7种传播机制：
 
 #### 1.3.3 事务失效的情况
 
-1. **@Transactional 应用在非 public 修饰的方法上**：因为内部的computeTransactionAttribute方法，获取Transactional 注解的事务配置信息的时候，会检查目标方法是否为 public，不是public 则不会获取 Transactional 注解配置信息。
+1. **@Transactional 应用在非 public 修饰的方法上**：TransactionInterceptor （事务拦截器）在目标方法执行前后进行拦截，DynamicAdvisedInterceptor（CglibAopProxy 的内部类）的 intercept 方法或 JdkDynamicAopProxy 的 invoke 方法会间接调用 AbstractFallbackTransactionAttributeSource的 computeTransactionAttribute 方法，获取Transactional 注解的事务配置信息。
+
+   因为内部的computeTransactionAttribute方法，获取Transactional 注解的事务配置信息的时候，会检查目标方法是否为 public，不是public 则不会获取 Transactional 注解配置信息。
+
 2. **@Transactional 注解属性 rollbackFor 设置错误**：如果方法抛出检查异常（如FileNotFound异常时），也会导致事务失效，因为 Transactional 注解的默认 rollbackFor 属性为运行时异常，所以无法捕获检查异常。我们只需要配置rollbackFor属性为Exception，这样别管是什么异常，都会回滚事务。
+
 3. **同一个类中方法调用，导致@Transactional失效**：同一个类中，A方法调用B方法，A没有事务，B声明了事务，外部调用方法A的话，会导致B的事务失效。因为要想一个方法的事务生效，就要调用这个类的代理对象，可是当一个类中的方法直接调用同类中的另一个方法时，调用不会通过Spring生成的代理对象，而是通过 `this` 直接调用。这种情况下，Spring AOP无法拦截这个内部调用，事务管理逻辑就不会被触发。
 
 
