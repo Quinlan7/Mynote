@@ -178,11 +178,62 @@
 
 ![image-20241028160023357](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202410281600531.png)
 
+改进之后
+
+![image-20241205093711121](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202412050937303.png)
 
 
 
+
+
+HaiKou
+
+| 模型\结果                        | MAE    | RMSE   | MAPE   |
+| -------------------------------- | ------ | ------ | ------ |
+| MFFDSTGCN-850epoch               | 1.5145 | 5.3820 | 0.4540 |
+| MFFDSTGCN-850epoch-noAirQuality  | 1.6940 | 6.0739 | 0.4736 |
+| MFFDSTGCN-850epoch-noHoliday     | 1.5949 | 5.5003 | 0.4697 |
+| MFFDSTGCN-850epoch-noWeather     | 1.6443 | 5.7489 | 0.5271 |
+| MFFDSTGCN-850epoch-noWind        | 1.8200 | 6.7797 | 0.5135 |
+| MFFDSTGCN-850epoch-noTemperature | 2.0077 | 6.9624 | 0.5633 |
+|                                  |        |        |        |
+
+HaiKou-ablation
+
++ MFFDSTGCN-850epoch-noMFFmoudle：在这个实验中我们移除掉多模态特征融合模块（图卷积部分），只是把提取完特征的交通流信息和多模态信息叠加到一起
++ MFFDSTGCN-850epoch-noMImoudle-noInfor：在这个实验中，我们移除掉所有多模态信息，来验证多模态信息的有效性。
+
+| 模型\结果                             | MAE    | RMSE   | MAPE   |
+| ------------------------------------- | ------ | ------ | ------ |
+| MFFDSTGCN-850epoch                    | 1.5145 | 5.3820 | 0.4540 |
+| MFFDSTGCN-850epoch-noMFFmoudle        | 1.7550 | 6.1579 | 0.4955 |
+| MFFDSTGCN-850epoch-noMImoudle-noInfor | 2.2108 | 7.7609 | 0.5444 |
+|                                       |        |        |        |
+
+​                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+
+Yellowtrip
+
+| 模型\结果                    | MAE    | RMSE   | MAPE   |
+| ---------------------------- | ------ | ------ | ------ |
+| author                       | 2.18   | 6.27   | 无     |
+| MFF-64B-dim32-runs1-850epoch | 1.5579 | 3.8317 | 0.4110 |
+|                              |        |        |        |
+|                              |        |        |        |
 
 ## 二、第二个模型
+
+![image-20241205093801899](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202412050938999.png)
+
+![image-20241205093825700](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202412050938834.png)
+
+![image-20241205093900127](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202412050939222.png)
+
+非线性时间交互：
+
+$\mathcal{X}_{\text{odd\_upd}} = \Phi(\mathcal{X}_{\text{odd}}) \odot \operatorname{Softmax}\left(\frac{\Phi(\mathcal{X}_{\text{odd}}) \odot \mathcal{X}_{\text{even}}}{\sqrt{F}} + \sigma(W_{\text{odd}} \cdot \mathcal{X}_{\text{odd}})\right)$
+
+$\mathcal{X}_{\text{even\_upd}} = \Gamma(\mathcal{X}_{\text{even}}) \odot \operatorname{Softmax}\left(\frac{\Gamma(\mathcal{X}_{\text{even}}) \odot \mathcal{X}_{\text{odd}}}{\sqrt{F}} + \sigma(W_{\text{even}} \cdot \mathcal{X}_{\text{even}})\right)$
 
 
 
