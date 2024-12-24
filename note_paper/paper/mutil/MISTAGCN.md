@@ -56,29 +56,17 @@ Previous work on this topic falls into two categories: classical statistical met
 
 ### 3.1 问题描述
 
-*In this study, we define a traffic network as a combination of at least one undirected graph G = (V, E, A), where V denotes the set of nodes (|V| = N, which is shared by each graph), E denotes the set of edges between these nodes (|E| = M), A denotes the adjacency matrix of the graph. At each time slice, each node detects F measurements (or features, e.g. flows, weather and air conditions, etc. [2,4,13]), under the same sampling frequency.*
+在这项研究中，我们将交通网络定义为至少一个无向图 $G = (V, E, A)$ 的组合，其中 $V$ 表示节点的集合（$|V| = N$，在每个图中都是共享的，E 表示这些节点之间的边的集合（$|E| = M$），$A$ 表示图的邻接矩阵。在每个时间片段，每个节点以相同的采样频率检测到  $F$  个测量值（或特征，例如流量、天气和空气条件等[2,4,13]）。
 
-在这项研究中，我们将交通网络定义为至少一个无向图 G = (V, E, A) 的组合，其中 V 表示节点的集合（|V| = N，在每个图中都是共享的），E 表示这些节点之间的边的集合（|E| = M），A 表示图的邻接矩阵。在每个时间片段，每个节点以相同的采样频率检测到 F 个测量值（或特征，例如流量、天气和空气条件等[2,4,13]）。
-
-*Let x if t ∈ R denote the value of the f − th feature of node i at time t, x i t = (x i1 t , . . . , x iF t ) ∈ R F denote the value of all features of node i at time t, Xt = (x 1 t , . . . , x N t ) ∈ R N×F denote the values of all features of all nodes at time t, X = (X1, . . . , Xτ ) ∈ R τ×N×F denote the values of all features of all nodes over τ time slices, X i = X[:, i, :] = (x if t )t=1..τ ,f =1..F denotes the values of all features of node i over τ time slices. The traffic prediction problem as shown in Fig. 1 is expressed as:*
-
-$x^{if}_{t} \in R$表示节点 i 在时刻 t 的第 f 个特征的值，$x^{i}_{t}=(x^{i1}_{t},\dots,x^{iF}_{t})\in R^{F}$表示节点 i 在时刻 t 所有特征的值，$X_{t}=(x^{1}_{t},\dots,x^{N}_{t})\in R^{N\times F}$表示在时刻 t 所有节点的所有特征值，$\mathcal{X}=(X_{1},\dots,X_{\tau})\in R^{\tau \times N\times F}$表示在 $\tau$ 个时间片段内所有节点的所有特征值，$X^{i}$表示节点 i 在 $\tau$ 个时间片段内所有特征值。如图1所示，交通预测问题表达为：
+$x^{if}_{t} \in R$表示节点 $i$ 在时刻 $t$ 的第 $f$ 个特征的值，$x^{i}_{t}=(x^{i1}_{t},\dots,x^{iF}_{t})\in R^{F}$表示节点 $i$ 在时刻 $t$ 所有特征的值，$X_{t}=(x^{1}_{t},\dots,x^{N}_{t})\in R^{N\times F}$表示在时刻 t 所有节点的所有特征值，$\mathcal{X}=(X_{1},\dots,X_{\tau})\in R^{\tau \times N\times F}$表示在 $\tau$ 个时间片段内所有节点的所有特征值，$X^{i}=\mathcal{X} [:,i,:]=(x_{t}^{i,f})_{t = 1..\tau,f = 1..F}$ 表示节点 $i$ 在 $\tau$ 个时间片段内所有特征值。如图1所示，交通预测问题表达为：
 
 ![image-20231203212615198](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202312032126282.png)
 
-*Given X, the historical measurements of all nodes in the traffic network, predict, with the available graph structure(s), the future traffic sequences Y = (Y1, . . . , Yτp ) ∈ R τp×N over the next τp time slices, where Ys = (y 1 s , . . . , y N s ) = (x 11 τ+s , . . . , x 1N τ+s ) ∈ R N (1 ≤ s ≤ τp) denotes the traffic features of all nodes at time τ + s.*
+给定交通网络中所有节点的历史观测值 $X$，利用可用的图结构来预测未来 $\tau_{p}$ 个时间片上的交通序列 $\mathcal{Y} =(Y_{1},\cdots,Y_{\tau_{p}})\in\mathbb{R}^{\tau_{p}\times N}$，其中 $Y_{s}=(y_{s}^{1},\cdots,y_{s}^{N})=(x_{\tau + s}^{1,1},\cdots,x_{\tau + s}^{1,N})\in\mathbb{R}^{N}(1\leq s\leq\tau_{p})$表示在时刻 $\tau + s$ 时所有节点的交通特征。 
 
-给定 X，交通网络中所有节点的历史测量值，利用可用的图结构，预测未来 $\tau _{p}$ 个时间片段内的交通序列 $\mathcal{Y} = (Y_{1},\dots,Y_{\tau_{p}})$，其中 $Y_{s}(1\le s \le \tau_{p})$ 表示时刻 $\tau + s$ 所有节点的交通特征。
-
-*Remark 1. The above definition applies not only to prediction of the 1st feature, but also to prediction of the f -th (1 ≤ f ≤ F ) feature. In fact, the order of features can be rearranged to fit such problem*
-
-注释 1：上述定义不仅适用于第1个特征的预测，还适用于第 f 个（1 ≤ f ≤ F）特征的预测。实际上，特征的顺序可以重新排列以适应这样的问题。
+注记1：上述定义不仅适用于对第一个特征的预测，也适用于对第 $f$ 个（$1\leq f\leq F$）特征的预测。实际上，特征的顺序可以重新排列以适应此类问题。
 
 ### 3.2 图卷积网络
-
-*Let D ∈ R N×N = diag(d1, . . . , dN ) be the degree matrix of graph G, where di = ∑ j Aij denotes degree of node i ∈ 1 : N. The symmetric normalized Laplacian matrix of graph G is defined as L = D − 1 2 (D − A)D − 1 2 = IN − D − 1 2 AD− 1 2 . The eigenvalue decomposition of the Laplacian matrix is L = UΛU T = U diag(λ1, . . . , λN )U T . For a given input x ∈ R N , the Fourier transform is defined as xˆ = U T x, the inverse Fourier transform is x = Uxˆ. The convolution operator on graph ∗G is defined in the Fourier domain, such that*
-
-*x ∗G y = U((U T x) ⊙ (U T y)), (1) where ⊙ is the element-wise Hadamard product. A parameterized filter in the Fourier domain is defined as gθ ∗G x = gθ (UΛU T )x = Ugθ (Λ)U T x, (2) where θ is a parameter vector, not necessarily be in R n ; and a non-parametric filter, i.e. a filter whose parameters are all free, would be defined as gθ (Λ) = diag(θ), (3) where the parameter θ ∈ R n is a vector of Fourier coefficients [12, 16]. To avoid eigenvalue decomposition, gθ can be approximated by a truncated expansion in terms of Chebyshev polynomials Tk(Λ) up to the K − th order gθ (Λ) ≈ K−1 ∑ k=0 θkTk( ˜Λ), (4) where Λ˜ = 2 λmax Λ − In, λmax denotes the largest eigenvalue of L, θ = (θ0, . . . , θK−1) T ∈ R K , and gθ ∗G x = gθ (L)x = K−1 ∑ k=0 θkTk( ˜L)x, (5) where ˜L = 2 λmax L − IN . The recursive definition of the Chebyshev polynomial is Tk(x) = 2xTk−1(x) − Tk−2(x), with T0(x) = 1, T1(x) = x*
 
 让 $D \in \mathbb{R}^{N \times N} = \text{diag}(d_1, \ldots, d_N) $ 是图 $ G $ 的度矩阵，其中 $d_i = \sum_j A_{ij} $ 表示节点 $i \in 1 : N$ 的度。图 $G$ 的对称归一化拉普拉斯矩阵被定义为 $L = D^{-\frac{1}{2}}(D - A)D^{-\frac{1}{2}} = I_N - D^{-\frac{1}{2}}AD^{-\frac{1}{2}} $。拉普拉斯矩阵的特征值分解为 $L = U\Lambda U^T = U \text{diag}(\lambda_1, \ldots, \lambda_N)U^T $。对于给定的输入 $ x \in \mathbb{R}^N $，傅里叶变换被定义为 $\hat{x} = U^Tx $，逆傅里叶变换为 $ x = U\hat{x} $。在图 $\ast g$ 上的卷积操作在傅里叶域中定义，如下：
 
@@ -106,15 +94,9 @@ $$g_{\theta} \ast G x = g_{\theta}(L)x = \sum_{k=0}^{K-1} \theta_k T_k(\tilde{L}
 
 ## 四、提出的方法
 
-*In this section, we provide details of the proposed Multiple Information Spatial–Temporal Attention based Graph Convolution Networks (MISTAGCN), as shown in Fig. 2.*
-
 在这一部分，我们将详细介绍所提出的基于多信息时空注意力的图卷积网络（MISTAGCN），如图2所示。
 
 ### 4.1 输入的准备
-
-*Like [2], we construct the inputs of MISTAGCN, which contain three time series segments of length Tr , Td and Tw along time axis, namely, the recent input, daily-period input and weekly-period input.
-
-Let q be sampling frequency (q times/day), t be current time, Tp be the size of prediction window, then the three time series segments can be calculated as*
 
 与[2]类似，我们构建了MISTAGCN的输入，其中包含沿时间轴的三个时间序列段，分别为Tr、Td和Tw，即最近输入、每日时段输入和每周时段输入。
 
@@ -126,25 +108,17 @@ Let q be sampling frequency (q times/day), t be current time, Tp be the size of 
 
 ### 4.2 图结构
 
-*We extend the idea of [4] to add three graph structures for MISTAGCN, namely, the Distance Graph (DG), the Interaction Graph (IG) and the Correlation Graph (CG). Among them, the Adjacency matrix of DG (ADG) is defined as*
-
 我们扩展了[4]的思想，为MISTAGCN添加了三个图结构，分别是距离图（DG），交互图（IG）和相关图（CG）。其中，DG的邻接矩阵（ADG）定义为：
 
 ![image-20231203220303748](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202312032203855.png)
-
-*where dij denotes the distance between region i and j, i.e. the distance between centers of the two regions; the Adjacency matrix of IG (AIG) is defined as the aggregation of interaction records between each pair of regions (i, j), i.e.*
 
 其中，dij表示区域i和j之间的距离，即两个区域中心之间的距离；IG的邻接矩阵（AIG）定义为每对区域（i，j）之间交互记录的聚合，即：
 
 ![image-20231203220721409](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202312032207471.png)
 
-*where iij denotes the number of interaction records between region i and j; the Adjacency matrix of CG (ACG) is defined as correlation between each pair of regions (i, j), i.e.*
-
 其中，iij表示区域i和j之间的交互记录数；CG的邻接矩阵（ACG）定义为每对区域（i，j）之间的相关性，即：
 
 ![image-20231203221126084](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202312032211136.png)
-
-*where rij denotes Pearson correlation between region i and j, Tc is a predefined time window constant, ρti and ρtj denote the density of region i and j at time t, respectively,*
 
 其中，rij表示区域i和j之间的Pearson相关性，Tc是预定义的时间窗口常数，ρti和ρtj分别表示时间t时刻区域i和j的密度，即：
 
@@ -152,15 +126,11 @@ Let q be sampling frequency (q times/day), t be current time, Tp be the size of 
 
 ![image-20231203221524327](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202312032215387.png)
 
-*Further more, in order to guarantee convergence and stability of GCN, we transform the three adjacency matrices to symmetric semi positive form, using softmax function as*
-
 此外，为了保证GCN的收敛性和稳定性，我们将三个邻接矩阵转换为对称半正定形式，使用 softmax 函数进行处理。
 
 ![image-20231203221751781](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202312032217825.png)
 
 ### 4.3 空间和时间注意力
-
-*Spatial–Temporal Attention mechanism (STAtt) consists of two kinds of attentions, Spatial Attention (SAtt), which captures dynamic relationship between nodes in spatial dimension, and Temporal Attention (TAtt), which captures traffic conditions in time dimension. We extract and organize SAtt and TAtt from a batch of inputs Hs (as shown in Fig. 2, H ∈ R N×F×T is the input of an STBlock), denoted as H ∈ R batch×N×F×T . In detail, spatial attention S ′ ∈ R N×N is defined as*
 
 空间-时间注意力机制（STAtt）包括两种类型的注意力，即空间注意力（SAtt），捕捉空间维度上节点之间的动态关系，和时间注意力（TAtt），捕捉时间维度上的交通状况。我们从一批输入Hs中提取和组织SAtt和TAtt（如图2所示，H ∈ R N×F×T是STBlock的输入），记为H ∈ R batch×N×F×T。具体而言，空间注意力S' ∈ R N×N 定义为
 
@@ -168,37 +138,29 @@ Let q be sampling frequency (q times/day), t be current time, Tp be the size of 
 
 ### 4.4 空间和时间模块
 
-*As shown in Fig. 2, a Spatial–Temporal Block (STBlock) consists of TAtt, GCN, SAtt, Temporal Convolution (TempConv) and residual connection, etc. At first, we directly apply temporal attention to a batch of inputs of a STBlock, denoted as H ∈ R batch×N×F×T , which yields*
-
 如图2所示，空间-时间块（STBlock）由TAtt、GCN、SAtt、时间卷积（TempConv）和残差连接等组成。首先，我们直接将时间注意力应用于STBlock的一批输入，记为H ∈ R batch×N×F×T，得到
 
 $$\mathcal{H^{1}} = \mathcal{H} E'$$($E'$是时间注意力)
 
-*Then, we rearrange the elements of the ST features, apply graph convolution and spatial attention, with parameter Θ = (Θ0, . . . , ΘK−1) ∈ R K×F×Fo , as shown in Eq. (22)–(24),*
-
 然后，我们重新排列ST特征的元素，应用图卷积和空间注意力，其中参数Θ = (Θ0, . . . , ΘK−1) ∈ R K×F×Fo，如公式(22)-(24)所示，
 
-![image-20231224154728297](C:\Users\zhf\AppData\Roaming\Typora\typora-user-images\image-20231224154728297.png)
-
-*While H2 ∈ R batch×N×Fo×T captures neighboring information for each node in the graph, the temporal dimension of such data does not match our destination. We add a standard convolution layer in temporal dimension and map the result by LeakyReLU, to update the signals of each node by merging information at the neighboring time slices, which is shown as*
+![image-20241214004640964](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202412140046110.png)
 
 在这里，$H^2 \in \mathbb{R}^{\text{batch} \times N \times F_o \times T}$ 捕捉了图中每个节点的相邻信息，但这些数据的时间维度与我们的目标不匹配。我们在时间维度上添加了一个标准的卷积层，并通过 LeakyReLU 映射结果，通过合并相邻时间片的信息来更新每个节点的信号，具体如下：
 
-![image-20231204090816732](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202312040908793.png)
-
-*where ∗ denotes the standard convolution operation, Φ denotes the convolution kernel in temporal dimension, LeakyReLU is the activation function.*
+![image-20241214004702340](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202412140047418.png)
 
 其中，∗ 表示标准的卷积操作，Φ 表示在时间维度上的卷积核，LeakyReLU 是激活函数。
 
 ### 4.5 多信息融合
-
-*MISTAGCN consists of two stages. In the first stage (corresponding to the first part of the model, as shown in Fig. 2 and Alg. 2), two graph structures (eg. DG, IG) are selected to construct STBlocks, respectively. Meanwhile, each one of the three inputs (Xr , Xd, Xw) is rearranged and fed into each STBlock to compute a tensor containing latent variables, respectively. In other words, each (input, graph) pair corresponds to a tensor containing latent variables. To sum up, we have three inputs and two types of graph structures to feed into the first part of MISTAGCN. There are six possible combination for such data and thus will generate six outputs. Each of them contains a portion of the underlying information of the target. In the second stage (corresponding to the second part of MISTAGCN, as shown in Fig. 2 and Alg. 3), a combination of the six tensors are fed into a multi layer network to yield an approximation of the target traffic features. Each layer of the network is a STBlock based on the remaining one graph structure (eg. CG). In addition, the number of features of the output of the last layer is set to 1.*
 
 MISTAGCN包括两个阶段。在第一阶段（对应于模型的第一部分，如图2和Alg. 2所示），选择两种图结构（例如DG、IG）分别构建STBlock。同时，将三个输入（Xr，Xd，Xw）中的每一个重新排列并馈送到每个STBlock中，以分别计算包含潜在变量的张量。换句话说，每个（输入，图）对应于包含潜在变量的张量。总的来说，我们有三个输入和两种图结构，馈送到MISTAGCN的第一部分。对于这样的数据，有六种可能的组合，因此会生成六个输出。每个输出都包含目标的潜在信息的一部分。在第二阶段（对应于MISTAGCN的第二部分，如图2和Alg. 3所示），将六个张量的组合馈送到多层网络，以产生目标交通特征的近似值。网络的每一层都是基于另一种图结构（例如CG）的STBlock。此外，最后一层输出的特征数被设置为1。
 
 
 
 ## 五、实验和分析
+
+本节详细描述了数据集、训练与评估过程，以及数值结果和性能分析等内容。
 
 ### 5.1 数据描述和预处理
 
@@ -209,8 +171,6 @@ MISTAGCN包括两个阶段。在第一阶段（对应于模型的第一部分，
 纽约黄色出租车行程数据：黄色出租车行程记录包括捕捉上车和下车的日期/时间、上车和下车的位置、行程距离、详细票价、费率类型、支付类型和司机报告的乘客数量等字段。所附数据集中使用的数据是由纽约市出租车和豪华轿车委员会（TLC）授权的技术提供商在出租车和豪华轿车乘客增强计划（TPEP/LPEP）下收集并提供的。该数据集的区域来源于该城市的行政计划。时间跨度从2022年1月1日到2022年2月28日，每个时间片段跨足1小时。
 
 ### 5.2 基线与评估标准
-
-*We compare MISTAGCN with the following baselines: Vector Auto-Regressive (VAR, [24]), Full Connected Long Short Term Memory networks (FC-LSTM, [17]), Spatio-Temporal Graph Convolutional Networks (STGCN, [20]), Dynamic Spatial–Temporal Graph Convolutional Neural Networks (DGCNN, [7]), Attention Based Spatial–Temporal Graph Convolution Networks (ASTGCN, [2]), Graph WaveNet [18], Multiple Spatial–Temporal Information Fusion Networks (MSTIF-NET, [4]), Adaptive Graph Convolutional Recurrent Networks (AGCRN, [21]), Graph MultiAttention Networks (GMAN, [23]), Spatial–Temporal Fusion Graph Neural Networks (STFGNN, [22]). Meanwhile, we adopt Rooted Mean Square Error (RMSE) and Mean Average Error (MAE) metrics to evaluate the performance of different methods.*
 
 我们将MISTAGCN与以下基线进行比较：矢量自回归（VAR，[24]）、全连接长短时记忆网络（FC-LSTM，[17]）、时空图卷积网络（STGCN，[20]）、动态时空图卷积神经网络（DGCNN，[7]）、基于注意力的时空图卷积网络（ASTGCN，[2]）、Graph WaveNet [18]、多空间时序信息融合网络（MSTIF-NET，[4]）、自适应图卷积循环网络（AGCRN，[21]）、图多头注意力网络（GMAN，[23]）、时空融合图神经网络（STFGNN，[22]）。同时，我们采用均方根误差（RMSE）和平均绝对误差（MAE）指标来评估不同方法的性能。
 
@@ -250,17 +210,11 @@ MISTAGCN包括两个阶段。在第一阶段（对应于模型的第一部分，
 
 ## 六、总结与未来工作
 
-*In this study, we propose Multiple Information SpatialTemporal Attention based Graph Convolution Networks (MISTAGCN) to train and predict the traffic. The proposed model makes full use of the disequilibrium of information in time and space by first applying spatial attention and temporal attention to a K-order GCN, and then fusing several kinds of latent information through a similar process. Experimental results of MISTAGCN are remarkable in comparison to several state-of-art models. In the future, it is potential to make further improvements on the structure of MISTAGCN by adding adjustable modules and parameters, or increasing parallelism of the algorithm to accelerate the train and test process. Meanwhile, some possible extension could be made to other time series with periodic regularity.*
-
 在这项研究中，我们提出了基于多信息时空注意力的图卷积网络（MISTAGCN），用于训练和预测交通流量。该模型通过首先对K阶图卷积网络应用空间注意力和时间注意力，然后通过类似的过程融合多种潜在信息，充分利用了时空中信息的不平衡性。与几种最先进的模型相比，MISTAGCN的实验结果表现出色。
 
 未来，可以通过添加可调模块和参数，或增加算法的并行性以加速训练和测试过程，进一步改进MISTAGCN的结构。同时，还可以将一些可能的扩展应用于具有周期性规律的其他时间序列数据。
 
 
-
-
-
-*Acknowledgments This work is supported by the National Natural Science Foundation of China (Grant No. 61772386). Our thanks to the datasets comes from Didi Gaya data opening program (data source: Didi Chuxing GAIA Initiative, https://gaia.didichuxing.com) and The New York City Taxi and Limousine Commission (TLC) (data source: TLC Trip Record Data, https://www1.nyc.gov/site/tlc/about/tlctrip-record-data.page).*
 
 致谢：本研究得到了中国国家自然科学基金的支持（项目编号：61772386）。我们要感谢数据集来自滴滴出行的 Gaya 数据开放计划（数据来源：滴滴出行 GAIA 计划，https://gaia.didichuxing.com）以及纽约市出租车和豪华轿车委员会（TLC）（数据来源：TLC 行程记录数据，https://www1.nyc.gov/site/tlc/about/tlctrip-record-data.page）。
 

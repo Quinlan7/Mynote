@@ -294,3 +294,34 @@ $\mathcal{X}_{\text{even\_upd}} = \Gamma(\mathcal{X}_{\text{even}}) \odot \opera
 > ### 总结：
 >
 > **非线性时间加权机制**通过引入非线性激活函数，可以使模型更加灵活地捕捉时序数据中的复杂依赖，尤其是那些非线性或具有长时延效应的依赖。通过调整时间步之间的权重，模型能够动态地适应数据中的不同模式，从而提高预测和建模能力。
+
+
+
+## 三、写作问题
+
+1. 证明多模态信息的影响(引言部分)，这部分内容要写在哪里？
+2. 创新点（引言） 写在哪里？
+3. 3.2.2.1 预处理中编码映射的映射表要不要提供，提供的话七十种映射怎
+
+
+
+
+
+
+
+
+
+> 数据集信息：
+>
+> | Datasets | Samples | Nodes | Sample Rate | Time Span |
+> | -------- | ------- | ----- | ----------- | --------- |
+> | Haikou   | 2208    | 195   | 1 hour      | 3 months  |
+> | New York | 1416    | 261   | 1hour       | 2 months  |
+>
+> 以下是这三个评估指标在 LaTeX 格式下的公式： 
+>
+> 均方根误差（RMSE）： $RMSE=\sqrt{\frac{1}{n}\sum_{i = 1}^{n}(y_{i}-\hat{y}_{i})^{2}}$ 
+>
+> 平均绝对误差（MAE）： $MAE=\frac{1}{n}\sum_{i = 1}^{n}\vert y_{i}-\hat{y}_{i}\vert$ 
+>
+> 平均绝对百分比误差（MAPE）： $MAPE=\frac{1}{n}\sum_{i=1}^{n}\left\vert\frac{y_{i}-\hat{y}_{i}}{y_{i}}\right\vert\times 100\%$

@@ -49,7 +49,27 @@ Specifically, we design a dynamic graph construction method to learn the time-sp
 
 
 
+## 二、预备知识
+
+在本节中，我们首先介绍本文所使用的符号及预备知识。然后，我们将利用多层面数据进行交通速度预测的问题形式化。
+
+### 2.1 符号和定义
+
+定义2.1（交通速度）。交通速度是路段描述交通状况的一个关键特征。在本文中，我们将具有历史速度数据的路段集合记为$V_{p}=\{v_{1},v_{2},\cdots,v_{N_{p}}\}$，其中 $N_{p}$ 是路段的数量，并且将第 $i$ 个路段在时隙 $t$ 的交通速度记为$x^{p}_{i,t}\in \mathbb{R}$。此外，我们使用 $X^{p}_{t}\in \mathbb{R}^{N_{p}}$ 来表示在时隙 $t$ 的所有交通速度观测值。 
+
+定义2.2（辅助特征）。不同的交通特征（如交通速度和交通流量）之间存在着潜在的相关性。尽管某些特征在某些特定应用中并不能直接发挥作用，但基于某些原因，它们能够有助于交通速度的预测。在本文中，具有历史辅助特征的路段集合记为 $V_{a}=\{s_{1},s_{2},\cdots,s_{N_{a}}\}$，其中 $N_{a}$ 是路段的数量，并且将第 $i$ 个路段在时隙 $t$ 的辅助特征记为 $x^{a}_{i,t}\in \mathbb{R}$ 。与交通速度类似，我们使用 $X^{a}_{t}\in \mathbb{R}^{N_{a}}$ 来表示在时隙 $t$ 的所有路段的辅助特征。
+
+定义2.3（动态图）。不同路段之间的相关性是动态变化的，这种相关性从黎明到黄昏都会有所不同。这促使我们构建动态图，该动态图以一组路段作为其节点，但在每个时刻有着不同的边。对于时隙 $t$，交通图记为 $G_{t}=\{\mathbb{V} , \mathbb{E} ^{t}\}$ ，其中 $\mathbb{V} $ 是节点集合，$\mathbb{E} ^{t}$ 是边的集合。$e_{t,i,j}=(v_{i},v_{j},A_{t,i,j})\in E^{t}$ 表示在时隙 $t$ 存在一条从$v_{j}$ 指向 $v_{i}$ 的边，其边权重为 $A_{t,i,j}$，它是一个三阶邻接张量 $A$ 的第 $(t,i,j)$ 个元素。此外，$G_{t}$ 可以用矩阵 $A_{t}$ 的形式来表示，而整个动态图则可以用 $A$ 来表示。  
+
+### 2.2 问题公式化
+
+交通速度预测旨在利用过去一段时间内的历史速度数据预测所有路段在未来一段时间内的交通速度。在本文中，我们进一步考虑历史辅助数据的影响。形式化地表述为，给定交通速度的 $P$ 个历史步长以及辅助特征的 $P$ 个历史步长，我们的目标是学习一个模型 $f$ 来预测未来 $Q$ 个步长的交通速度，即 $\hat{X}^{p}_{t + 1:t + Q}=f(X^{p}_{t - P + 1:t}, X^{a}_{t - P + 1:t})$。 在本文中，我们重点关注交通速度预测，因此在本文的后半部分我们也将交通速度称为“主要特征”。 
+
+
+
 ## 三、方法
+
+在本节中，我们将详细介绍我们所提出的模型。我们所提模型的整体框架如图2所示，该框架大致可划分为四个部分：动态图构建器、主要部分、辅助部分以及多层面融合模块。 
 
 ![image-20231204162742462](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202312041627607.png)
 
@@ -257,12 +277,6 @@ In this section, we evaluate our proposed model by empirically examining on thre
 
 ### 4.1 数据集
 
-Our experiments are conducted on three real-world datasets: PeMSD4, PeMSD8 and England respectively1 . These datasets both contains traffic speed and traffic volume collected by sensors. The traffic speed is viewed as the primary feature to predict with traffic volume as auxiliary feature. Statistics of these datasets are shown in Table 2. And other details of the datasets are introduced below: 
-
-+ PeMSD4. It is collected by Caltrans Performance Measurement System (PeMS)2 and released in ASTGCN [14] consisting of average speed, traffic volume in San Francisco Bay Area. Time span is from January to February in 2018. 
-+ PeMSD8. Similar as PeMSD4, it consists of average speed, traffic volume collected by PeMS in San Bernardino from July to August in 2016. 
-+ England. This dataset is derived from Highways England Traffic Data from Opening up Government of UK3 consisting of average speed, traffic volume around the country. In this paper, data from January to June in 2014 is selected.
-
 我们的实验基于三个真实世界的数据集：PeMSD4、PeMSD8 和 England。这些数据集都包含由传感器收集的交通速度和交通流量信息。交通速度被视为主要特征，而交通流量则作为辅助特征进行预测。这些数据集的统计信息如表2所示。以下是这些数据集的详细介绍：
 
 - **PeMSD4：** 由加利福尼亚州运输部性能测量系统（PeMS）收集，发布在ASTGCN [14]中，包括旧金山湾区的平均速度和交通流量。时间跨度为2018年1月至2月。
@@ -297,7 +311,7 @@ Our experiments are conducted on three real-world datasets: PeMSD4, PeMSD8 and E
 
 ### 4.3 实验设置
 
-在我们的模型中，每个部分的块数设置为 8，每个层的扩张比率为 [1, 2, 1, 2, 1, 2, 1, 2]，图卷积层的最大深度设置为 2。空洞卷积和图卷积的通道大小为 32，动态图构造器中的隐藏维度设置为 16。批量大小设置为 64，学习率设置为 0.001。主要超参数在验证集上进行了调整。模型由 Adam 优化器优化，采用了一个耐心值为 20的提前停止策略。所有数据集按照时间顺序按比例分为 6:2:2。对于 PeMSD4 和 PeMSD8，缺失值通过线性插值填充。预定义的图是根据传感器之间的距离初始化的。为了公平比较实验，在HA和VAR以外的所有基线模型中，每个基线的输入特征包括历史主要特征、历史辅助特征、一天中的时间和一周中的天。对于LR和XGBoost，我们为每个预测步骤训练一个模型。每个实验重复 5 次，报告平均性能。实验在一台配备有四个 TitanXp GPU 的机器上执行。采用三个指标来评估每个模型的性能：平均绝对误差（MAE）、平均百分比误差（MAPE）、平方根均方误差（RMSE）。
+在我们的模型中，每个部分的块数设置为 8，每个层的扩张比率为 [1, 2, 1, 2, 1, 2, 1, 2]，图卷积层的最大深度设置为 2。膨胀卷积和图卷积的通道大小为 32，动态图构造器中的隐藏维度设置为 16。批量大小设置为 64，学习率设置为 0.001。主要超参数在验证集上进行了调整。模型由 Adam 优化器优化，采用了一个耐心值为 20的提前停止策略。所有数据集按照时间顺序按比例分为 6:2:2。对于 PeMSD4 和 PeMSD8，缺失值通过线性插值填充。预定义的图是根据传感器之间的距离初始化的。为了公平比较实验，在HA和VAR以外的所有基线模型中，每个基线的输入特征包括历史主要特征、历史辅助特征、一天中的时间和一周中的天。对于LR和XGBoost，我们为每个预测步骤训练一个模型。每个实验重复 5 次，报告平均性能。实验在一台配备有四个 TitanXp GPU 的机器上执行。采用三个指标来评估每个模型的性能：平均绝对误差（MAE）、平均百分比误差（MAPE）、平方根均方误差（RMSE）。
 
 
 
