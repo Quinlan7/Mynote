@@ -18,60 +18,134 @@
     >
     > HaiKou
     >
-    > | 模型\结果                        | MAE    | RMSE   | MAPE   |
-    > | -------------------------------- | ------ | ------ | ------ |
-    > | MFFDSTGCN-850epoch               | 1.5145 | 5.3820 | 0.4540 |
-    > | MFFDSTGCN-850epoch-noAirQuality  | 1.6940 | 6.0739 | 0.4736 |
-    > | MFFDSTGCN-850epoch-noHoliday     | 1.5949 | 5.5003 | 0.4697 |
-    > | MFFDSTGCN-850epoch-noWeather     | 1.6443 | 5.7489 | 0.5271 |
-    > | MFFDSTGCN-850epoch-noWind        | 1.8200 | 6.7797 | 0.5135 |
-    > | MFFDSTGCN-850epoch-noTemperature | 2.4077 | 8.9624 | 0.5633 |
-    > | MFFDSTGCN-2000epoch              | 1.1035 | 3.5433 | 0.4796 |
+    > | 模型\结果         | MAE     | RMSE    | MAPE   |
+    > | ----------------- | ------- | ------- | ------ |
+    > | DMFFGCN           | 1.5145  | 5.3820  | 0.0454 |
+    > | DMFFGCN w/o H     | 1.5949  | 5.5003  | 0.0469 |
+    > | DMFFGCN w/o T     | 2.4077  | 8.9624  | 0.0563 |
+    > | DMFFGCN w/o C     | 1.6443  | 5.7489  | 0.0527 |
+    > | DMFFGCN w/o W     | 1.8200  | 6.7797  | 0.0513 |
+    > | DMFFGCN w/o A     | 1.6940  | 6.0739  | 0.0473 |
+    > | DMFFGCN-2000epoch | 1.1035  | 3.5433  | 0.0350 |
+    > |                   |         |         |        |
+    > | 模型              | MAE     | RMSE    | MAPE   |
+    > | AGCRN             | 18.7526 | 85.9551 | 0.3256 |
+    > | ASTGCN            | 2.7008  | 12.5958 | 0.0834 |
+    > | DGCNN             | 4.6817  | 19.2657 | 0.1762 |
+    > | FC-LSTM           | 19.5344 | 84.7473 | 0.3871 |
+    > | GMAN              | 7.7733  | 22.0913 | 0.2315 |
+    > | Graph WaveNet     | 7.2982  | 30.7311 | 0.2789 |
+    > | MSTIF-Net         | 7.0468  | 31.4890 | 0.2943 |
+    > | STFGNN            | 8.5211  | 40.6801 | 0.3328 |
+    > | STGCN             | 19.7796 | 84.9773 | 0.4217 |
+    > | VAR               | 6.2802  | 26.9623 | 0.2198 |
+    > | MISTAGCN          | 2.7752  | 10.3244 | 0.1357 |
+    >
+    > 
     >
     > HaiKou-ablation
     >
     > + MFFDSTGCN-850epoch-noMFFmoudle：在这个实验中我们移除掉多模态特征融合模块（图卷积部分），只是把提取完特征的交通流信息和多模态信息叠加到一起
     > + MFFDSTGCN-850epoch-noMImoudle：在这个实验中，我们移除掉专门处理多模态信息的并行模块，我们直接把辅助信息叠加到我们的交通流信息上，来验证这个并行模块的作用
     >
-    > | 模型\结果                              | MAE    | RMSE   | MAPE   |
-    > | -------------------------------------- | ------ | ------ | ------ |
-    > | MFFDSTGCN-850epoch                     | 1.5145 | 5.3820 | 0.4540 |
-    > | MFFDSTGCN-850epoch-noMFFmoudle         | 1.7550 | 6.1579 | 0.4955 |
-    > | MFFDSTGCN-850epoch-noMImoudle-allInfor | 1.3775 | 4.0976 | 0.4490 |
-    > | MFFDSTGCN-850epoch-noMImoudle-noInfor  | 2.2108 | 7.7609 | 0.5444 |
-    > |                                        |        |        |        |
-    >
-    > ​                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
-    >
-    > Yellowtrip
-    >
-    > | 模型\结果                    | MAE    | RMSE   | MAPE   |
-    > | ---------------------------- | ------ | ------ | ------ |
-    > | author                       | 2.18   | 6.27   | 无     |
-    > | MFF-64B-dim32-runs1-850epoch | 1.5579 | 3.8317 | 0.4110 |
-    > |                              |        |        |        |
-    > |                              |        |        |        |
-
-  + t 和 m 叠加输入相同模型                          √
-
-    > a 和 p 叠加输入模型
-    >
-    > ![image-20240616160808741](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202406161608905.png)
-    >
-    > 目前效果 怎么说呢。通过实践发现，由于是动态图，所以需要训练的epoch次数要更大才能效果更好。
-    >
-    > | 模型\结果                     | MAE  | RMSE  |
-    > | ----------------------------- | ---- | ----- |
-    > | DGC-32B-dim32-runs1           | 2.48 | 7.30  |
-    > | DGC-32B-dim32-runs10          | 2.45 | 10.38 |
-    > | DGC-16B-dim32-runs1           | 2.30 | 8.24  |
-    > | DGC-64B-dim32-runs1           | 2.02 | 6.96  |
-    > | DGC-64B-dim32-runs10          | 2.59 | 10.44 |
-    > | DGC-128B-dim32-runs1          | 8.79 | 36.76 |
-    > | DGC-64B-dim32-runs1-1000epoch | 2.28 | 7.87  |
+    > | 模型\结果        | MAE    | RMSE   | MAPE   |
+    > | ---------------- | ------ | ------ | ------ |
+    > | DMFFGCN          | 1.5145 | 5.3820 | 0.0454 |
+    > | DMFFGCN w/o DMFF | 1.7550 | 6.1579 | 0.0495 |
+    > | DMFFGCN w/o DG   | 2.2108 | 7.7609 | 0.0544 |
     >
     > 
-
+    >
+    > 不同预测步长的对比      
+    >
+    > tp = 3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+    >
+    > | 模型\结果     | MAE    | RMSE    | MAPE   |
+    > | ------------- | ------ | ------- | ------ |
+    > | DMFFGCN       | 1.5145 | 5.3820  | 0.0454 |
+    > | ASTGCN        | 2.7008 | 12.5958 | 0.0834 |
+    > | DGCNN         | 4.6817 | 19.2657 | 0.1762 |
+    > | VAR           | 6.2802 | 26.9623 | 0.2198 |
+    > | Graph WaveNet | 7.2982 | 30.7311 | 0.2789 |
+    > | STFGNN        | 8.5211 | 40.6801 | 0.3328 |
+    >
+    > 
+    >
+    > 非对齐多模态特征的实验
+    >
+    > | 模型\结果       | MAE    | RMSE   | MAPE   |
+    > | --------------- | ------ | ------ | ------ |
+    > | DMFFGCN (100%)  | 1.5145 | 5.3820 | 0.0454 |
+    > | DMFFGCN (0%)    | 2.7948 | 9.3546 | 0.0755 |
+    > | DMFFGCN (25.0%) | 1.9052 | 8.0519 | 0.0589 |
+    > | DMFFGCN (50.0%) | 1.6977 | 6.2440 | 0.0481 |
+    > | DMFFGCN (75.0%) | 1.5529 | 5.6233 | 0.0468 |
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    > Yellowtrip
+    >
+    > | 模型\结果     | MAE     | RMSE    | MAPE   |
+    > | ------------- | ------- | ------- | ------ |
+    > | MFF-850epoch  | 1.5579  | 3.8317  | 0.0411 |
+    > | AGCRN         | 14.9889 | 48.5508 | 0.2356 |
+    > | ASTGCN        | 3.6524  | 12.2728 | 0.0923 |
+    > | DGCNN         | 13.1800 | 28.7546 | 0.1874 |
+    > | FC-LSTM       | 17.0592 | 47.7628 | 0.2238 |
+    > | GMAN          | 4.4055  | 13.0637 | 0.1087 |
+    > | Graph WaveNet | 5.1916  | 16.1632 | 0.1245 |
+    > | MSTIF-Net     | 5.9649  | 19.3907 | 0.1467 |
+    > | STFGNN        | 5.7983  | 18.9360 | 0.1389 |
+    > | STGCN         | 15.3981 | 48.2825 | 0.2412 |
+    > | VAR           | 6.6032  | 21.3811 | 0.1578 |
+    > | MISTAGCN      | 2.1834  | 6.2657  | 0.0543 |
+    >
+    > 
+    >
+    > 消融实验
+    >
+    > | 模型\结果        | MAE    | RMSE   | MAPE   |
+    > | ---------------- | ------ | ------ | ------ |
+    > | author           | 2.1834 | 6.2657 | 0.0543 |
+    > | DMFFGCN          | 1.5579 | 3.8317 | 0.0411 |
+    > | DMFFGCN w/o DMFF | 1.7653 | 4.5872 | 0.0467 |
+    > | DMFFGCN w/o DG   | 2.0987 | 5.3421 | 0.0549 |
+    >
+    > 
+    >
+    > 多模态特征有效性验证实验
+    >
+    > | 模型\结果     | MAE    | RMSE   | MAPE   |
+    > | ------------- | ------ | ------ | ------ |
+    > | DMFFGCN       | 1.5579 | 3.8317 | 0.0411 |
+    > | DMFFGCN w/o H | 1.6448 | 3.9223 | 0.0423 |
+    > | DMFFGCN w/o T | 2.5334 | 5.6393 | 0.0495 |
+    > | DMFFGCN w/o C | 1.7205 | 4.0833 | 0.0458 |
+    > | DMFFGCN w/o W | 1.9174 | 4.5443 | 0.0441 |
+    > | DMFFGCN w/o A | 1.7072 | 4.2283 | 0.0433 |
+    >
+    > 
+    >
+    > 非对齐多模态特征实验
+    >
+    > | 模型\结果       | MAE    | RMSE   | MAPE   |
+    > | --------------- | ------ | ------ | ------ |
+    > | DMFFGCN (100%)  | 1.5579 | 3.8317 | 0.0411 |
+    > | DMFFGCN (0%)    | 2.7227 | 7.2687 | 0.0682 |
+    > | DMFFGCN (25.0%) | 1.9015 | 4.9868 | 0.0507 |
+    > | DMFFGCN (50.0%) | 1.7428 | 4.1325 | 0.0462 |
+    > | DMFFGCN (75.0%) | 1.6345 | 3.8350 | 0.0424 |
+  
 + 时间卷积改进为内部改进为膨胀卷积（或空洞卷积）          √
 
 > 在 WAVENET 中首次提出。
@@ -221,7 +295,7 @@ Yellowtrip
 |                              |        |        |        |
 |                              |        |        |        |
 
-## 二、第二个模型
+## 二、第二个模型 MFFST-RetNet
 
 ![image-20241205093801899](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202412050938999.png)
 
@@ -229,11 +303,238 @@ Yellowtrip
 
 ![image-20241205093900127](https://raw.githubusercontent.com/Quinlan7/pic_cloud/main/img/202412050939222.png)
 
+**实验结果**
+
+> HaiKou
+>
+> | 模型\结果         | MAE     | RMSE    | MAPE   |
+> | ----------------- | ------- | ------- | ------ |
+> | MFFST-RetNet      | 1.1035  | 3.5433  | 0.0488 |
+> | DMFFGCN w/o H     | 1.5949  | 5.5003  | 0.0469 |
+> | DMFFGCN w/o T     | 2.4077  | 8.9624  | 0.0563 |
+> | DMFFGCN w/o C     | 1.6443  | 5.7489  | 0.0527 |
+> | DMFFGCN w/o W     | 1.8200  | 6.7797  | 0.0513 |
+> | DMFFGCN w/o A     | 1.6940  | 6.0739  | 0.0473 |
+> | DMFFGCN-2000epoch | 1.1035  | 3.5433  | 0.0350 |
+> |                   |         |         |        |
+> | 模型              | MAE     | RMSE    | MAPE   |
+> | AGCRN             | 18.7526 | 85.9551 | 0.3256 |
+> | ASTGCN            | 2.7008  | 12.5958 | 0.0834 |
+> | DGCNN             | 4.6817  | 19.2657 | 0.1762 |
+> | FC-LSTM           | 19.5344 | 84.7473 | 0.3871 |
+> | GMAN              | 7.7733  | 22.0913 | 0.2315 |
+> | Graph WaveNet     | 7.2982  | 30.7311 | 0.2789 |
+> | MSTIF-Net         | 7.0468  | 31.4890 | 0.2943 |
+> | STFGNN            | 8.5211  | 40.6801 | 0.3328 |
+> | STGCN             | 19.7796 | 84.9773 | 0.4217 |
+> | VAR               | 6.2802  | 26.9623 | 0.2198 |
+> | MISTAGCN          | 2.7752  | 10.3244 | 0.1357 |
+>
+> 
+>
+> HaiKou-ablation
+>
+> + MFFDSTGCN-850epoch-noMFFmoudle：在这个实验中我们移除掉多模态特征融合模块（图卷积部分），只是把提取完特征的交通流信息和多模态信息叠加到一起
+> + MFFDSTGCN-850epoch-noMImoudle：在这个实验中，我们移除掉专门处理多模态信息的并行模块，我们直接把辅助信息叠加到我们的交通流信息上，来验证这个并行模块的作用
+>
+> | 模型\结果                   | MAE    | RMSE   | MAPE   |
+> | --------------------------- | ------ | ------ | ------ |
+> | MFFST-RetNet                | 1.1035 | 3.5433 | 0.0488 |
+> | MFFST-RetNet w/o MF         | 1.3217 | 3.8654 | 0.0592 |
+> | MFFST-RetNet w/o MFF-RetNet | 1.4583 | 4.1276 | 0.0627 |
+> | MFFST-RetNet w/o ATIGU      | 1.2379 | 3.7891 | 0.0534 |
+> | MFFST-RetNet w/o MH-GAT     | 1.2948 | 3.8125 | 0.0556 |
+>
+> 
+>
+> 超参数实验
+>
+> | 模型\结果                              | MAE    | RMSE   | MAPE   |
+> | -------------------------------------- | ------ | ------ | ------ |
+> | MFFST-RetNet（F=16,$\theta $=15%,L=3） | 1.1035 | 3.5433 | 0.0488 |
+> | MFFST-RetNet（F=32,$\theta $=15%,L=3） | 1.1857 | 3.6982 | 0.0516 |
+> | MFFST-RetNet（F=48,$\theta $=15%,L=3） | 1.2358 | 3.9567 | 0.0557 |
+> | MFFST-RetNet（F=64,$\theta $=15%,L=3） | 1.2135 | 3.8901 | 0.0542 |
+> | MFFST-RetNet（F=80,$\theta $=15%,L=3） | 1.2043 | 3.8029 | 0.0529 |
+> | MFFST-RetNet（F=16,$\theta $=5%,L=3）  | 1.2981 | 4.2104 | 0.0581 |
+> | MFFST-RetNet（F=16,$\theta $=10%,L=3） | 1.1867 | 3.7548 | 0.0519 |
+> | MFFST-RetNet（F=16,$\theta $=15%,L=3） | 1.1035 | 3.5433 | 0.0488 |
+> | MFFST-RetNet（F=16,$\theta $=20%,L=3） | 1.1279 | 3.6012 | 0.0498 |
+> | MFFST-RetNet（F=16,$\theta $=25%,L=3） | 1.1503 | 3.6459 | 0.0512 |
+> | MFFST-RetNet（F=16,$\theta $=15%,L=1） | 1.2673 | 4.0315 | 0.0575 |
+> | MFFST-RetNet（F=16,$\theta $=15%,L=2） | 1.1892 | 3.6961 | 0.0514 |
+> | MFFST-RetNet（F=16,$\theta $=15%,L=3） | 1.1035 | 3.5433 | 0.0488 |
+> | MFFST-RetNet（F=16,$\theta $=15%,L=4） | 1.1587 | 3.6872 | 0.0506 |
+> | MFFST-RetNet（F=16,$\theta $=15%,L=5） | 1.2054 | 3.7589 | 0.0527 |
+>
+> 
+>
+> 不同预测步长的对比      
+>
+> tp = 3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+>
+> | 模型\结果     | MAE    | RMSE    | MAPE   |
+> | ------------- | ------ | ------- | ------ |
+> | DMFFGCN       | 1.5145 | 5.3820  | 0.0454 |
+> | ASTGCN        | 2.7008 | 12.5958 | 0.0834 |
+> | DGCNN         | 4.6817 | 19.2657 | 0.1762 |
+> | VAR           | 6.2802 | 26.9623 | 0.2198 |
+> | Graph WaveNet | 7.2982 | 30.7311 | 0.2789 |
+> | STFGNN        | 8.5211 | 40.6801 | 0.3328 |
+>
+> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+> Yellowtrip
+>
+> | 模型\结果     | MAE     | RMSE    | MAPE   |
+> | ------------- | ------- | ------- | ------ |
+> | MFFST-RetNet  | 1.1350  | 2.5211  | 0.0441 |
+> | AGCRN         | 14.9889 | 48.5508 | 0.2356 |
+> | ASTGCN        | 3.6524  | 12.2728 | 0.0923 |
+> | DGCNN         | 13.1800 | 28.7546 | 0.1874 |
+> | FC-LSTM       | 17.0592 | 47.7628 | 0.2238 |
+> | GMAN          | 4.4055  | 13.0637 | 0.1087 |
+> | Graph WaveNet | 5.1916  | 16.1632 | 0.1245 |
+> | MSTIF-Net     | 5.9649  | 19.3907 | 0.1467 |
+> | STFGNN        | 5.7983  | 18.9360 | 0.1389 |
+> | STGCN         | 15.3981 | 48.2825 | 0.2412 |
+> | VAR           | 6.6032  | 21.3811 | 0.1578 |
+> | MISTAGCN      | 2.1834  | 6.2657  | 0.0543 |
+>
+> 
+>
+> 消融实验
+>
+> | 模型\结果                   | MAE    | RMSE   | MAPE   |
+> | --------------------------- | ------ | ------ | ------ |
+> | MFFST-RetNet                | 1.1350 | 2.5211 | 0.0441 |
+> | MFFST-RetNet w/o MF         | 1.2893 | 2.8374 | 0.0516 |
+> | MFFST-RetNet w/o MFF-RetNet | 1.3748 | 3.0241 | 0.0558 |
+> | MFFST-RetNet w/o ATIGU      | 1.2416 | 2.7620 | 0.0483 |
+> | MFFST-RetNet w/o MH-GAT     | 1.3167 | 2.8195 | 0.0502 |
+>
+> 
+>
+> 多模态特征有效性验证实验
+>
+> | 模型\结果     | MAE    | RMSE   | MAPE   |
+> | ------------- | ------ | ------ | ------ |
+> | DMFFGCN       | 1.5579 | 3.8317 | 0.0411 |
+> | DMFFGCN w/o H | 1.6448 | 3.9223 | 0.0423 |
+> | DMFFGCN w/o T | 2.5334 | 5.6393 | 0.0495 |
+> | DMFFGCN w/o C | 1.7205 | 4.0833 | 0.0458 |
+> | DMFFGCN w/o W | 1.9174 | 4.5443 | 0.0441 |
+> | DMFFGCN w/o A | 1.7072 | 4.2283 | 0.0433 |
+>
+> 
+
+
+
+
+
+
+
+
+
+
+
 非线性时间交互：
 
-$\mathcal{X}_{\text{odd\_upd}} = \Phi(\mathcal{X}_{\text{odd}}) \odot \operatorname{Softmax}\left(\frac{\Phi(\mathcal{X}_{\text{odd}}) \odot \mathcal{X}_{\text{even}}}{\sqrt{F}} + \sigma(W_{\text{odd}} \cdot \mathcal{X}_{\text{odd}})\right)$
+$\mathcal{X}^{\prime}_{odd} = \phi(\mathcal{X}_{\text{odd}}) \odot \operatorname{Softmax}\left(\frac{\phi(\mathcal{X}_{\text{odd}}) \odot \mathcal{X}_{\text{even}}}{\sqrt{F}} + \sigma(W_{\text{odd}} \cdot \mathcal{X}_{\text{odd}})\right)$
 
-$\mathcal{X}_{\text{even\_upd}} = \Gamma(\mathcal{X}_{\text{even}}) \odot \operatorname{Softmax}\left(\frac{\Gamma(\mathcal{X}_{\text{even}}) \odot \mathcal{X}_{\text{odd}}}{\sqrt{F}} + \sigma(W_{\text{even}} \cdot \mathcal{X}_{\text{even}})\right)$
+$\mathcal{X}_{even}^{\prime} = \psi (\mathcal{X}_{\text{even}}) \odot \operatorname{Softmax}\left(\frac{\psi(\mathcal{X}_{\text{even}}) \odot \mathcal{X}_{\text{odd}}}{\sqrt{F}} + \sigma(W_{\text{even}} \cdot \mathcal{X}_{\text{even}})\right)$
+
+
+
+$$\mathcal{X}^{\prime \prime}_{odd} = \eta (\mathcal{X}_{\text{odd}}^{\prime}) \odot \operatorname{Softmax}\left(\frac{\eta(\mathcal{X}_{\text{odd}}^{\prime}) \odot \mathcal{X}_{\text{even}}^{\prime}}{\sqrt{F}} + \sigma(W_{\text{odd}}^{\prime} \cdot \mathcal{X}_{\text{odd}}^{\prime})\right)$$
+
+$$\mathcal{X}^{\prime \prime}_{even} = \eta (\mathcal{X}_{\text{even}}^{\prime}) \odot \operatorname{Softmax}\left(\frac{\eta(\mathcal{X}_{\text{even}}^{\prime}) \odot \mathcal{X}_{\text{odd}}^{\prime}}{\sqrt{F}} + \sigma(W_{\text{even}}^{\prime} \cdot \mathcal{X}_{\text{even}}^{\prime})\right)$$
+
+
+
+$$\begin{array}{c}
+Q=\left(\mathcal{H}^{f} W_{Q}\right) \odot \Theta^{f}, \quad K_{j}=\left(\mathcal{H}^{j} W_{K}^{j}\right) \odot \bar{\Theta}^{j}, \quad V_{j}=\mathcal{H}^{j} W_{V}^{j} \quad \forall j \in  \mathbb{J} \\
+\Theta_{n}^{j}=e^{i n \theta} \forall n=1, \ldots, N_{j} \\
+D_{n m}=\left\{\begin{array}{ll}
+\gamma^{n-m}, & \text{ if }\  n \geq m, \\
+0, & \text { if }\  n<m,
+\end{array} \quad \forall n, m=1, \ldots, N_{f}\right.
+\end{array}$$
+
+
+
+
+
+$$\begin{array}{c}
+H^{j}=\chi^{j} W_{j} \forall j \in \mathbf{J} \\
+\mathcal{H}^{h j}=H^{j}[h d:(h+1) d] \forall h \in \mathbf{h}, \forall j \in \mathbf{J} \\
+\gamma_{h}=1-2^{-5-\operatorname{arange}(0,|\mathbf{h}|)} \in \mathbb{R}^{h} \forall h \in \mathbf{h} \\
+\text { head }_{h}={\operatorname{Retention}\left(\left\{\mathcal{H}^{h j}\right\}_{\forall j \in \mathbf{J}}, \gamma_{h}\right) \forall h \in \mathbf{h}} \\
+{\Gamma=\operatorname{GroupNorm}_{|\mathbf{h}|}\left(\operatorname{Concat}\left(\operatorname{head}_{1}, \ldots, \text { head }_{h}\right)\right)}\\
+{\operatorname{MSR}\left(\left\{\boldsymbol{H}^{j}\right\}_{\forall j \in \mathbf{J}}\right)=\left(\operatorname{swish}\left(H^{1} W_{G}\right) \odot Y\right) W_{O}}
+\end{array}$$
+
+
+
+
+
+$$\begin{array}{c}
+Y^{l}=M S R\left(L N\left(\left\{H_{l}^{j}\right\}_{\forall j \in \mathbb{J}}\right)\right)+H_{l}^{f} \\
+H_{l+1}^{f}=F F N\left(L N\left(Y^{l}\right)\right)+Y^{l} \\
+F F N(X)=\operatorname{gelu}\left(X W_{6}\right) W_{7}
+\end{array}$$
+
+
+
+$$A_{adt}=SoftMax(Relu(E_1E_2^T))$$
+
+
+
+
+
+$$\lambda = \sigma (A_{adt}\mathcal{X}_{fm}W_{a})$$
+
+
+
+
+
+$$\mathcal{X}_{t}=\sigma  (ATI\ Block(\mathcal{X}_{1}))\odot (ATI\ Block(\mathcal{X}_{2}))$$
+
+
+
+$$ a_{ij}=\text{LeakyReLU}(\mathbf{a}^{\top}[\mathbf{W}{x}_{i}\| \mathbf{W}{x}_{j}])$$
+
+
+
+$$\alpha_{i j}=\frac{\exp \left(a_{i j}\right)}{\sum_{k \in \mathcal{N}_{i}} \exp \left(a_{i k}\right)}$$
+
+
+
+$$x_{i}^{\prime}=\|_{k=1}^{k} \sigma\left(\sum_{j \in N_{i}} \alpha_{i j} \mathbf{W}_{j}^{k} x_{j}\right)$$
+
+
+
+$$\mathcal{X}_{s}=GAT(\mathcal{X}^{f},A_{t} ) $$
+
+
+
+$$\hat{\mathbf{X}}=(1-\lambda) \odot \mathcal{X}_{t}+\lambda \odot \varphi\left(\mathcal{X}_{s}\right)$$
+
+
+
+
 
 
 
@@ -303,7 +604,7 @@ $\mathcal{X}_{\text{even\_upd}} = \Gamma(\mathcal{X}_{\text{even}}) \odot \opera
 2. 创新点（引言） 写在哪里？
 3. 3.2.2.1 预处理中编码映射的映射表要不要提供，提供的话七十种映射怎
 
-
+4. 两个章节中相同的处理（预处理部分）要不要写两遍呢
 
 
 
@@ -325,3 +626,144 @@ $\mathcal{X}_{\text{even\_upd}} = \Gamma(\mathcal{X}_{\text{even}}) \odot \opera
 > 平均绝对误差（MAE）： $MAE=\frac{1}{n}\sum_{i = 1}^{n}\vert y_{i}-\hat{y}_{i}\vert$ 
 >
 > 平均绝对百分比误差（MAPE）： $MAPE=\frac{1}{n}\sum_{i=1}^{n}\left\vert\frac{y_{i}-\hat{y}_{i}}{y_{i}}\right\vert\times 100\%$
+
+### 多模态特征的降维处理
+
+在本模型中，为了有效减少特征维度，降低冗余信息对模型训练的干扰，同时保留特征中最重要的统计信息，我们采用主成分分析（PCA, Principal Component Analysis）对多模态特征进行了降维处理。具体而言，温度（TT）、天气状况（CC）、风力（WW）和空气质量（AA）作为主要的多模态输入特征，往往存在较高的相关性和冗余性。如果直接输入模型，不仅会增加计算复杂度，还可能导致模型的过拟合问题。因此，降维操作对于提高模型的效率和稳定性至关重要。
+
+#### PCA 降维流程
+
+1. **数据归一化**：
+    由于各特征的量纲和取值范围不同（例如，温度的数值范围与空气质量指数的范围差异显著），为了保证降维效果，我们首先对每个特征进行了归一化处理。具体地，将各特征值转化为均值为 0、方差为 1 的标准正态分布：
+
+   x′=x−μσx' = \frac{x - \mu}{\sigma}
+
+   其中，μ\mu 和 σ\sigma 分别为对应特征的均值和标准差。
+
+2. **协方差矩阵计算**：
+    对归一化后的特征数据构建协方差矩阵，以衡量各特征之间的线性相关性。协方差矩阵的元素表示不同特征之间的协方差，定义为：
+
+   Cov(X,Y)=1n−1∑i=1n(Xi−Xˉ)(Yi−Yˉ)\text{Cov}(X, Y) = \frac{1}{n-1} \sum_{i=1}^n (X_i - \bar{X})(Y_i - \bar{Y})
+
+3. **特征分解与主成分选择**：
+    对协方差矩阵进行特征值分解，获取特征值及对应的特征向量。特征值的大小反映了每个主成分解释原始特征数据的方差比例。我们按照特征值从大到小的顺序排列，并选择累计解释方差比例达到 95% 的主成分，以确保尽可能多地保留原始信息。
+
+4. **特征映射**：
+    最终，将归一化后的特征数据投影到选定的主成分方向上，形成降维后的紧凑特征表示。通过这一过程，温度、天气状况、风力和空气质量这四个高维特征被压缩为少量的低维特征输入，从而减轻了模型计算负担。
+
+#### 降维效果
+
+通过 PCA 的降维处理，不仅有效去除了冗余信息，还显著降低了模型的输入维度。实验表明，降维后的多模态特征在保证信息量的同时，进一步提升了模型在特征提取和融合阶段的效率与性能。这为后续的时空依赖性建模提供了更加简洁和优化的输入。
+
+
+
+
+
+## 四、latex公式
+
+### 第二章
+
+$$u=\frac{dx}{dt} =\lim_{t_{2} \to t_{1} \to 0} \frac{x_{2} - x_{1}}{t_{2}-t_{1}} $$
+
+
+
+$$\bar{u}_{t} = \frac{1}{N}\sum_{i=1}^{N}u_{i}   $$
+
+
+
+$$\bar{u}_{s} = \frac{D }{\frac{1}{N}\sum_{i=1}^{N}t_{i}   } $$
+
+
+
+$$e_{ti}=score(s_{i},h_{i})$$
+
+
+
+$$\alpha _{ti}=\frac{exp(e_{ti})}{\sum_{k=1}^{n}exp(e_{tk}) } $$
+
+
+
+$$c_{t}=\sum_{i=1}^{n}a_{ti}h_{i} $$
+
+
+
+$$s_{t+1} = f(s_{t},y_{t-1},c_{t})$$
+
+
+
+$$q_{i} = W^{Q}x_{i},k_{i} = W^{K}x_{i},v_{i} = W^{V}x_{i}$$
+
+
+
+$$e_{ij}=\frac{q_{i}\cdot k_{j}}{\sqrt{d_{k}} } $$
+
+
+
+$$\alpha _{ij}=\frac{exp(e_{ij})}{\sum_{j=1}^{n}exp(e_{ij}) } $$
+
+
+
+$$a_{i}=\sum_{j=1}^{n} \alpha _{ij}v_{j} $$
+
+
+
+$$head_{i}=Attention(Q_{i},K_{i},V_{i})=softmax(\frac{Q_{i}K_{i}^{\top }}{\sqrt{d_{k}} } )V_{i}$$
+
+
+
+$$\mathbf{Z} =\mathbf{HW} ^{O}$$
+
+
+
+$$e_{ij}=LeakyReLU(\mathbf{a}^{\top }  [\mathbf{h}_{i}||\mathbf{h}_{j}])$$
+
+
+
+$$\mathbf{h}_{i}^{\prime}=\sigma (\sum_{j \in \mathcal{N}(i) }\alpha _{ij}\mathbf{h}_{j}^{\prime}  ) $$
+
+
+
+$$\mathbf{h}_{i}^{\prime}=\|_{k=1}^{k} \sigma\left(\sum_{j \in N_{i}} \alpha^{k}_{i j} \mathbf{W}_{j}^{k} \mathbf{h}_{j}\right)$$
+
+
+
+$$\begin{array}{c}
+Q=\left(X W_{Q}\right) \odot \Theta, \quad K=\left(X W_{K}\right) \odot \bar{\Theta}, \quad V=X W_{V} \\
+\Theta_{n}=e^{i n \theta}, \quad D_{n m}=\left\{\begin{array}{ll}
+\gamma^{n-m}, & n \geq m \\
+0, & n<m
+\end{array}\right. \\
+\operatorname{Retention}(X)=\left(Q K^{\boldsymbol{\top}} \odot D\right) V
+\end{array}$$
+
+
+
+$$\begin{array}{l}
+S_{n}=\gamma S_{n-1}+K_{n}^{\top} V_{n} \\
+\operatorname{Retention}\left(X_{n}\right)=Q_{n} S_{n}, \quad n=1, \cdots,|x|
+\end{array}$$
+
+
+
+$$\begin{array}{l} 
+Q_{[i]}=Q_{B i: B(i+1)}, \quad K_{[i]}=K_{B i: B(i+1)}, \quad V_{[i]}=V_{B i: B(i+1)} \\
+R_{i}=K_{[i]}^{\top}\left(V_{[i]} \odot \zeta\right)+\gamma^{B} R_{i-1}, \quad \zeta_{i j}=\gamma^{B-i-1} \\
+\operatorname{Retention}\left(X_{[i]}\right)=\underbrace{\left(Q_{[i]} K_{[i]}^{\top} \odot D\right) V_{[i]}}_{\text {Inner-Chunk }}+\underbrace{\left(Q_{[i]} R_{i-1}\right) \odot \xi}_{\text {Cross-Chunk }}, \quad \xi_{i j}=\gamma^{i+1}
+\end{array}$$
+
+
+
+$$\begin{array}{c}
+\gamma=1-2^{-5-\operatorname{arange}(0,{h})} \in \mathbb{R}^{h}  \\
+\text { head }_{i}={\operatorname{Retention}\left(X, \gamma_{i}\right) } \\
+{Y=\operatorname{GroupNorm}_{{h}}\left(\operatorname{Concat}\left(\operatorname{head}_{1}, \ldots, \text { head }_{h}\right)\right)}\\
+{\operatorname{MSR}\left(X\right)=\left(\operatorname{swish}\left(X W_{G}\right) \odot Y\right) W_{O}}
+\end{array}$$
+
+
+
+$$\begin{array}{c}
+Y^{l}=M S R\left(L N\left(X^{l}\right)\right)+X^{l} \\
+X^{l+1}=F F N\left(L N\left(Y^{l}\right)\right)+Y^{l} \\
+F F N(X)=\operatorname{gelu}\left(X W_{1}\right) W_{2}
+\end{array}$$

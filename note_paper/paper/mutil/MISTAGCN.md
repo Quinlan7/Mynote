@@ -68,27 +68,29 @@ $x^{if}_{t} \in R$表示节点 $i$ 在时刻 $t$ 的第 $f$ 个特征的值，$x
 
 ### 3.2 图卷积网络
 
-让 $D \in \mathbb{R}^{N \times N} = \text{diag}(d_1, \ldots, d_N) $ 是图 $ G $ 的度矩阵，其中 $d_i = \sum_j A_{ij} $ 表示节点 $i \in 1 : N$ 的度。图 $G$ 的对称归一化拉普拉斯矩阵被定义为 $L = D^{-\frac{1}{2}}(D - A)D^{-\frac{1}{2}} = I_N - D^{-\frac{1}{2}}AD^{-\frac{1}{2}} $。拉普拉斯矩阵的特征值分解为 $L = U\Lambda U^T = U \text{diag}(\lambda_1, \ldots, \lambda_N)U^T $。对于给定的输入 $ x \in \mathbb{R}^N $，傅里叶变换被定义为 $\hat{x} = U^Tx $，逆傅里叶变换为 $ x = U\hat{x} $。在图 $\ast g$ 上的卷积操作在傅里叶域中定义，如下：
+令 $D \in \mathbb{R}^{N \times N} = \text{diag}(d_1, \ldots, d_N) $ 是图 $ G $ 的度矩阵，其中 $d_i = \sum_j A_{ij} $ 表示节点 $i \in 1 : N$ 的度。图 $G$ 的对称归一化拉普拉斯矩阵被定义为 $L = D^{-\frac{1}{2}}(D - A)D^{-\frac{1}{2}} = I_N - D^{-\frac{1}{2}}AD^{-\frac{1}{2}} $。拉普拉斯矩阵的特征值分解为 $L = U\Lambda U^T = U \text{diag}(\lambda_1, \ldots, \lambda_N)U^T $。对于给定的输入 $ x \in \mathbb{R}^N $，傅里叶变换被定义为 $\hat{x} = U^Tx $，逆傅里叶变换为 $ x = U\hat{x} $。在图 $\ast_ \mathcal{G} $ 上的卷积操作在傅里叶域中定义，如下：
 
-$$x \ast g \ y = U((U^T x) \circ (U^T y))$$
+$$x \ast_ \mathcal{G}  \ y = U((U^T x) \odot  (U^T y))$$
 
-其中 $ \circ $ 是逐元素的Hadamard乘积。在傅立叶域中的参数化滤波器定义为
+其中 $ \odot  $ 是逐元素的Hadamard乘积。在傅立叶域中的参数化滤波器定义为
 
- $$g_{\theta} \ast g x = g_{\theta} (U\Lambda U^T)x = U g_{\theta} (\Lambda)U^T x $$ 
+ $$g_{\theta} \ast_ \mathcal{G} x = g_{\theta} (U\Lambda U^T)x = U g_{\theta} (\Lambda)U^T x $$ 
 
 其中 $ \theta $ 是一个参数向量，不一定属于 $ \mathbb{R}^n $；而非参数化滤波器，即其参数全部自由，可以定义为
 
 $$g_{\theta}(\Lambda) = \text{diag}(\theta) $$ 
 
-其中参数 $ \theta \in \mathbb{R}^n $ 是傅立叶系数的向量 [12, 16]。为了避免特征值分解，$ g_{\theta} $ 可以通过对Λ进行Chebyshev多项式Tk(Λ)的截断展开来近似，直到第K阶：
+其中参数 $ \theta \in \mathbb{R}^n $ 是傅立叶系数的向量 [12, 16]。为了避免特征值分解，$ g_{\theta} $ 可以通过进行Chebyshev多项式$T_k(Λ)$的截断展开来近似，直到第K阶：
 
 $$ g_{\theta}(\Lambda) \approx \sum_{k=0}^{K-1} \theta_k T_k(\tilde{\Lambda}) $$
 
-其中 $ \tilde{\Lambda} = 2\lambda_{\text{max}}\Lambda - I_N $，$ \lambda_{\text{max}} $ 表示L的最大特征值，$ \theta = (\theta_0, \ldots, \theta_{K-1})^T \in \mathbb{R}^K $，并且
+其中 $ \tilde{\Lambda} = \frac{2}{\lambda_{\text{max}}}\Lambda - I_N $，$ \lambda_{\text{max}} $ 表示L的最大特征值，
 
-$$g_{\theta} \ast G x = g_{\theta}(L)x = \sum_{k=0}^{K-1} \theta_k T_k(\tilde{L})x$$
+$ \theta = (\theta_0, \ldots, \theta_{K-1})^T \in \mathbb{R}^K $，并且
 
-其中 $ \tilde{L} = 2\lambda_{\text{max}}L - I_N $。Chebyshev多项式的递归定义是 $ T_k(x) = 2xT_{k-1}(x) - T_{k-2}(x) $，其中 $ T_0(x) = 1 $，$ T_1(x) = x $。
+$$g_{\theta} \ast_ \mathcal{G} x = g_{\theta}(L)x = \sum_{k=0}^{K-1} \theta_k T_k(\tilde{L})x$$
+
+其中 $ \tilde{L} = \frac{2}{\lambda_{\text{max}}} L - I_N $。Chebyshev多项式的递归定义是 $ T_k(x) = 2xT_{k-1}(x) - T_{k-2}(x) $，其中 $ T_0(x) = 1 $，$ T_1(x) = x $。
 
 
 
